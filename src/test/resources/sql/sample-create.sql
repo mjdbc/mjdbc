@@ -7,5 +7,5 @@ CREATE TABLE users (
 );
 
 
-INSERT INTO users (login, first_name, last_name, gender) VALUES ('', '', '', 1);
-INSERT INTO users (login, first_name, last_name, gender) VALUES ('', '', '', 0);
+INSERT INTO users (login, first_name, last_name, gender) VALUES ('u1', 'First1', 'Last1', 1);
+INSERT INTO users (login, first_name, last_name, gender) VALUES ('u2', 'First2', 'Last2', 0);

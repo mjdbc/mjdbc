@@ -1,14 +1,13 @@
 package mini.jdbc;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.sql.Connection;
 
 /**
  *
  */
-public interface DbOp<T> {
-    @Nullable
+public interface DbOpNN<T> {
+    @NotNull
     T run(@NotNull DbConnection c) throws Exception;
 }

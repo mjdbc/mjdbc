@@ -3,6 +3,7 @@ package mini.jdbc;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**
@@ -10,5 +11,5 @@ import java.sql.SQLException;
  */
 public interface DbMapper<T> {
     @NotNull
-    T map(DbResultSet r) throws SQLException;
+    T map(ResultSet r) throws SQLException;
 }

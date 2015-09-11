@@ -3,8 +3,8 @@ package mini.jdbc;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -14,22 +14,21 @@ import java.util.Map;
 /**
  * Statement that uses named parameters and safe operations to fetch results by hiding result set manipulation.
  */
-public class DbStatement<T> {
+public class DbStatement<T> implements AutoCloseable {
     @NotNull
     private final PreparedStatement statement;
 
     private final Map<String, List<Integer>> indexMap = new HashMap<>();
     private final DbMapper<T> mapper;
 
-    @SuppressWarnings("unused")
-    public DbStatement(Connection c, String query) throws SQLException {
-        this(c, query, null);
-    }
-
-    public DbStatement(Connection c, String query, DbMapper<T> mapper) throws SQLException {
+    public DbStatement(DbConnection c, String query, DbMapper<T> mapper) throws SQLException {
         this.mapper = mapper;
         String parsedQuery = parse(query, indexMap);
-        statement = c.prepareStatement(parsedQuery);
+        try {
+            statement = c.sqlConnection.prepareStatement(parsedQuery);
+        } finally {
+            c.statementsToClose.add(this);
+        }
     }
 
 
@@ -66,7 +65,7 @@ public class DbStatement<T> {
 
     @Nullable
     public T query() throws SQLException {
-        try (DbResultSet r = new DbResultSet(statement.executeQuery())) {
+        try (ResultSet r = statement.executeQuery()) {
             if (r.next()) {
                 return mapper.map(r);
             }
@@ -77,7 +76,7 @@ public class DbStatement<T> {
     @NotNull
     public List<T> queryList() throws SQLException {
         List<T> res = new ArrayList<>();
-        try (DbResultSet r = new DbResultSet(statement.executeQuery())) {
+        try (ResultSet r = statement.executeQuery()) {
             while (r.next()) {
                 res.add(mapper.map(r));
             }
@@ -92,7 +91,7 @@ public class DbStatement<T> {
 
     @NotNull
     public T insertAndReturnId() throws SQLException {
-        try (DbResultSet r = new DbResultSet(statement.executeQuery())) {
+        try (ResultSet r = statement.executeQuery()) {
             if (r.next()) {
                 return mapper.map(r);
             }
@@ -167,4 +166,8 @@ public class DbStatement<T> {
         return parsedQuery.toString();
     }
 
+    @Override
+    public void close() throws SQLException {
+        statement.close();
+    }
 }
