@@ -26,39 +26,20 @@ public class DbUtils {
     public static HikariDataSource prepareDataSource(String config) {
         try {
             HikariDataSource dataSource = new HikariDataSource(new HikariConfig("/" + config + ".properties"));
-            dropDb("sql/" + config + "-drop.sql", dataSource);
-            createDb("sql/" + config + "-create.sql", dataSource);
+            runScript("sql/" + config + "-drop.sql", dataSource, false);
+            runScript("sql/" + config + "-create.sql", dataSource, true);
             return dataSource;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    public static void createDb(String scriptFile, DataSource dataSource) throws SQLException, IOException {
-        // Create MySql Connection
+    public static void runScript(String scriptFile, DataSource dataSource, boolean stopOnErrors) throws SQLException, IOException {
         try (Connection con = dataSource.getConnection()) {
             try (Reader reader = new InputStreamReader(DbUtils.class.getResourceAsStream("/" + scriptFile))) {
-                runScript(con, reader, true);
-            }
-
-        }
-    }
-
-    public static void dropDb(String scriptFile, DataSource dataSource) throws SQLException, IOException {
-        // Create MySql Connection
-        try (Connection con = dataSource.getConnection()) {
-            try (Reader reader = new InputStreamReader(DbUtils.class.getResourceAsStream("/" + scriptFile))) {
-                runScript(con, reader, false);
+                new ScriptRunner(con, true, stopOnErrors).runScript(reader);
             }
         }
-    }
-
-
-    private static void runScript(Connection con, Reader reader, boolean stopOnErrors) throws IOException, SQLException {
-        ScriptRunner runner = new ScriptRunner(con, true, stopOnErrors);
-        runner.setLogWriter(null);
-        runner.setErrorLogWriter(null);
-        runner.runScript(reader);
     }
 
 }
