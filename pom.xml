@@ -27,6 +27,12 @@
         </plugins>
     </build>
     <dependencies>
+        <dependency>
+            <groupId>org.ow2.asm</groupId>
+            <artifactId>asm</artifactId>
+            <version>5.0.4</version>
+        </dependency>
+
         <!-- Compile only -->
         <!--
             Mini-JDBC supports Java7, so has no Java8 annotations available.

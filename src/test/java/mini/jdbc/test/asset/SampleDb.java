@@ -1,7 +1,7 @@
 package mini.jdbc.test.asset;
 
-import mini.jdbc.test.Db;
-import mini.jdbc.test.Tx;
+import mini.jdbc.Db;
+import mini.jdbc.Tx;
 
 /**
  *

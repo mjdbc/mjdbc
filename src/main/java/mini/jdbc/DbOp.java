@@ -1,4 +1,4 @@
-package mini.jdbc.test;
+package mini.jdbc;
 
 import org.jetbrains.annotations.NotNull;
 
