@@ -2,7 +2,6 @@ package mini.jdbc.test.util;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
-import org.jetbrains.annotations.NotNull;
 
 import javax.sql.DataSource;
 import java.io.IOException;
@@ -24,11 +23,11 @@ public class DbUtils {
         }
     }
 
-    public static HikariDataSource prepareDataSource(@NotNull String config, String dbFile) {
+    public static HikariDataSource prepareDataSource(String config) {
         try {
-            HikariDataSource dataSource = new HikariDataSource(new HikariConfig("/" + config));
-            dropDb("sql/" + dbFile + "-drop.sql", dataSource);
-            createDb("sql/" + dbFile + "-create.sql", dataSource);
+            HikariDataSource dataSource = new HikariDataSource(new HikariConfig("/" + config + ".properties"));
+            dropDb("sql/" + config + "-drop.sql", dataSource);
+            createDb("sql/" + config + "-create.sql", dataSource);
             return dataSource;
         } catch (Exception e) {
             throw new RuntimeException(e);

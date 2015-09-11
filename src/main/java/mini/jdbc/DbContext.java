@@ -9,10 +9,10 @@ import java.sql.Connection;
  */
 public class DbContext {
     @NotNull
-    final Db db;
+    final DbImpl db;
     Connection connection;
 
-    DbContext(@NotNull Db db) {
+    DbContext(@NotNull DbImpl db) {
         this.db = db;
     }
 

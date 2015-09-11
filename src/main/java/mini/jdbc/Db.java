@@ -10,6 +10,4 @@ public interface Db {
     <T> T attach(@NotNull final Dbi impl, Class<T> interfaceClass);
 
     <T> T execute(@NotNull DbOp<T> op);
-
-    <T> T execute(@NotNull DbOp<T> op, @NotNull DbContext context);
 }

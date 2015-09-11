@@ -24,7 +24,7 @@ public class SamplesTest extends org.junit.Assert {
 
     @Before
     public void setUp() {
-        ds = DbUtils.prepareDataSource("sampledb.properties", "sample");
+        ds = DbUtils.prepareDataSource("sample");
     }
 
     @After
@@ -34,9 +34,8 @@ public class SamplesTest extends org.junit.Assert {
 
     @Test
     public void test1() throws SQLException {
-        DataSource dataSource = DbUtils.prepareDataSource("sampledb.properties", "sample");
-        Assert.assertNotNull(dataSource);
-        Db db = new DbImpl(dataSource);
+        Assert.assertNotNull(ds);
+        Db db = new DbImpl(ds);
         db.execute(new DbOp<Void>() {
             public Void run(@NotNull Connection c) throws Exception {
                 try (ResultSet rs = c.createStatement().executeQuery("SELECT * FROM users")) {

@@ -14,6 +14,8 @@ import java.sql.SQLException;
  */
 public class DbImpl implements Db {
 
+    private ThreadLocal<Connection> activeConnections = new ThreadLocal<>();
+
     @NotNull
     private DataSource dataSource;
 
@@ -52,25 +54,32 @@ public class DbImpl implements Db {
 
     public <T> T execute(@NotNull DbOp<T> op, @NotNull DbContext context) {
         boolean topLevel = false;
+        Connection c = activeConnections.get();
         try {
             try {
-                if (context.connection == null) {
-                    context.connection = dataSource.getConnection();
+                if (c == null) {
+                    c = dataSource.getConnection();
                     topLevel = true;
                 }
-                T res = op.run(context.connection);
+                if (context.connection == null) {
+                    context.connection = c;
+                } else if (context.connection != c) {
+                    throw new IllegalStateException("Context is in illegal state!");
+                }
+
+                T res = op.run(c);
                 if (topLevel) {
-                    context.connection.commit();
+                    c.commit();
                 }
                 return res;
             } catch (Exception e) {
                 if (topLevel) {
-                    context.connection.rollback();
+                    c.rollback();
                 }
                 throw new RuntimeException(e);
             } finally {
                 if (topLevel) {
-                    context.connection.close();
+                    c.close();
                     context.connection = null;
                 }
             }
