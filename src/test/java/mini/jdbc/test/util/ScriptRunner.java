@@ -6,6 +6,7 @@ package mini.jdbc.test.util;
  * and a constructor
  * GPSHansl, 06.08.2015: regex for delimiter, rearrange comment/delimiter detection, remove some ide warnings.
  */
+
 /*
  *  Copyright 2004 Clinton Begin
  *
@@ -123,6 +124,7 @@ public class ScriptRunner {
      * @throws SQLException if any SQL errors occur
      * @throws IOException  if there is an error reading from the Reader
      */
+    @SuppressWarnings("StatementWithEmptyBody")
     private void runScript(Connection conn, Reader reader) throws IOException,
             SQLException {
         StringBuffer command = null;
@@ -214,22 +216,15 @@ public class ScriptRunner {
         return delimiter;
     }
 
-    @SuppressWarnings("UseOfSystemOutOrSystemErr")
     private void print(Object o) {
         if (logWriter != null) {
-            System.out.print(o);
+            logWriter.print(o);
         }
     }
 
     private void println(Object o) {
         if (logWriter != null) {
             logWriter.println(o);
-        }
-    }
-
-    private void printlnError(Object o) {
-        if (errorLogWriter != null) {
-            errorLogWriter.println(o);
         }
     }
 

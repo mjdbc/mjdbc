@@ -37,7 +37,10 @@ public class DbUtils {
     public static void runScript(String scriptFile, DataSource dataSource, boolean stopOnErrors) throws SQLException, IOException {
         try (Connection con = dataSource.getConnection()) {
             try (Reader reader = new InputStreamReader(DbUtils.class.getResourceAsStream("/" + scriptFile))) {
-                new ScriptRunner(con, true, stopOnErrors).runScript(reader);
+                ScriptRunner runner = new ScriptRunner(con, true, stopOnErrors);
+                runner.setLogWriter(null);
+                runner.setErrorLogWriter(null);
+                runner.runScript(reader);
             }
         }
     }

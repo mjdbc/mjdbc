@@ -44,15 +44,11 @@ public class DbImpl implements Db {
         }
         //noinspection unchecked
         T result = (T) Proxy.newProxyInstance(impl.getClass().getClassLoader(), new Class[]{interfaceClass}, handler);
-        impl.setContext(new DbContext(this));
+        impl.setContext(new DbiContext(this));
         return result;
     }
 
     public <T> T execute(@NotNull DbOp<T> op) {
-        return execute(op, new DbContext(this));
-    }
-
-    public <T> T execute(@NotNull DbOp<T> op, @NotNull DbContext context) {
         boolean topLevel = false;
         Connection c = activeConnections.get();
         try {
@@ -61,12 +57,6 @@ public class DbImpl implements Db {
                     c = dataSource.getConnection();
                     topLevel = true;
                 }
-                if (context.connection == null) {
-                    context.connection = c;
-                } else if (context.connection != c) {
-                    throw new IllegalStateException("Context is in illegal state!");
-                }
-
                 T res = op.run(c);
                 if (topLevel) {
                     c.commit();
@@ -80,7 +70,6 @@ public class DbImpl implements Db {
             } finally {
                 if (topLevel) {
                     c.close();
-                    context.connection = null;
                 }
             }
         } catch (SQLException e) {

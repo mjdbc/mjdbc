@@ -15,4 +15,4 @@ target
 hs_err_pid*
 
 #tmp files & logs from tests
-derby.log
+.tmp/

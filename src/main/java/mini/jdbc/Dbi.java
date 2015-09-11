@@ -1,10 +1,10 @@
 package mini.jdbc;
 
 /**
- *
+ * Dbi -> Database Interface. Set of methods that incapsulate logic of complex database updates.
  */
 public interface Dbi {
-    void setContext(DbContext context);
+    void setContext(DbiContext context);
 
-    DbContext getContext();
+    DbiContext getContext();
 }

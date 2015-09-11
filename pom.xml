@@ -24,14 +24,26 @@
                     <target>1.7</target>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <systemProperties>
+                        <property>
+                            <name>derby.stream.error.file</name>
+                            <value>.tmp/derby.log</value>
+                        </property>
+                    </systemProperties>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
     <dependencies>
-        <!-- Compile only -->
-        <!--
-            Mini-JDBC supports Java7, so has no Java8 annotations available.
-            To minimize the result size Jetbrains annotations are used (20kb)
-        -->
+
+        <!-- Compile-time -->
+
+        <!-- Mini-JDBC supports Java7, so has no Java8 annotations available.
+        To minimize the result size Jetbrains annotations are used (20kb) -->
         <dependency>
             <groupId>com.intellij</groupId>
             <artifactId>annotations</artifactId>
@@ -39,7 +51,7 @@
             <scope>provided</scope>
         </dependency>
 
-        <!-- Testing only -->
+        <!-- Testing -->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -70,7 +82,6 @@
             <version>1.7.12</version>
             <scope>test</scope>
         </dependency>
-
 
     </dependencies>
 </project>
