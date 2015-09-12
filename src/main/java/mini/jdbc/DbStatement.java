@@ -3,9 +3,12 @@ package mini.jdbc;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.SQLType;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -16,12 +19,14 @@ import java.util.Map;
  */
 public class DbStatement<T> implements AutoCloseable {
     @NotNull
-    private final PreparedStatement statement;
+    public final PreparedStatement statement;
+
+    @NotNull
+    public final DbMapper<T> mapper;
 
     private final Map<String, List<Integer>> indexMap = new HashMap<>();
-    private final DbMapper<T> mapper;
 
-    public DbStatement(DbConnection c, String query, DbMapper<T> mapper) throws SQLException {
+    public DbStatement(@NotNull DbConnection c, @NotNull String query, @NotNull DbMapper<T> mapper) throws SQLException {
         this.mapper = mapper;
         String parsedQuery = parse(query, indexMap);
         try {
@@ -31,37 +36,84 @@ public class DbStatement<T> implements AutoCloseable {
         }
     }
 
-
-    public DbStatement<T> setString(String name, String value) throws SQLException {
+    public DbStatement<T> setNull(@NotNull String name, @NotNull SQLType type) throws SQLException {
         for (int i : getIndexes(name)) {
-            statement.setString(i, value);
+            statement.setNull(i, type.getVendorTypeNumber());
         }
         return this;
     }
 
-
-    public DbStatement<T> setInt(String name, int value) throws SQLException {
-        for (int i : getIndexes(name)) {
-            statement.setInt(i, value);
-        }
-        return this;
-    }
-
-    public DbStatement<T> setLong(String name, long value) throws SQLException {
-        for (int i : getIndexes(name)) {
-            statement.setLong(i, value);
-        }
-        return this;
-    }
-
-
-    public DbStatement<T> setBoolean(String name, boolean value) throws SQLException {
+    @NotNull
+    public DbStatement<T> setBoolean(@NotNull String name, boolean value) throws SQLException {
         for (int i : getIndexes(name)) {
             statement.setBoolean(i, value);
         }
         return this;
     }
 
+    @NotNull
+    public DbStatement<T> setInt(@NotNull String name, int value) throws SQLException {
+        for (int i : getIndexes(name)) {
+            statement.setInt(i, value);
+        }
+        return this;
+    }
+
+    @NotNull
+    public DbStatement<T> setLong(@NotNull String name, long value) throws SQLException {
+        for (int i : getIndexes(name)) {
+            statement.setLong(i, value);
+        }
+        return this;
+    }
+
+    @NotNull
+    public DbStatement<T> setFloat(@NotNull String name, float value) throws SQLException {
+        for (int i : getIndexes(name)) {
+            statement.setFloat(i, value);
+        }
+        return this;
+    }
+
+    @NotNull
+    public DbStatement<T> setDouble(@NotNull String name, double value) throws SQLException {
+        for (int i : getIndexes(name)) {
+            statement.setDouble(i, value);
+        }
+        return this;
+    }
+
+    @NotNull
+    public DbStatement<T> setBigDecimal(@NotNull String name, BigDecimal value) throws SQLException {
+        for (int i : getIndexes(name)) {
+            statement.setBigDecimal(i, value);
+        }
+        return this;
+    }
+
+    @NotNull
+    public DbStatement<T> setString(@NotNull String name, String value) throws SQLException {
+        for (int i : getIndexes(name)) {
+            statement.setString(i, value);
+        }
+        return this;
+    }
+
+    @NotNull
+    public DbStatement<T> setBytes(@NotNull String name, byte[] value) throws SQLException {
+        for (int i : getIndexes(name)) {
+            statement.setBytes(i, value);
+        }
+        return this;
+    }
+
+    @NotNull
+    public DbStatement<T> setTimestamp(@NotNull String name, Timestamp value) throws SQLException {
+        for (int i : getIndexes(name)) {
+            statement.setTimestamp(i, value);
+        }
+        return this;
+    }
 
     @Nullable
     public T query() throws SQLException {
@@ -91,7 +143,8 @@ public class DbStatement<T> implements AutoCloseable {
 
     @NotNull
     public T insertAndReturnId() throws SQLException {
-        try (ResultSet r = statement.executeQuery()) {
+        statement.executeUpdate();
+        try (ResultSet r = statement.getGeneratedKeys()) {
             if (r.next()) {
                 return mapper.map(r);
             }
@@ -103,9 +156,8 @@ public class DbStatement<T> implements AutoCloseable {
         return statement.executeUpdate();
     }
 
-
     @NotNull
-    private List<Integer> getIndexes(String name) {
+    public List<Integer> getIndexes(String name) {
         List<Integer> indexes = indexMap.get(name);
         if (indexes == null) {
             throw new IllegalArgumentException("Parameter not found: " + name);
@@ -114,8 +166,9 @@ public class DbStatement<T> implements AutoCloseable {
     }
 
 
-    // TODO: add mappings cache for parsed maps
-    private static String parse(String query, Map<String, List<Integer>> paramMap) {
+    // TODO: add mappings cache for parsed maps -> reuse DbConnection -> Db::cache!
+    @NotNull
+    private static String parse(@NotNull String query, @NotNull Map<String, List<Integer>> paramMap) {
         int length = query.length();
         StringBuilder parsedQuery = new StringBuilder(length);
         boolean inSingleQuote = false;
