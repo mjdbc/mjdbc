@@ -26,6 +26,9 @@ public class DbStatement<T> implements AutoCloseable {
 
     private final Map<String, List<Integer>> indexMap = new HashMap<>();
 
+    //TODO: create mappers registry in DB!
+    //public DbStatement(@NotNull DbConnection c, @NotNull String query, @NotNull Class<T> resultClass) throws SQLException {
+
     public DbStatement(@NotNull DbConnection c, @NotNull String query, @NotNull DbMapper<T> mapper) throws SQLException {
         this.mapper = mapper;
         String parsedQuery = parse(query, indexMap);
@@ -115,6 +118,12 @@ public class DbStatement<T> implements AutoCloseable {
         return this;
     }
 
+    @NotNull
+    public ResultSet executeQuery() throws SQLException {
+        return statement.executeQuery();
+    }
+
+
     @Nullable
     public T query() throws SQLException {
         try (ResultSet r = statement.executeQuery()) {
@@ -137,8 +146,8 @@ public class DbStatement<T> implements AutoCloseable {
     }
 
 
-    public void insert() throws SQLException {
-        statement.executeUpdate();
+    public int insert() throws SQLException {
+        return statement.executeUpdate();
     }
 
     @NotNull

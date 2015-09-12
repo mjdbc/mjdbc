@@ -4,7 +4,6 @@ import com.zaxxer.hikari.HikariDataSource;
 import junit.framework.Assert;
 import mini.jdbc.Db;
 import mini.jdbc.DbImpl;
-import mini.jdbc.DbOp;
 import mini.jdbc.test.asset.dbi.SampleDbi;
 import mini.jdbc.test.asset.dbi.SampleDbiImpl;
 import mini.jdbc.test.asset.model.User;
@@ -25,7 +24,6 @@ public class SamplesTest extends org.junit.Assert {
      * Low level connection pool.
      */
     private HikariDataSource ds;
-    private Db db;
 
     /**
      * Custom database interface. DAO.
@@ -35,14 +33,13 @@ public class SamplesTest extends org.junit.Assert {
     @Before
     public void setUp() {
         ds = DbUtils.prepareDataSource("sample");
-        db = new DbImpl(ds);
+        DbImpl db = new DbImpl(ds);
         dbi = db.attachDbi(new SampleDbiImpl(db), SampleDbi.class);
     }
 
     @After
     public void tearDown() {
         dbi = null;
-        db = null;
         ds.close();
     }
 
@@ -50,13 +47,12 @@ public class SamplesTest extends org.junit.Assert {
     public void checkDatabaseNotEmpty() throws SQLException {
         Assert.assertNotNull(ds);
         Db db = new DbImpl(ds);
-        db.execute((DbOp<Void>) c -> {
+        db.executeV(c -> {
             try (Statement statement = c.sqlConnection.createStatement()) {
                 try (ResultSet rs = statement.executeQuery("SELECT * FROM users")) {
                     assertTrue(rs.next());
                 }
             }
-            return null;
         });
     }
 
