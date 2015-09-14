@@ -1,6 +1,5 @@
 package mini.jdbc;
 
-import mini.jdbc.mapper.IntegerMapper;
 import mini.jdbc.mapper.ListMapper;
 import mini.jdbc.mapper.VoidMapper;
 import org.jetbrains.annotations.NotNull;
@@ -12,6 +11,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Proxy;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,15 +28,9 @@ public class DbImpl implements Db {
 
     private final Map<Method, OpRef> opByMethod = new ConcurrentHashMap<>();
 
-    private final Map<Class, DbMapper> mapperByClass = new ConcurrentHashMap<Class, DbMapper>() {{
-        // no return type
-        put(Void.TYPE, VoidMapper.INSTANCE);
-        put(Void.class, VoidMapper.INSTANCE);
+    private final Map<Class, DbMapper> mapperByClass = new ConcurrentHashMap<>(Mappers.BUILT_IN_MAPPERS);
 
-        // primitive types
-        put(Integer.TYPE, IntegerMapper.INSTANCE);
-        put(Integer.class, IntegerMapper.INSTANCE);
-    }};
+    private final Map<Class, DbParameterBinder> binderByClass = new ConcurrentHashMap<>(Binders.BUILT_IN_BINDERS);
 
     @NotNull
     private DataSource dataSource;
@@ -50,6 +44,13 @@ public class DbImpl implements Db {
         requireNonNull(mapperClass);
         requireNonNull(mapper);
         mapperByClass.put(mapperClass, mapper);
+    }
+
+    @Override
+    public void registerBinder(@NotNull Class binderClass, @NotNull DbParameterBinder binder) {
+        requireNonNull(binderClass);
+        requireNonNull(binder);
+        binderByClass.put(binderClass, binder);
     }
 
     @NotNull
@@ -136,7 +137,20 @@ public class DbImpl implements Db {
         }
         InvocationHandler handler = (proxy, method, args) -> {
             OpRef p = opByMethod.get(method);
-            return execute(p.op);
+            return DbImpl.this.execute(c -> {
+                //noinspection unchecked
+                DbStatement s = new DbStatement(c, p.parsedSql, p.resultMapper, p.parametersMapping);
+                for (int i = 0; i < args.length; i++) {
+                    DbParameterBinder binder = p.parameterBinders[i];
+                    //noinspection unchecked
+                    binder.bind(s.statement, i, args[i]);
+                }
+                if (p.resultMapper != VoidMapper.INSTANCE) {
+                    return s.query();
+                }
+                s.update();
+                return null;
+            });
         };
 
         //noinspection unchecked
@@ -144,6 +158,7 @@ public class DbImpl implements Db {
     }
 
     private void registerMethod(Method m) {
+        // return type
         DbMapper resultMapper = null;
         Class<?> returnType = m.getReturnType();
         if (returnType == List.class) {
@@ -160,6 +175,7 @@ public class DbImpl implements Db {
             throw new RuntimeException("Not supported query result type: " + returnType);
         }
 
+        // sql named params
         Sql sqlAnnotation = m.getAnnotation(Sql.class);
         if (sqlAnnotation == null) {
             throw new RuntimeException("Method has no @Sql annotation: " + m);
@@ -170,31 +186,72 @@ public class DbImpl implements Db {
         }
         Map<String, List<Integer>> parametersMapping = new HashMap<>();
         String parsedSql = DbStatement.parse(sql, parametersMapping);
-        opByMethod.put(m, new OpRef(parsedSql, resultMapper, parametersMapping));
+
+        // parameter binders
+        List<DbParameterBinder> binders = new ArrayList<>();
+        Class<?>[] parameterTypes = m.getParameterTypes();
+        for (int i = 0; i < m.getParameterCount(); i++) {
+            Class<?> parameterType = parameterTypes[i];
+            DbParameterBinder binder = binderByClass.get(parameterType);
+            if (binder == null) {
+                // try to find binder by superclass.
+                binder = findBinderByParents(parameterType);
+                if (binder == null) {
+                    throw new IllegalArgumentException("Can't find parameter binder for: " + parameterType);
+                }
+            }
+            binders.add(binder);
+        }
+
+        // construct result mapping
+        opByMethod.put(m, new OpRef(parsedSql, resultMapper, parametersMapping, binders.toArray(new DbParameterBinder[binders.size()])));
     }
 
-    private class OpRef {
-        @NotNull
-        String parsedSql;
-        @NotNull
-        DbMapper resultMapper;
-        @NotNull
-        Map<String, List<Integer>> parametersMapping;
-        DbOp op;
+    @Nullable
+    private DbParameterBinder findBinderByParents(Class<?> parameterType) {
+        Class superClass = parameterType.getSuperclass();
+        while (superClass != Object.class) {
+            DbParameterBinder binder = binderByClass.get(parameterType);
+            if (binder != null) {
+                return binder;
+            }
+            superClass = superClass.getSuperclass();
+        }
+        return findBinderByInterfaces(parameterType.getInterfaces());
+    }
 
-        public OpRef(@NotNull String parsedSql, @NotNull DbMapper resultMapper, @NotNull Map<String, List<Integer>> parametersMapping) {
+    private DbParameterBinder findBinderByInterfaces(Class<?>[] interfaces) {
+        for (Class interfaceClass : interfaces) {
+            DbParameterBinder binder = binderByClass.get(interfaceClass);
+            if (binder == null) {
+                binder = findBinderByInterfaces(interfaceClass.getInterfaces());
+            }
+            if (binder != null) {
+                return binder;
+            }
+        }
+        return null;
+    }
+
+    private static class OpRef {
+        @NotNull
+        final String parsedSql;
+
+        @NotNull
+        final DbMapper resultMapper;
+
+        @NotNull
+        final Map<String, List<Integer>> parametersMapping;
+
+        @NotNull
+        final DbParameterBinder[] parameterBinders;
+
+        public OpRef(@NotNull String parsedSql, @NotNull DbMapper resultMapper,
+                     @NotNull Map<String, List<Integer>> parametersMapping, @NotNull DbParameterBinder[] parameterBinders) {
             this.parsedSql = parsedSql;
             this.resultMapper = resultMapper;
             this.parametersMapping = parametersMapping;
-            this.op = c -> {
-                //noinspection unchecked
-                DbStatement s = new DbStatement(c, parsedSql, resultMapper, parametersMapping);
-                if (resultMapper != VoidMapper.INSTANCE) {
-                    return s.query();
-                }
-                s.update();
-                return null;
-            };
+            this.parameterBinders = parameterBinders;
         }
     }
 }
