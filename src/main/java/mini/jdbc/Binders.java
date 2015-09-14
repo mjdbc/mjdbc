@@ -1,10 +1,8 @@
 package mini.jdbc;
 
-import mini.jdbc.binder.DbIntBinder;
-import mini.jdbc.binder.DbLongBinder;
-import mini.jdbc.binder.DbStringBinder;
+import mini.jdbc.binder.DbValueBinder;
 import mini.jdbc.binder.JavaTypeBinder;
-import mini.jdbc.binder.JavaTypeBinder.JavaType;
+import mini.jdbc.binder.JavaType;
 import mini.jdbc.type.DbInt;
 import mini.jdbc.type.DbLong;
 import mini.jdbc.type.DbString;
@@ -42,8 +40,8 @@ public final class Binders {
         put(CharSequence.class, new JavaTypeBinder(JavaType.String));
 
         // Custom types
-        put(DbInt.class, new DbIntBinder());
-        put(DbLong.class, new DbLongBinder());
-        put(DbString.class, new DbStringBinder());
+        put(DbInt.class, new DbValueBinder(JavaType.Integer));
+        put(DbLong.class, new DbValueBinder(JavaType.Long));
+        put(DbString.class, new DbValueBinder(JavaType.String));
     }});
 }

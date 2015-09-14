@@ -15,6 +15,7 @@ public class SampleDbiImpl implements SampleDbi {
 
     public SampleDbiImpl(Db db) {
         this.db = db;
+        db.registerMapper(User.class, User.MAPPER);
     }
 
     @Tx

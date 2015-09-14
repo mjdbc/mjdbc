@@ -4,6 +4,7 @@ import com.zaxxer.hikari.HikariDataSource;
 import junit.framework.Assert;
 import mini.jdbc.Db;
 import mini.jdbc.DbImpl;
+import mini.jdbc.test.asset.SampleQueries;
 import mini.jdbc.test.asset.dbi.SampleDbi;
 import mini.jdbc.test.asset.dbi.SampleDbiImpl;
 import mini.jdbc.test.asset.model.User;
@@ -30,11 +31,17 @@ public class SamplesTest extends org.junit.Assert {
      */
     private SampleDbi dbi;
 
+    /**
+     * Set of queries.
+     */
+    private SampleQueries sampleQueries;
+
     @Before
     public void setUp() {
         ds = DbUtils.prepareDataSource("sample");
         DbImpl db = new DbImpl(ds);
         dbi = db.attachDbi(new SampleDbiImpl(db), SampleDbi.class);
+        sampleQueries = db.attachQueries(SampleQueries.class);
     }
 
     @After
@@ -60,6 +67,13 @@ public class SamplesTest extends org.junit.Assert {
     @Test
     public void checkDbi() throws SQLException {
         User user = dbi.getUserByLogin("u1");
+        assertNotNull(user);
+        assertEquals("u1", user.login);
+    }
+
+    @Test
+    public void checkQuery() throws SQLException {
+        User user = sampleQueries.selectUser("u1");
         assertNotNull(user);
         assertEquals("u1", user.login);
     }

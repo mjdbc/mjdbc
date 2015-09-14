@@ -118,19 +118,4 @@ public class JavaTypeBinder implements DbParameterBinder {
         }
     }
 
-    public enum JavaType {
-        BigDecimal,
-        Boolean,
-        Byte,
-        Character,
-        Date,
-        Double,
-        Short,
-        Float,
-        Integer,
-        Long,
-        SqlDate,
-        String,
-        Timestamp
-    }
 }

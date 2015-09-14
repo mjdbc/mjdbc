@@ -14,7 +14,7 @@ public enum Gender implements DbInt {
     }
 
     @Override
-    public int getIntValue() {
+    public int getDbValue() {
         return dbValue;
     }
 

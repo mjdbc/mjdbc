@@ -12,6 +12,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Proxy;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -58,17 +59,8 @@ public class DbImpl implements Db {
         requireNonNull(impl);
         requireNonNull(daoInterface);
 
-        InvocationHandler handler = (proxy, method, args) -> {
-            if (method.getAnnotation(Tx.class) != null) {
-                //noinspection unchecked
-                return execute(c -> (T) method.invoke(impl, args));
-            } else {
-                return method.invoke(impl, args);
-            }
-        };
-
         //noinspection unchecked
-        return (T) Proxy.newProxyInstance(impl.getClass().getClassLoader(), new Class[]{daoInterface}, handler);
+        return (T) Proxy.newProxyInstance(impl.getClass().getClassLoader(), new Class[]{daoInterface}, new DbiProxy<>(impl));
     }
 
 
@@ -135,26 +127,8 @@ public class DbImpl implements Db {
         for (Method m : queryInterface.getMethods()) {
             registerMethod(m);
         }
-        InvocationHandler handler = (proxy, method, args) -> {
-            OpRef p = opByMethod.get(method);
-            return DbImpl.this.execute(c -> {
-                //noinspection unchecked
-                DbStatement s = new DbStatement(c, p.parsedSql, p.resultMapper, p.parametersMapping);
-                for (int i = 0; i < args.length; i++) {
-                    DbParameterBinder binder = p.parameterBinders[i];
-                    //noinspection unchecked
-                    binder.bind(s.statement, i, args[i]);
-                }
-                if (p.resultMapper != VoidMapper.INSTANCE) {
-                    return s.query();
-                }
-                s.update();
-                return null;
-            });
-        };
-
         //noinspection unchecked
-        return (T) Proxy.newProxyInstance(queryInterface.getClassLoader(), new Class[]{queryInterface}, handler);
+        return (T) Proxy.newProxyInstance(queryInterface.getClassLoader(), new Class[]{queryInterface}, new QueryProxy());
     }
 
     private void registerMethod(Method m) {
@@ -189,22 +163,37 @@ public class DbImpl implements Db {
 
         // parameter binders
         List<DbParameterBinder> binders = new ArrayList<>();
+        List<String> names = new ArrayList<>();
         Class<?>[] parameterTypes = m.getParameterTypes();
         for (int i = 0; i < m.getParameterCount(); i++) {
+            Bind bindAnnotation = (Bind) Arrays.stream(m.getParameterAnnotations()[i]).filter(a -> a instanceof Bind).findFirst().orElse(null);
+            if (bindAnnotation == null) {
+                throw new IllegalArgumentException("Unbound parameter: " + i + ", method: " + m);
+            }
+            String name = bindAnnotation.value();
+            if (name.isEmpty()) {
+                throw new IllegalArgumentException("Parameter name is empty: " + i + ", method: " + m);
+            }
+            names.add(name);
             Class<?> parameterType = parameterTypes[i];
             DbParameterBinder binder = binderByClass.get(parameterType);
             if (binder == null) {
                 // try to find binder by superclass.
                 binder = findBinderByParents(parameterType);
                 if (binder == null) {
-                    throw new IllegalArgumentException("Can't find parameter binder for: " + parameterType);
+                    throw new IllegalArgumentException("Can't find parameter binder for: " + parameterType + ", method: " + m);
                 }
             }
             binders.add(binder);
         }
 
         // construct result mapping
-        opByMethod.put(m, new OpRef(parsedSql, resultMapper, parametersMapping, binders.toArray(new DbParameterBinder[binders.size()])));
+        opByMethod.put(m,
+                new OpRef(parsedSql,
+                        resultMapper,
+                        parametersMapping,
+                        names.toArray(new String[names.size()]),
+                        binders.toArray(new DbParameterBinder[binders.size()])));
     }
 
     @Nullable
@@ -241,17 +230,60 @@ public class DbImpl implements Db {
         final DbMapper resultMapper;
 
         @NotNull
-        final Map<String, List<Integer>> parametersMapping;
+        final Map<String, List<Integer>> parametersNamesMapping;
+
+        @NotNull
+        final String[] parameterNames;
 
         @NotNull
         final DbParameterBinder[] parameterBinders;
 
-        public OpRef(@NotNull String parsedSql, @NotNull DbMapper resultMapper,
-                     @NotNull Map<String, List<Integer>> parametersMapping, @NotNull DbParameterBinder[] parameterBinders) {
+        public OpRef(@NotNull String parsedSql, @NotNull DbMapper resultMapper, @NotNull Map<String, List<Integer>> parametersNamesMapping,
+                     @NotNull String[] parameterNames, @NotNull DbParameterBinder[] parameterBinders) {
             this.parsedSql = parsedSql;
             this.resultMapper = resultMapper;
-            this.parametersMapping = parametersMapping;
+            this.parametersNamesMapping = parametersNamesMapping;
+            this.parameterNames = parameterNames;
             this.parameterBinders = parameterBinders;
+        }
+    }
+
+    private class QueryProxy implements InvocationHandler {
+        @Override
+        public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+            OpRef p = opByMethod.get(method);
+            return DbImpl.this.execute(c -> {
+                //noinspection unchecked
+                DbStatement s = new DbStatement(c, p.parsedSql, p.resultMapper, p.parametersNamesMapping);
+                for (int i = 0; i < args.length; i++) {
+                    DbParameterBinder binder = p.parameterBinders[i];
+                    //noinspection unchecked
+                    binder.bind(s.statement, i + 1, args[i]);
+                }
+                if (p.resultMapper != VoidMapper.INSTANCE) {
+                    return s.query();
+                }
+                s.update();
+                return null;
+            });
+        }
+    }
+
+    private class DbiProxy<T> implements InvocationHandler {
+        private final T impl;
+
+        public DbiProxy(T impl) {
+            this.impl = impl;
+        }
+
+        @Override
+        public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+            if (method.getAnnotation(Tx.class) != null) {
+                //noinspection unchecked
+                return DbImpl.this.execute(c -> (T) method.invoke(impl, args));
+            } else {
+                return method.invoke(impl, args);
+            }
         }
     }
 }
