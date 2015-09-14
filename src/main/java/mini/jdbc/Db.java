@@ -8,6 +8,8 @@ import org.jetbrains.annotations.Nullable;
  */
 public interface Db {
 
+    <T> void registerMapper(@NotNull Class<T> mapperClass, @NotNull DbMapper<T> mapper);
+
     @NotNull
     <T> T attachDbi(@NotNull T impl, @NotNull Class<T> daoInterface);
 
