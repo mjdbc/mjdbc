@@ -93,7 +93,7 @@ public class SamplesTest extends org.junit.Assert {
     public void checkMultipleQueriesSameTransaction() {
         User user = sampleQueries.selectUser("u1");
         assertNotNull(user);
-        int oldScore = dbi.updateScore(user.login, 10);
+        int oldScore = dbi.updateScore(user.login, user.score + 1);
         assertEquals(user.score, oldScore);
     }
 
@@ -114,4 +114,17 @@ public class SamplesTest extends org.junit.Assert {
         }
     }
 
+    @Test
+    public void checkBeanBinder() {
+        // update score using bean binder
+        User oldUser = sampleQueries.selectUser("u1");
+        assertNotNull(oldUser);
+        oldUser.score = oldUser.score + 1;
+        sampleQueries.updateScore(oldUser);
+
+        // fetch data and check it was updated
+        User newUser = sampleQueries.selectUser("u1");
+        assertNotNull(newUser);
+        assertEquals(oldUser.score, newUser.score);
+    }
 }

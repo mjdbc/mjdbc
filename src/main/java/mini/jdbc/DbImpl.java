@@ -6,6 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.sql.DataSource;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -19,6 +20,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static java.lang.reflect.Modifier.isFinal;
+import static java.lang.reflect.Modifier.isPublic;
+import static java.lang.reflect.Modifier.isStatic;
+import static java.lang.reflect.Modifier.isTransient;
 import static java.util.Objects.requireNonNull;
 
 /**
@@ -33,6 +38,9 @@ public class DbImpl implements Db {
     private final Map<Class, DbMapper> mapperByClass = new ConcurrentHashMap<>(Mappers.BUILT_IN_MAPPERS);
 
     private final Map<Class, DbBinder> binderByClass = new ConcurrentHashMap<>(Binders.BUILT_IN_BINDERS);
+
+    private final Map<Class, List<BindInfo>> beanInfoByClass = new ConcurrentHashMap<>();
+
 
     @NotNull
     private DataSource dataSource;
@@ -169,39 +177,98 @@ public class DbImpl implements Db {
         Map<String, List<Integer>> parametersMapping = new HashMap<>();
         String parsedSql = DbStatement.parse(sql, parametersMapping);
 
-        // parameter binders
-        List<DbBinder> binders = new ArrayList<>();
-        List<String> names = new ArrayList<>();
+        // parameter bindings
+        List<BindInfo> bindings = new ArrayList<>();
         Class<?>[] parameterTypes = m.getParameterTypes();
         for (int i = 0; i < m.getParameterCount(); i++) {
+            Class<?> parameterType = parameterTypes[i];
             Bind bindAnnotation = (Bind) Arrays.stream(m.getParameterAnnotations()[i]).filter(a -> a instanceof Bind).findFirst().orElse(null);
             if (bindAnnotation == null) {
-                throw new IllegalArgumentException("Unbound parameter: " + i + ", method: " + m);
+                BindBean bindBeanAnnotation = (BindBean) Arrays.stream(m.getParameterAnnotations()[i]).filter(a -> a instanceof BindBean).findFirst().orElse(null);
+                if (bindBeanAnnotation == null) {
+                    throw new IllegalArgumentException("Unbound parameter: " + i + ", method: " + m);
+                }
+                if (m.getParameterCount() != 1) {
+                    throw new RuntimeException("@BindBean must be the only parameter! Method: " + m);
+                }
+                bindings.addAll(getBeanBinders(parameterType));
+                break;
             }
             String name = bindAnnotation.value();
             if (name.isEmpty()) {
-                throw new IllegalArgumentException("Parameter name is empty: " + i + ", method: " + m);
+                throw new IllegalArgumentException("Parameter name is empty! Position" + i + ", method: " + m);
             }
-            names.add(name);
-            Class<?> parameterType = parameterTypes[i];
-            DbBinder binder = binderByClass.get(parameterType);
+            DbBinder binder = getBinderByClass(parameterType);
             if (binder == null) {
-                // try to find binder by superclass.
-                binder = findBinderByParents(parameterType);
-                if (binder == null) {
-                    throw new IllegalArgumentException("No parameter binder for: " + parameterType + ", method: " + m + ", position: " + i + ", type: " + parameterType);
-                }
+                throw new IllegalArgumentException("No parameter binder for: " + parameterType + ", method: " + m + ", position: " + i + ", type: " + parameterType);
             }
-            binders.add(binder);
+            bindings.add(new BindInfo(name, binder, i, null, null));
+        }
+        // check that all binding found
+        for (String name : parametersMapping.keySet()) {
+            BindInfo info = bindings.stream().filter(b -> b.mappedName.equals(name)).findAny().orElse(null);
+            if (info == null) {
+                throw new RuntimeException("No binding found for " + name + ", method: " + m);
+            }
         }
 
         // construct result mapping
-        opByMethod.put(m,
-                new OpRef(parsedSql,
-                        resultMapper,
-                        parametersMapping,
-                        names.toArray(new String[names.size()]),
-                        binders.toArray(new DbBinder[binders.size()])));
+        opByMethod.put(m, new OpRef(parsedSql, resultMapper, parametersMapping, bindings.toArray(new BindInfo[bindings.size()])));
+    }
+
+    @Nullable
+    private DbBinder getBinderByClass(Class<?> parameterType) {
+        DbBinder binder = binderByClass.get(parameterType);
+        if (binder == null) {
+            // try to find binder by superclass.
+            binder = findBinderByParents(parameterType);
+        }
+        return binder;
+    }
+
+    /**
+     * For all public fields and getters assign binders by type
+     */
+    private List<BindInfo> getBeanBinders(Class<?> type) {
+        List<BindInfo> bindings = beanInfoByClass.get(type);
+        if (bindings != null) {
+            return bindings;
+        }
+        bindings = new ArrayList<>();
+
+        // check all public fields
+        for (Field f : type.getFields()) {
+            int modifiers = f.getModifiers();
+            if (isFinal(modifiers) || !isPublic(modifiers) || isStatic(modifiers) || isTransient(modifiers)) {
+                continue; //ignore
+            }
+            DbBinder binder = getBinderByClass(f.getType());
+            if (binder == null) {
+                throw new IllegalArgumentException("No bean binder for field: " + f + ", bean: " + type);
+            }
+            bindings.add(new BindInfo(f.getName(), binder, 0, f, null));
+        }
+
+        // check all public get/is methods
+        for (Method m : type.getMethods()) {
+            int modifiers = m.getModifiers();
+            String methodName = m.getName();
+            if (!isPublic(modifiers) || isStatic(modifiers) || !methodName.startsWith("get") || !methodName.startsWith("is")) {
+                continue; //ignore
+            }
+            String suffix = methodName.startsWith("is") ? methodName.substring(2) : methodName.substring(3);
+            String propertyName = Character.toLowerCase(suffix.charAt(0)) + suffix.substring(1);
+            if (bindings.stream().filter(b -> b.mappedName.equals(propertyName)).findAny().orElse(null) != null) { // field has higher priority.
+                continue;
+            }
+            DbBinder binder = getBinderByClass(m.getReturnType());
+            if (binder == null) {
+                throw new IllegalArgumentException("No bean binder for method: " + m + ", bean: " + type);
+            }
+            bindings.add(new BindInfo(propertyName, binder, 0, null, m));
+        }
+        beanInfoByClass.put(type, bindings);
+        return bindings;
     }
 
     @Nullable
@@ -241,35 +308,35 @@ public class DbImpl implements Db {
         final Map<String, List<Integer>> parametersNamesMapping;
 
         @NotNull
-        final String[] parameterNames;
+        final BindInfo[] bindings;
 
-        @NotNull
-        final DbBinder[] parameterBinders;
 
-        public OpRef(@NotNull String parsedSql, @NotNull DbMapper resultMapper, @NotNull Map<String, List<Integer>> parametersNamesMapping,
-                     @NotNull String[] parameterNames, @NotNull DbBinder[] parameterBinders) {
+        public OpRef(@NotNull String parsedSql, @NotNull DbMapper resultMapper,
+                     @NotNull Map<String, List<Integer>> parametersNamesMapping, @NotNull BindInfo[] bindings) {
             this.parsedSql = parsedSql;
             this.resultMapper = resultMapper;
             this.parametersNamesMapping = parametersNamesMapping;
-            this.parameterNames = parameterNames;
-            this.parameterBinders = parameterBinders;
+            this.bindings = bindings;
         }
     }
 
     private class QueryProxy implements InvocationHandler {
+        @SuppressWarnings("unchecked")
         @Override
         public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
             OpRef p = opByMethod.get(method);
             return DbImpl.this.execute(c -> {
-                //noinspection unchecked
                 DbStatement s = new DbStatement(c, p.parsedSql, p.resultMapper, p.parametersNamesMapping);
                 if (args != null) {
-                    for (int i = 0; i < args.length; i++) {
-                        DbBinder binder = p.parameterBinders[i];
-                        List<Integer> parameterIndexes = p.parametersNamesMapping.get(p.parameterNames[i]);
-                        for (Integer idx : parameterIndexes) {
-                            //noinspection unchecked
-                            binder.bind(s.statement, idx, args[i]);
+                    for (BindInfo bi : p.bindings) {
+                        List<Integer> sqlIndexes = p.parametersNamesMapping.get(bi.mappedName);
+                        if (sqlIndexes == null) {
+                            continue;
+                        }
+                        for (Integer idx : sqlIndexes) {
+                            Object arg = args[bi.argumentIdx];
+                            Object value = bi.field != null ? bi.field.get(arg) : bi.getter != null ? bi.getter.invoke(arg) : arg;
+                            bi.binder.bind(s.statement, idx, value);
                         }
                     }
                 }
@@ -297,6 +364,34 @@ public class DbImpl implements Db {
             } else {
                 return method.invoke(impl, args);
             }
+        }
+    }
+
+    private static class BindInfo {
+        @NotNull
+        String mappedName;
+        @NotNull
+        DbBinder binder;
+
+        public final int argumentIdx;
+
+        @Nullable
+        private final Field field;
+
+        @Nullable
+        private final Method getter;
+
+        public BindInfo(@NotNull String mappedName, @NotNull DbBinder binder, int argumentIdx, @Nullable Field field, @Nullable Method getter) {
+            this.mappedName = mappedName;
+            this.binder = binder;
+            this.argumentIdx = argumentIdx;
+            this.field = field;
+            this.getter = getter;
+        }
+
+        @Override
+        public String toString() {
+            return "BinderInfo[n:'" + mappedName + "', b:" + binder + ", a:" + argumentIdx + ", f:" + field + ", g:" + getter + "]";
         }
     }
 }

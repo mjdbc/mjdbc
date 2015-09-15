@@ -35,9 +35,9 @@ public class SampleDbiImpl implements SampleDbi {
         if (user == null) {
             return -1;
         }
-        int res = user.score;
+        int oldScore = user.score;
         queries.updateScore(user.login, newScore);
-        return res;
+        return oldScore;
     }
 
     @Tx
