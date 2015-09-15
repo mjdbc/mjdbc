@@ -1,16 +1,17 @@
 package mini.jdbc.binder;
 
-import mini.jdbc.DbParameterBinder;
+import mini.jdbc.DbBinder;
 import mini.jdbc.type.DbInt;
 import mini.jdbc.type.DbLong;
 import mini.jdbc.type.DbString;
+import mini.jdbc.util.JavaType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-public class DbValueBinder implements DbParameterBinder {
+public class DbValueBinder implements DbBinder {
     @NotNull
     private final JavaType type;
 

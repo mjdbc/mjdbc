@@ -1,6 +1,7 @@
 package mini.jdbc.binder;
 
-import mini.jdbc.DbParameterBinder;
+import mini.jdbc.DbBinder;
+import mini.jdbc.util.JavaType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -11,7 +12,7 @@ import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.Date;
 
-public class JavaTypeBinder implements DbParameterBinder {
+public class JavaTypeBinder implements DbBinder {
 
     private final JavaType type;
 

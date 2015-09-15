@@ -1,11 +1,10 @@
 package mini.jdbc;
 
 import mini.jdbc.binder.DbValueBinder;
-import mini.jdbc.binder.JavaTypeBinder;
-import mini.jdbc.binder.JavaType;
 import mini.jdbc.type.DbInt;
 import mini.jdbc.type.DbLong;
 import mini.jdbc.type.DbString;
+import mini.jdbc.util.JavaType;
 
 import java.math.BigDecimal;
 import java.security.Timestamp;
@@ -13,33 +12,36 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Map of all 'mini-jdbc' binders in a single place.
+ */
 public final class Binders {
 
-    public static final Map<Class, DbParameterBinder> BUILT_IN_BINDERS = Collections.unmodifiableMap(new HashMap<Class, DbParameterBinder>() {{
+    public static final Map<Class, DbBinder> BUILT_IN_BINDERS = Collections.unmodifiableMap(new HashMap<Class, DbBinder>() {{
 
-        //primitive types
-        put(Boolean.class, new JavaTypeBinder(JavaType.Boolean));
-        put(Byte.class, new JavaTypeBinder(JavaType.Byte));
-        put(Character.class, new JavaTypeBinder(JavaType.Character));
-        put(Double.class, new JavaTypeBinder(JavaType.Double));
-        put(Short.class, new JavaTypeBinder(JavaType.Short));
-        put(Float.class, new JavaTypeBinder(JavaType.Float));
-        put(Integer.class, new JavaTypeBinder(JavaType.Integer));
-        put(Long.class, new JavaTypeBinder(JavaType.Long));
+        // primitive types
+        put(Boolean.class, JavaType.Boolean.binder);
+        put(Byte.class, JavaType.Byte.binder);
+        put(Character.class, JavaType.Character.binder);
+        put(Double.class, JavaType.Double.binder);
+        put(Short.class, JavaType.Short.binder);
+        put(Float.class, JavaType.Float.binder);
+        put(Integer.class, JavaType.Integer.binder);
+        put(Long.class, JavaType.Long.binder);
 
-        // Sql relate types
-        put(BigDecimal.class, new JavaTypeBinder(JavaType.BigDecimal));
-        put(java.util.Date.class, new JavaTypeBinder(JavaType.Date));
-        put(java.sql.Date.class, new JavaTypeBinder(JavaType.SqlDate));
-        put(Timestamp.class, new JavaTypeBinder(JavaType.Timestamp));
+        // jdbc related types
+        put(BigDecimal.class, JavaType.BigDecimal.binder);
+        put(java.util.Date.class, JavaType.Date.binder);
+        put(java.sql.Date.class, JavaType.SqlDate.binder);
+        put(Timestamp.class, JavaType.Timestamp.binder);
 
-        // String classes
-        put(String.class, new JavaTypeBinder(JavaType.String));
-        put(StringBuilder.class, new JavaTypeBinder(JavaType.String));
-        put(StringBuffer.class, new JavaTypeBinder(JavaType.String));
-        put(CharSequence.class, new JavaTypeBinder(JavaType.String));
+        // Strings
+        put(String.class, JavaType.String.binder);
+        put(StringBuilder.class, JavaType.String.binder);
+        put(StringBuffer.class, JavaType.String.binder);
+        put(CharSequence.class, JavaType.String.binder);
 
-        // Custom types
+        // Helper types
         put(DbInt.class, new DbValueBinder(JavaType.Integer));
         put(DbLong.class, new DbValueBinder(JavaType.Long));
         put(DbString.class, new DbValueBinder(JavaType.String));

@@ -10,6 +10,6 @@ import java.sql.SQLException;
 /**
  *
  */
-public interface DbParameterBinder<T> {
+public interface DbBinder<T> {
     void bind(@NotNull PreparedStatement statement, int idx, @Nullable T value) throws SQLException;
 }

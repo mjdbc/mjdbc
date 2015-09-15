@@ -24,7 +24,7 @@ public interface Db {
      * @param binderClass - parameter class to be processed by this binder.
      * @param binder      - binder implementation.
      */
-    void registerBinder(@NotNull Class binderClass, @NotNull DbParameterBinder binder);
+    void registerBinder(@NotNull Class binderClass, @NotNull DbBinder binder);
 
     /**
      * Attaches Dbi (Database Interface) implementation to the database.

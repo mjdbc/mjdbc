@@ -16,6 +16,7 @@ import org.junit.Test;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.List;
 
 /**
  *
@@ -63,7 +64,6 @@ public class SamplesTest extends org.junit.Assert {
         });
     }
 
-
     @Test
     public void checkDbi() throws SQLException {
         User user = dbi.getUserByLogin("u1");
@@ -76,6 +76,18 @@ public class SamplesTest extends org.junit.Assert {
         User user = sampleQueries.selectUser("u1");
         assertNotNull(user);
         assertEquals("u1", user.login);
+    }
+
+    @Test
+    public void checkIntMapper() throws SQLException {
+        int n = sampleQueries.countUsers();
+        assertEquals(2, n);
+    }
+
+    @Test
+    public void checkListMapper() throws SQLException {
+        List<User> users = sampleQueries.selectAllUsers();
+        assertEquals(2, users.size());
     }
 
 }
