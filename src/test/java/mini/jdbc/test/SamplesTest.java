@@ -4,6 +4,7 @@ import com.zaxxer.hikari.HikariDataSource;
 import junit.framework.Assert;
 import mini.jdbc.Db;
 import mini.jdbc.DbImpl;
+import mini.jdbc.DbTimer;
 import mini.jdbc.test.asset.SampleQueries;
 import mini.jdbc.test.asset.dbi.SampleDbi;
 import mini.jdbc.test.asset.dbi.SampleDbiImpl;
@@ -14,6 +15,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.lang.reflect.Method;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.List;
@@ -28,7 +30,12 @@ public class SamplesTest extends org.junit.Assert {
     private HikariDataSource ds;
 
     /**
-     * Custom database interface. DAO.
+     * Database instance.
+     */
+    private DbImpl db;
+
+    /**
+     * Custom data access interface.
      */
     private SampleDbi dbi;
 
@@ -40,7 +47,7 @@ public class SamplesTest extends org.junit.Assert {
     @Before
     public void setUp() {
         ds = DbUtils.prepareDataSource("sample");
-        DbImpl db = new DbImpl(ds);
+        db = new DbImpl(ds);
         dbi = db.attachDbi(new SampleDbiImpl(db), SampleDbi.class);
 
         // Usually DB must be accessed by calling dbi interface method.
@@ -150,5 +157,25 @@ public class SamplesTest extends org.junit.Assert {
         User checkUser2 = dbi.getUserByLogin(u.login);
         assertNotNull(checkUser2);
         assertEquals(u.id, checkUser2.id);
+    }
+
+    @Test
+    public void checkTxTimer() throws NoSuchMethodException {
+        dbi.getUserByLogin("u1");
+        Method method = SampleDbi.class.getMethod("getUserByLogin", String.class);
+        DbTimer timer = db.getTimers().get(method);
+        assertNotNull(timer);
+        assertTrue(timer.getInvocationCount() > 0);
+        assertTrue(timer.getTotalTimeInNanos() > 0);
+    }
+
+    @Test
+    public void checkSqlTimer() throws NoSuchMethodException {
+        sampleQueries.countUsers();
+        Method method = SampleQueries.class.getMethod("countUsers");
+        DbTimer timer = db.getTimers().get(method);
+        assertNotNull(timer);
+        assertTrue(timer.getInvocationCount() > 0);
+        assertTrue(timer.getTotalTimeInNanos() > 0);
     }
 }

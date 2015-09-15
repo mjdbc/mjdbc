@@ -3,6 +3,9 @@ package mini.jdbc;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.lang.reflect.Method;
+import java.util.Map;
+
 /**
  * Database access interface. Allows to register result set mappers, statement parameter binders and execute queries and updates over database.
  */
@@ -74,4 +77,14 @@ public interface Db {
      * @param op - operation impl.
      */
     void executeV(@NotNull DbOpV op);
+
+
+    /**
+     * Returns per-method timers. Statistics is collected for all @Tx methods of attached Dbi interfaces
+     * and for all @Sql methods of attached query interfaces.
+     *
+     * @return per-method statistics. Note: This is direct access to the timers map. The timers are updated concurrently.
+     * if timer is removed from the map -> it restarts.
+     */
+    Map<Method, DbTimer> getTimers();
 }

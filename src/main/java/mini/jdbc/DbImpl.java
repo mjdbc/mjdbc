@@ -43,6 +43,7 @@ public class DbImpl implements Db {
 
     private final Map<Class, List<BindInfo>> beanInfoByClass = new ConcurrentHashMap<>();
 
+    private final Map<Method, DbTimer> timersByMethod = new ConcurrentHashMap<>();
 
     @NotNull
     private DataSource dataSource;
@@ -87,6 +88,11 @@ public class DbImpl implements Db {
 
     public void executeV(@NotNull DbOpV op) {
         executeImpl(op);
+    }
+
+    @Override
+    public Map<Method, DbTimer> getTimers() {
+        return timersByMethod;
     }
 
     @SuppressWarnings("unchecked")
@@ -351,31 +357,36 @@ public class DbImpl implements Db {
         @Override
         public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
             OpRef p = opByMethod.get(method);
-            return DbImpl.this.execute(c -> {
-                DbStatement s = new DbStatement(c, p.parsedSql, p.resultMapper, p.parametersNamesMapping, p.useGeneratedKeys);
-                if (args != null) {
-                    for (BindInfo bi : p.bindings) {
-                        List<Integer> sqlIndexes = p.parametersNamesMapping.get(bi.mappedName);
-                        if (sqlIndexes == null) {
-                            continue;
-                        }
-                        for (Integer idx : sqlIndexes) {
-                            Object arg = args[bi.argumentIdx];
-                            Object value = bi.field != null ? bi.field.get(arg) : bi.getter != null ? bi.getter.invoke(arg) : arg;
-                            bi.binder.bind(s.statement, idx, value);
+            long t0 = System.nanoTime();
+            try {
+                return DbImpl.this.execute(c -> {
+                    DbStatement s = new DbStatement(c, p.parsedSql, p.resultMapper, p.parametersNamesMapping, p.useGeneratedKeys);
+                    if (args != null) {
+                        for (BindInfo bi : p.bindings) {
+                            List<Integer> sqlIndexes = p.parametersNamesMapping.get(bi.mappedName);
+                            if (sqlIndexes == null) {
+                                continue;
+                            }
+                            for (Integer idx : sqlIndexes) {
+                                Object arg = args[bi.argumentIdx];
+                                Object value = bi.field != null ? bi.field.get(arg) : bi.getter != null ? bi.getter.invoke(arg) : arg;
+                                bi.binder.bind(s.statement, idx, value);
+                            }
                         }
                     }
-                }
-                if (p.resultMapper != VoidMapper.INSTANCE) {
-                    if (p.useGeneratedKeys) {
-                        return s.updateAndGetGeneratedKeys();
-                    } else {
-                        return s.query();
+                    if (p.resultMapper != VoidMapper.INSTANCE) {
+                        if (p.useGeneratedKeys) {
+                            return s.updateAndGetGeneratedKeys();
+                        } else {
+                            return s.query();
+                        }
                     }
-                }
-                s.executeUpdate();
-                return null;
-            });
+                    s.executeUpdate();
+                    return null;
+                });
+            } finally {
+                updateTimer(method, t0);
+            }
         }
     }
 
@@ -389,11 +400,31 @@ public class DbImpl implements Db {
         @Override
         public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
             if (method.getAnnotation(Tx.class) != null) {
-                //noinspection unchecked
-                return DbImpl.this.execute(c -> (T) method.invoke(impl, args));
+                long t0 = System.nanoTime();
+                try {
+                    //noinspection unchecked
+                    return DbImpl.this.execute(c -> (T) method.invoke(impl, args));
+                } finally {
+                    updateTimer(method, t0);
+                }
             } else {
                 return method.invoke(impl, args);
             }
         }
     }
+
+    private void updateTimer(Method method, long t0) {
+        DbTimer timer = timersByMethod.get(method);
+        if (timer == null) {
+            synchronized (timersByMethod) {
+                timer = timersByMethod.get(method);
+                if (timer == null) {
+                    timer = new DbTimer(method);
+                    timersByMethod.put(method, timer);
+                }
+            }
+        }
+        timer.onInvoke(System.nanoTime() - t0);
+    }
+
 }
