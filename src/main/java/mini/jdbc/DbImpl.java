@@ -2,6 +2,8 @@ package mini.jdbc;
 
 import mini.jdbc.mapper.ListMapper;
 import mini.jdbc.mapper.VoidMapper;
+import mini.jdbc.util.Binders;
+import mini.jdbc.util.Mappers;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -198,13 +200,14 @@ public class DbImpl implements Db {
             if (name.isEmpty()) {
                 throw new IllegalArgumentException("Parameter name is empty! Position" + i + ", method: " + m);
             }
-            DbBinder binder = getBinderByClass(parameterType);
+            DbBinder binder = findBinderByType(parameterType);
             if (binder == null) {
                 throw new IllegalArgumentException("No parameter binder for: " + parameterType + ", method: " + m + ", position: " + i + ", type: " + parameterType);
             }
             bindings.add(new BindInfo(name, binder, i, null, null));
         }
-        // check that all binding found
+
+        // check that all parameters are bound
         for (String name : parametersMapping.keySet()) {
             BindInfo info = bindings.stream().filter(b -> b.mappedName.equals(name)).findAny().orElse(null);
             if (info == null) {
@@ -212,18 +215,10 @@ public class DbImpl implements Db {
             }
         }
 
-        // construct result mapping
-        opByMethod.put(m, new OpRef(parsedSql, resultMapper, parametersMapping, bindings.toArray(new BindInfo[bindings.size()])));
-    }
+        boolean useGeneratedKeys = returnType.getAnnotation(UseGeneratedKeys.class) != null || sql.toUpperCase().startsWith("INSERT ");
 
-    @Nullable
-    private DbBinder getBinderByClass(Class<?> parameterType) {
-        DbBinder binder = binderByClass.get(parameterType);
-        if (binder == null) {
-            // try to find binder by superclass.
-            binder = findBinderByParents(parameterType);
-        }
-        return binder;
+        // construct result mapping
+        opByMethod.put(m, new OpRef(parsedSql, resultMapper, useGeneratedKeys, parametersMapping, bindings.toArray(new BindInfo[bindings.size()])));
     }
 
     /**
@@ -242,7 +237,7 @@ public class DbImpl implements Db {
             if (isFinal(modifiers) || !isPublic(modifiers) || isStatic(modifiers) || isTransient(modifiers)) {
                 continue; //ignore
             }
-            DbBinder binder = getBinderByClass(f.getType());
+            DbBinder binder = findBinderByType(f.getType());
             if (binder == null) {
                 throw new IllegalArgumentException("No bean binder for field: " + f + ", bean: " + type);
             }
@@ -261,7 +256,7 @@ public class DbImpl implements Db {
             if (bindings.stream().filter(b -> b.mappedName.equals(propertyName)).findAny().orElse(null) != null) { // field has higher priority.
                 continue;
             }
-            DbBinder binder = getBinderByClass(m.getReturnType());
+            DbBinder binder = findBinderByType(m.getReturnType());
             if (binder == null) {
                 throw new IllegalArgumentException("No bean binder for method: " + m + ", bean: " + type);
             }
@@ -272,16 +267,16 @@ public class DbImpl implements Db {
     }
 
     @Nullable
-    private DbBinder findBinderByParents(Class<?> parameterType) {
-        Class superClass = parameterType.getSuperclass();
-        while (superClass != null) {
-            DbBinder binder = binderByClass.get(parameterType);
-            if (binder != null) {
-                return binder;
+    private DbBinder findBinderByType(Class<?> parameterType) {
+        DbBinder binder = binderByClass.get(parameterType);
+        if (binder == null) {
+            binder = findBinderByInterfaces(parameterType.getInterfaces());
+            if (binder == null) {
+                Class superClass = parameterType.getSuperclass();
+                binder = superClass == null ? null : findBinderByType(superClass);
             }
-            superClass = superClass.getSuperclass();
         }
-        return findBinderByInterfaces(parameterType.getInterfaces());
+        return binder;
     }
 
     private DbBinder findBinderByInterfaces(Class<?>[] interfaces) {
@@ -310,60 +305,16 @@ public class DbImpl implements Db {
         @NotNull
         final BindInfo[] bindings;
 
+        final boolean useGeneratedKeys;
 
-        public OpRef(@NotNull String parsedSql, @NotNull DbMapper resultMapper,
+
+        public OpRef(@NotNull String parsedSql, @NotNull DbMapper resultMapper, boolean useGeneratedKeys,
                      @NotNull Map<String, List<Integer>> parametersNamesMapping, @NotNull BindInfo[] bindings) {
             this.parsedSql = parsedSql;
+            this.useGeneratedKeys = useGeneratedKeys;
             this.resultMapper = resultMapper;
             this.parametersNamesMapping = parametersNamesMapping;
             this.bindings = bindings;
-        }
-    }
-
-    private class QueryProxy implements InvocationHandler {
-        @SuppressWarnings("unchecked")
-        @Override
-        public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-            OpRef p = opByMethod.get(method);
-            return DbImpl.this.execute(c -> {
-                DbStatement s = new DbStatement(c, p.parsedSql, p.resultMapper, p.parametersNamesMapping);
-                if (args != null) {
-                    for (BindInfo bi : p.bindings) {
-                        List<Integer> sqlIndexes = p.parametersNamesMapping.get(bi.mappedName);
-                        if (sqlIndexes == null) {
-                            continue;
-                        }
-                        for (Integer idx : sqlIndexes) {
-                            Object arg = args[bi.argumentIdx];
-                            Object value = bi.field != null ? bi.field.get(arg) : bi.getter != null ? bi.getter.invoke(arg) : arg;
-                            bi.binder.bind(s.statement, idx, value);
-                        }
-                    }
-                }
-                if (p.resultMapper != VoidMapper.INSTANCE) {
-                    return s.query();
-                }
-                s.update();
-                return null;
-            });
-        }
-    }
-
-    private class DbiProxy<T> implements InvocationHandler {
-        private final T impl;
-
-        public DbiProxy(T impl) {
-            this.impl = impl;
-        }
-
-        @Override
-        public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-            if (method.getAnnotation(Tx.class) != null) {
-                //noinspection unchecked
-                return DbImpl.this.execute(c -> (T) method.invoke(impl, args));
-            } else {
-                return method.invoke(impl, args);
-            }
         }
     }
 
@@ -392,6 +343,57 @@ public class DbImpl implements Db {
         @Override
         public String toString() {
             return "BinderInfo[n:'" + mappedName + "', b:" + binder + ", a:" + argumentIdx + ", f:" + field + ", g:" + getter + "]";
+        }
+    }
+
+    private class QueryProxy implements InvocationHandler {
+        @SuppressWarnings("unchecked")
+        @Override
+        public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+            OpRef p = opByMethod.get(method);
+            return DbImpl.this.execute(c -> {
+                DbStatement s = new DbStatement(c, p.parsedSql, p.resultMapper, p.parametersNamesMapping, p.useGeneratedKeys);
+                if (args != null) {
+                    for (BindInfo bi : p.bindings) {
+                        List<Integer> sqlIndexes = p.parametersNamesMapping.get(bi.mappedName);
+                        if (sqlIndexes == null) {
+                            continue;
+                        }
+                        for (Integer idx : sqlIndexes) {
+                            Object arg = args[bi.argumentIdx];
+                            Object value = bi.field != null ? bi.field.get(arg) : bi.getter != null ? bi.getter.invoke(arg) : arg;
+                            bi.binder.bind(s.statement, idx, value);
+                        }
+                    }
+                }
+                if (p.resultMapper != VoidMapper.INSTANCE) {
+                    if (p.useGeneratedKeys) {
+                        return s.updateAndGetGeneratedKeys();
+                    } else {
+                        return s.query();
+                    }
+                }
+                s.executeUpdate();
+                return null;
+            });
+        }
+    }
+
+    private class DbiProxy<T> implements InvocationHandler {
+        private final T impl;
+
+        public DbiProxy(T impl) {
+            this.impl = impl;
+        }
+
+        @Override
+        public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+            if (method.getAnnotation(Tx.class) != null) {
+                //noinspection unchecked
+                return DbImpl.this.execute(c -> (T) method.invoke(impl, args));
+            } else {
+                return method.invoke(impl, args);
+            }
         }
     }
 }

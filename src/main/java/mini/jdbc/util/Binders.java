@@ -1,5 +1,6 @@
-package mini.jdbc;
+package mini.jdbc.util;
 
+import mini.jdbc.DbBinder;
 import mini.jdbc.binder.DbValueBinder;
 import mini.jdbc.type.DbInt;
 import mini.jdbc.type.DbLong;

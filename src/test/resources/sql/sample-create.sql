@@ -4,7 +4,7 @@ CREATE TABLE users (
   first_name VARCHAR(30) NOT NULL,
   last_name  VARCHAR(30) NOT NULL,
   gender     INTEGER     NOT NULL, --gender: 0 - Male, 1 - Female.
-  score      INTEGER     NOT NULL -- some integer field to update in tests.
+  score      INTEGER     NOT NULL -- some integer field to executeUpdate in tests.
 );
 
 

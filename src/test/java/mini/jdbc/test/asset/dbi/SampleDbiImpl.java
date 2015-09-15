@@ -5,6 +5,7 @@ import mini.jdbc.DbStatement;
 import mini.jdbc.Tx;
 import mini.jdbc.test.asset.SampleQueries;
 import mini.jdbc.test.asset.model.User;
+import mini.jdbc.test.asset.model.UserId;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -17,8 +18,16 @@ public class SampleDbiImpl implements SampleDbi {
 
     public SampleDbiImpl(Db db) {
         this.db = db;
+        db.registerMapper(UserId.class, UserId.MAPPER);
         db.registerMapper(User.class, User.MAPPER);
         queries = db.attachQueries(SampleQueries.class);
+    }
+
+    @Tx
+    @Nullable
+    @Override
+    public User getUserById(@NotNull UserId id) {
+        return queries.getUserById(id);
     }
 
     @Tx
@@ -31,7 +40,7 @@ public class SampleDbiImpl implements SampleDbi {
     @Tx
     @Override
     public int updateScore(@NotNull String login, int newScore) {
-        User user = queries.selectUser(login);
+        User user = queries.getUserByLogin(login);
         if (user == null) {
             return -1;
         }
@@ -43,11 +52,17 @@ public class SampleDbiImpl implements SampleDbi {
     @Tx
     @Override
     public int updateScoreAndRollback(@NotNull String login, int newScore) {
-        User user = queries.selectUser(login);
+        User user = queries.getUserByLogin(login);
         if (user == null) {
             return -1;
         }
         queries.updateScore(user.login, newScore);
         throw new RuntimeException("Rollback!");
+    }
+
+    @Override
+    @Tx
+    public void createUser(@NotNull User user) {
+        user.id = queries.insertUser(user);
     }
 }

@@ -4,10 +4,12 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.math.BigDecimal;
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLType;
+import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -22,27 +24,34 @@ public class DbStatement<T> implements AutoCloseable {
     public final PreparedStatement statement;
 
     @NotNull
-    public final DbMapper<T> mapper;
+    public final DbMapper<T> resultMapper;
 
     private final Map<String, List<Integer>> parametersMapping;
 
-    //TODO: create mappers registry in DB!
-    //public DbStatement(@NotNull DbConnection c, @NotNull String query, @NotNull Class<T> resultClass) throws SQLException {
+    public DbStatement(@NotNull DbConnection c, @NotNull String sql, @NotNull DbMapper<T> resultMapper) throws SQLException {
+        this(c, sql, resultMapper, false);
+    }
 
-    public DbStatement(@NotNull DbConnection c, @NotNull String sql, @NotNull DbMapper<T> mapper) throws SQLException {
-        this.mapper = mapper;
+    public DbStatement(@NotNull DbConnection c, @NotNull String sql, @NotNull DbMapper<T> resultMapper, boolean useGeneratedKeys) throws SQLException {
+        this.resultMapper = resultMapper;
         this.parametersMapping = new HashMap<>();
         String parsedSql = parse(sql, this.parametersMapping);
-        statement = c.sqlConnection.prepareStatement(parsedSql);
+        statement = prepareStatement(c.sqlConnection, parsedSql, useGeneratedKeys);
         c.statementsToClose.add(this);
     }
 
-    public DbStatement(@NotNull DbConnection c, @NotNull String parsedSql, @NotNull DbMapper<T> mapper, Map<String, List<Integer>> parametersMapping) throws SQLException {
-        this.mapper = mapper;
+    public DbStatement(@NotNull DbConnection c, @NotNull String parsedSql, @NotNull DbMapper<T> resultMapper,
+                       Map<String, List<Integer>> parametersMapping, boolean useGeneratedKeys) throws SQLException {
+        this.resultMapper = resultMapper;
         this.parametersMapping = parametersMapping;
-        statement = c.sqlConnection.prepareStatement(parsedSql);
+        statement = prepareStatement(c.sqlConnection, parsedSql, useGeneratedKeys);
         c.statementsToClose.add(this);
     }
+
+    private PreparedStatement prepareStatement(@NotNull Connection c, @NotNull String parsedSql, boolean useGeneratedKeys) throws SQLException {
+        return useGeneratedKeys ? c.prepareStatement(parsedSql, Statement.RETURN_GENERATED_KEYS) : c.prepareStatement(parsedSql);
+    }
+
 
     public DbStatement<T> setNull(@NotNull String name, @NotNull SQLType type) throws SQLException {
         for (int i : getIndexes(name)) {
@@ -133,7 +142,7 @@ public class DbStatement<T> implements AutoCloseable {
     public T query() throws SQLException {
         try (ResultSet r = statement.executeQuery()) {
             if (r.next()) {
-                return mapper.map(r);
+                return resultMapper.map(r);
             }
             return null;
         }
@@ -144,7 +153,7 @@ public class DbStatement<T> implements AutoCloseable {
         List<T> res = new ArrayList<>();
         try (ResultSet r = statement.executeQuery()) {
             while (r.next()) {
-                res.add(mapper.map(r));
+                res.add(resultMapper.map(r));
             }
         }
         return res;
@@ -156,17 +165,17 @@ public class DbStatement<T> implements AutoCloseable {
     }
 
     @NotNull
-    public T insertAndReturnId() throws SQLException {
+    public T updateAndGetGeneratedKeys() throws SQLException {
         statement.executeUpdate();
         try (ResultSet r = statement.getGeneratedKeys()) {
             if (r.next()) {
-                return mapper.map(r);
+                return resultMapper.map(r);
             }
-            throw new SQLException("Insert returned no ID!");
+            throw new SQLException("Result set is empty!");
         }
     }
 
-    public int update() throws SQLException {
+    public int executeUpdate() throws SQLException {
         return statement.executeUpdate();
     }
 

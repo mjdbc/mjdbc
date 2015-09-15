@@ -7,6 +7,7 @@ import mini.jdbc.DbImpl;
 import mini.jdbc.test.asset.SampleQueries;
 import mini.jdbc.test.asset.dbi.SampleDbi;
 import mini.jdbc.test.asset.dbi.SampleDbiImpl;
+import mini.jdbc.test.asset.model.Gender;
 import mini.jdbc.test.asset.model.User;
 import mini.jdbc.test.util.DbUtils;
 import org.junit.After;
@@ -41,6 +42,9 @@ public class SamplesTest extends org.junit.Assert {
         ds = DbUtils.prepareDataSource("sample");
         DbImpl db = new DbImpl(ds);
         dbi = db.attachDbi(new SampleDbiImpl(db), SampleDbi.class);
+
+        // Usually DB must be accessed by calling dbi interface method.
+        // But for testing we create a separate queries interface here.
         sampleQueries = db.attachQueries(SampleQueries.class);
     }
 
@@ -72,7 +76,7 @@ public class SamplesTest extends org.junit.Assert {
 
     @Test
     public void checkQuery() {
-        User user = sampleQueries.selectUser("u1");
+        User user = sampleQueries.getUserByLogin("u1");
         assertNotNull(user);
         assertEquals("u1", user.login);
     }
@@ -91,7 +95,7 @@ public class SamplesTest extends org.junit.Assert {
 
     @Test
     public void checkMultipleQueriesSameTransaction() {
-        User user = sampleQueries.selectUser("u1");
+        User user = sampleQueries.getUserByLogin("u1");
         assertNotNull(user);
         int oldScore = dbi.updateScore(user.login, user.score + 1);
         assertEquals(user.score, oldScore);
@@ -99,7 +103,7 @@ public class SamplesTest extends org.junit.Assert {
 
     @Test
     public void checkRollback() {
-        User oldUser = sampleQueries.selectUser("u1");
+        User oldUser = sampleQueries.getUserByLogin("u1");
         assertNotNull(oldUser);
         try {
             dbi.updateScoreAndRollback(oldUser.login, 10);
@@ -108,7 +112,7 @@ public class SamplesTest extends org.junit.Assert {
             assertEquals(RuntimeException.class, e.getClass());
             assertEquals("Rollback!", e.getMessage());
 
-            User newUser = sampleQueries.selectUser("u1");
+            User newUser = sampleQueries.getUserByLogin("u1");
             assertNotNull(newUser);
             assertEquals(oldUser.score, newUser.score);
         }
@@ -116,15 +120,35 @@ public class SamplesTest extends org.junit.Assert {
 
     @Test
     public void checkBeanBinder() {
-        // update score using bean binder
-        User oldUser = sampleQueries.selectUser("u1");
+        // executeUpdate score using bean binder
+        User oldUser = sampleQueries.getUserByLogin("u1");
         assertNotNull(oldUser);
         oldUser.score = oldUser.score + 1;
         sampleQueries.updateScore(oldUser);
 
         // fetch data and check it was updated
-        User newUser = sampleQueries.selectUser("u1");
+        User newUser = sampleQueries.getUserByLogin("u1");
         assertNotNull(newUser);
         assertEquals(oldUser.score, newUser.score);
+    }
+
+    @Test
+    public void checkInsert() {
+        User u = new User();
+        u.login = "u3";
+        u.firstName = "First3";
+        u.lastName = "Last3";
+        u.gender = Gender.FEMALE;
+        dbi.createUser(u);
+
+        assertNotNull(u.id);
+
+        User checkUser1 = dbi.getUserById(u.id);
+        assertNotNull(checkUser1);
+        assertEquals(u.login, checkUser1.login);
+
+        User checkUser2 = dbi.getUserByLogin(u.login);
+        assertNotNull(checkUser2);
+        assertEquals(u.id, checkUser2.id);
     }
 }

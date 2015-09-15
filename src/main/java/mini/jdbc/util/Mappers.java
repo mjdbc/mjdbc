@@ -1,5 +1,6 @@
-package mini.jdbc;
+package mini.jdbc.util;
 
+import mini.jdbc.DbMapper;
 import mini.jdbc.mapper.VoidMapper;
 import mini.jdbc.util.JavaType;
 

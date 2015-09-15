@@ -3,6 +3,7 @@ package mini.jdbc.test.asset.model;
 import mini.jdbc.DbMapper;
 
 public class User {
+    public UserId id;
     public String login;
     public String firstName;
     public String lastName;
@@ -11,6 +12,7 @@ public class User {
 
     public static DbMapper<User> MAPPER = (r) -> {
         User user = new User();
+        user.id = new UserId(r.getInt("id"));
         user.login = r.getString("login");
         user.firstName = r.getString("first_name");
         user.lastName = r.getString("last_name");
