@@ -11,4 +11,16 @@ public interface SampleDbi {
     @Nullable
     User getUserByLogin(@NotNull String login);
 
+    /**
+     * Updates user's score, returns old value.
+     */
+    @Tx
+    int updateScore(@NotNull String login, int newScore);
+
+
+    /**
+     * Updates user's score and rolls back
+     */
+    @Tx
+    int updateScoreAndRollback(@NotNull String login, int newScore);
 }

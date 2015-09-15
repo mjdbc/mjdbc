@@ -51,4 +51,9 @@ public final class JavaTypeMapper implements DbMapper {
         }
         throw new IllegalArgumentException("Unsupported type: " + type);
     }
+
+    @Override
+    public String toString() {
+        return "JavaTypeMapper[" + type + "]";
+    }
 }

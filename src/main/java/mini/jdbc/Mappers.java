@@ -47,6 +47,6 @@ public final class Mappers {
         // Strings
         put(String.class, JavaType.String.mapper);
 
-        // Array and collection wrappers are processed separately.
+        // Collection wrappers are processed separately.
     }});
 }

@@ -20,13 +20,21 @@ public final class Binders {
     public static final Map<Class, DbBinder> BUILT_IN_BINDERS = Collections.unmodifiableMap(new HashMap<Class, DbBinder>() {{
 
         // primitive types
+        put(Boolean.TYPE, JavaType.Boolean.binder);
         put(Boolean.class, JavaType.Boolean.binder);
+        put(Byte.TYPE, JavaType.Byte.binder);
         put(Byte.class, JavaType.Byte.binder);
+        put(Character.TYPE, JavaType.Character.binder);
         put(Character.class, JavaType.Character.binder);
+        put(Double.TYPE, JavaType.Double.binder);
         put(Double.class, JavaType.Double.binder);
+        put(Short.TYPE, JavaType.Short.binder);
         put(Short.class, JavaType.Short.binder);
+        put(Float.TYPE, JavaType.Float.binder);
         put(Float.class, JavaType.Float.binder);
+        put(Integer.TYPE, JavaType.Integer.binder);
         put(Integer.class, JavaType.Integer.binder);
+        put(Long.TYPE, JavaType.Long.binder);
         put(Long.class, JavaType.Long.binder);
 
         // jdbc related types

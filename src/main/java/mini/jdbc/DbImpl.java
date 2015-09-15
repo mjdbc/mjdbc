@@ -7,6 +7,7 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.sql.DataSource;
 import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Proxy;
@@ -87,6 +88,7 @@ public class DbImpl implements Db {
             try {
                 if (c == null) {
                     c = new DbConnection(dataSource.getConnection());
+                    activeConnections.set(c);
                     topLevel = true;
                 }
                 T res = (T) run(op, c);
@@ -98,9 +100,15 @@ public class DbImpl implements Db {
                 if (topLevel) {
                     c.rollback();
                 }
+                if (e instanceof RuntimeException) {
+                    throw (RuntimeException) e;
+                } else if (e instanceof InvocationTargetException && e.getCause() instanceof RuntimeException) {
+                    throw (RuntimeException) e.getCause();
+                }
                 throw new RuntimeException(e);
             } finally {
                 if (topLevel) {
+                    activeConnections.set(null);
                     c.close();
                 }
             }
@@ -181,7 +189,7 @@ public class DbImpl implements Db {
                 // try to find binder by superclass.
                 binder = findBinderByParents(parameterType);
                 if (binder == null) {
-                    throw new IllegalArgumentException("Can't find parameter binder for: " + parameterType + ", method: " + m);
+                    throw new IllegalArgumentException("No parameter binder for: " + parameterType + ", method: " + m + ", position: " + i + ", type: " + parameterType);
                 }
             }
             binders.add(binder);
@@ -199,7 +207,7 @@ public class DbImpl implements Db {
     @Nullable
     private DbBinder findBinderByParents(Class<?> parameterType) {
         Class superClass = parameterType.getSuperclass();
-        while (superClass != Object.class) {
+        while (superClass != null) {
             DbBinder binder = binderByClass.get(parameterType);
             if (binder != null) {
                 return binder;
@@ -258,8 +266,11 @@ public class DbImpl implements Db {
                 if (args != null) {
                     for (int i = 0; i < args.length; i++) {
                         DbBinder binder = p.parameterBinders[i];
-                        //noinspection unchecked
-                        binder.bind(s.statement, i + 1, args[i]);
+                        List<Integer> parameterIndexes = p.parametersNamesMapping.get(p.parameterNames[i]);
+                        for (Integer idx : parameterIndexes) {
+                            //noinspection unchecked
+                            binder.bind(s.statement, idx, args[i]);
+                        }
                     }
                 }
                 if (p.resultMapper != VoidMapper.INSTANCE) {

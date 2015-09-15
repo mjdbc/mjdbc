@@ -14,7 +14,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
 
@@ -52,7 +51,7 @@ public class SamplesTest extends org.junit.Assert {
     }
 
     @Test
-    public void checkDatabaseNotEmpty() throws SQLException {
+    public void checkDatabaseNotEmpty() {
         Assert.assertNotNull(ds);
         Db db = new DbImpl(ds);
         db.executeV(c -> {
@@ -65,29 +64,54 @@ public class SamplesTest extends org.junit.Assert {
     }
 
     @Test
-    public void checkDbi() throws SQLException {
+    public void checkDbi() {
         User user = dbi.getUserByLogin("u1");
         assertNotNull(user);
         assertEquals("u1", user.login);
     }
 
     @Test
-    public void checkQuery() throws SQLException {
+    public void checkQuery() {
         User user = sampleQueries.selectUser("u1");
         assertNotNull(user);
         assertEquals("u1", user.login);
     }
 
     @Test
-    public void checkIntMapper() throws SQLException {
+    public void checkIntMapper() {
         int n = sampleQueries.countUsers();
         assertEquals(2, n);
     }
 
     @Test
-    public void checkListMapper() throws SQLException {
+    public void checkListMapper() {
         List<User> users = sampleQueries.selectAllUsers();
         assertEquals(2, users.size());
+    }
+
+    @Test
+    public void checkMultipleQueriesSameTransaction() {
+        User user = sampleQueries.selectUser("u1");
+        assertNotNull(user);
+        int oldScore = dbi.updateScore(user.login, 10);
+        assertEquals(user.score, oldScore);
+    }
+
+    @Test
+    public void checkRollback() {
+        User oldUser = sampleQueries.selectUser("u1");
+        assertNotNull(oldUser);
+        try {
+            dbi.updateScoreAndRollback(oldUser.login, 10);
+            fail("Unreachable!");
+        } catch (Exception e) {
+            assertEquals(RuntimeException.class, e.getClass());
+            assertEquals("Rollback!", e.getMessage());
+
+            User newUser = sampleQueries.selectUser("u1");
+            assertNotNull(newUser);
+            assertEquals(oldUser.score, newUser.score);
+        }
     }
 
 }

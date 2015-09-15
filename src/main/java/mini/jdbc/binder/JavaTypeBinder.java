@@ -119,4 +119,8 @@ public class JavaTypeBinder implements DbBinder {
         }
     }
 
+    @Override
+    public String toString() {
+        return "JavaTypeBinder[" + type + "]";
+    }
 }
