@@ -22,4 +22,4 @@ Java 1.8+
 
 ### License
 
-This project available under 'Apache Version 2' license
+This project available under MIT license
