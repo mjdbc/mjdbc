@@ -1,17 +1,20 @@
 package com.github.mjdbc.test.asset;
 
 
+import com.github.mjdbc.Bind;
 import com.github.mjdbc.BindBean;
 import com.github.mjdbc.Sql;
 import com.github.mjdbc.UseGeneratedKeys;
 import com.github.mjdbc.test.asset.model.User;
 import com.github.mjdbc.test.asset.model.UserId;
-import com.github.mjdbc.Bind;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
+/**
+ * Set of raw SQL method to access to 'user' table data.
+ */
 public interface UserSql {
 
     @Nullable
