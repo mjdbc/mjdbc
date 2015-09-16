@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Statement that uses named parameters and safe operations to fetch results by hiding result set manipulation.
+ * Statement with named parameters support and safe operations to fetch results by hiding result set manipulation.
  */
 public class DbStatement<T> implements AutoCloseable {
     @NotNull

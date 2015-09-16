@@ -2,10 +2,8 @@ package mini.jdbc;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.sql.Connection;
-
 /**
- *
+ * Database operation with @NotNull result.
  */
 public interface DbOpNN<T> {
     @NotNull

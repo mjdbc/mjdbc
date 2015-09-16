@@ -29,7 +29,7 @@ import static java.lang.reflect.Modifier.isTransient;
 import static java.util.Objects.requireNonNull;
 
 /**
- *
+ * Main class of the library: implementation for Db interface.
  */
 public class DbImpl implements Db {
 
@@ -426,5 +426,4 @@ public class DbImpl implements Db {
         }
         timer.onInvoke(System.nanoTime() - t0);
     }
-
 }

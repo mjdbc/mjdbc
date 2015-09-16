@@ -8,11 +8,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- *
+ * Lightweight java.sql.Connection wrapper.
+ * Used in pair with DbStatement and DbOpX classes for automatic statements cleanup when connection is closed.
  */
 public class DbConnection {
+    /**
+     * Native SQL connection.
+     */
     public final Connection sqlConnection;
 
+    /**
+     * List of statements to close when connection is closed.
+     */
     @NotNull
     protected List<DbStatement> statementsToClose = new ArrayList<>();
 
@@ -30,7 +37,10 @@ public class DbConnection {
 
     public void close() throws SQLException {
         for (DbStatement s : statementsToClose) {
-            s.close();
+            try {
+                s.close();
+            } catch (SQLException ignored) {
+            }
         }
         sqlConnection.close();
     }

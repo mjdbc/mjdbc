@@ -3,10 +3,8 @@ package mini.jdbc;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.sql.Connection;
-
 /**
- *
+ * Database operation with @Nullable result.
  */
 public interface DbOp<T> {
     @Nullable

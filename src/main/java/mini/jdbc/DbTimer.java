@@ -4,11 +4,16 @@ import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Method;
 
+/**
+ * Structure to hold per-method statistics: total invocation count and total time spent inside of the method in nanoseconds.
+ */
 public final class DbTimer {
 
     @NotNull
     private final Method method;
+
     protected volatile long invocationCount;
+
     protected volatile long totalTimeInNanos;
 
     public DbTimer(@NotNull Method method) {
