@@ -2,7 +2,15 @@ package mini.jdbc.test.asset.model;
 
 import mini.jdbc.DbMapper;
 
-public class User {
+/**
+ * Sample class for user record in DB.
+ * Fields are public because it's hard to find a reason to write both getters and setters.
+ * Note: mini-jdbc will work with getters too.
+ */
+public final class User {
+    /**
+     * It is recommended to have type safe IDs.
+     */
     public UserId id;
     public String login;
     public String firstName;
@@ -10,6 +18,9 @@ public class User {
     public Gender gender;
     public int score;
 
+    /**
+     * Class to create User object from result set.
+     */
     public static DbMapper<User> MAPPER = (r) -> {
         User user = new User();
         user.id = new UserId(r.getInt("id"));

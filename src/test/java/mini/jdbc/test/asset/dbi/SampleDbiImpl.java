@@ -3,66 +3,109 @@ package mini.jdbc.test.asset.dbi;
 import mini.jdbc.Db;
 import mini.jdbc.DbStatement;
 import mini.jdbc.Tx;
-import mini.jdbc.test.asset.SampleQueries;
+import mini.jdbc.test.asset.UserSql;
 import mini.jdbc.test.asset.model.User;
 import mini.jdbc.test.asset.model.UserId;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Objects;
+
 /**
+ * SampleDbi implementation. All methods annotated with @Tx will be wrapped with transaction context.
  */
 public class SampleDbiImpl implements SampleDbi {
 
+    /**
+     * Internal link to Database. May be useful to perform some low-level ops.
+     */
     private final Db db;
-    private final SampleQueries queries;
 
+    /**
+     * Set of raw SQL queries. All these queries are parsed and checked on startup (when interface is attached).
+     */
+    private final UserSql userSql;
+
+    /**
+     * Public constructor. Follow inlined comments.
+     */
     public SampleDbiImpl(Db db) {
+        // database reference can be useful for low-level queries.
         this.db = db;
+
+        // register some mappers to be used automatically in all queries.
         db.registerMapper(UserId.class, UserId.MAPPER);
         db.registerMapper(User.class, User.MAPPER);
-        queries = db.attachQueries(SampleQueries.class);
+
+        // attach (parse, check, get proxy implementation) all queries in SampleQueries interface.
+        userSql = db.attachSql(UserSql.class);
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Tx
+    @Override
+    public void createUser(@NotNull User user) {
+        Objects.requireNonNull(user);
+        // insert user using sql interface and assign id.
+        user.id = userSql.insertUser(user);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     @Tx
     @Nullable
     @Override
-    public User getUserById(@NotNull UserId id) {
-        return queries.getUserById(id);
-    }
-
-    @Tx
-    @Nullable
-    @Override
-    public User getUserByLogin(final @NotNull String login) {
+    public User getUserByLogin(@NotNull String login) {
+        Objects.requireNonNull(login);
         return db.execute(c -> new DbStatement<>(c, "SELECT * FROM users WHERE login = :login", User.MAPPER).setString("login", login).query());
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Tx
+    public User getUserById(@NotNull UserId id) {
+        Objects.requireNonNull(id);
+        return userSql.getUserById(id);
+    }
+
+
+    /**
+     * {@inheritDoc}
+     */
     @Tx
     @Override
     public int updateScore(@NotNull String login, int newScore) {
-        User user = queries.getUserByLogin(login);
+        // use sql interface to perform sql query.
+        // mapper registered in the constructor will be used to map result class.
+        User user = userSql.getUserByLogin(login);
         if (user == null) {
             return -1;
         }
+
         int oldScore = user.score;
-        queries.updateScore(user.login, newScore);
+        // use sql interface again. Note: this call is in the same transaction!
+        userSql.updateScore(user.login, newScore);
         return oldScore;
     }
 
+
+    /**
+     * {@inheritDoc}
+     */
     @Tx
     @Override
     public int updateScoreAndRollback(@NotNull String login, int newScore) {
-        User user = queries.getUserByLogin(login);
+        User user = userSql.getUserByLogin(login);
         if (user == null) {
             return -1;
         }
-        queries.updateScore(user.login, newScore);
-        throw new RuntimeException("Rollback!");
-    }
+        userSql.updateScore(user.login, newScore);
 
-    @Override
-    @Tx
-    public void createUser(@NotNull User user) {
-        user.id = queries.insertUser(user);
+        // trigger rollback and undo score update.
+        throw new RuntimeException("Rollback!");
     }
 }

@@ -42,14 +42,14 @@ public interface Db {
     <T> T attachDbi(@NotNull T impl, @NotNull Class<T> dbiInterface);
 
     /**
-     * Attaches query interface to the database. All queries are parsed and validated during this call.
+     * Attaches sql interface to the database. All sql queries are parsed and validated during this call.
      *
-     * @param queryInterface - query interface to process.
-     * @param <T>            - type of the interface.
+     * @param sqlInterface - sql interface to attach (parse & check & implement).
+     * @param <T>          - type of the interface.
      * @return interface implementation.
      */
     @NotNull
-    <T> T attachQueries(@NotNull Class<T> queryInterface);
+    <T> T attachSql(@NotNull Class<T> sqlInterface);
 
     /**
      * Executes database query that produces Nullable result.

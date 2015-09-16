@@ -146,13 +146,13 @@ public class DbImpl implements Db {
 
     @NotNull
     @Override
-    public <T> T attachQueries(@NotNull Class<T> queryInterface) {
-        requireNonNull(queryInterface);
-        for (Method m : queryInterface.getMethods()) {
+    public <T> T attachSql(@NotNull Class<T> sqlInterface) {
+        requireNonNull(sqlInterface);
+        for (Method m : sqlInterface.getMethods()) {
             registerMethod(m);
         }
         //noinspection unchecked
-        return (T) Proxy.newProxyInstance(queryInterface.getClassLoader(), new Class[]{queryInterface}, new QueryProxy());
+        return (T) Proxy.newProxyInstance(sqlInterface.getClassLoader(), new Class[]{sqlInterface}, new SqlProxy());
     }
 
     private void registerMethod(Method m) {
@@ -352,7 +352,7 @@ public class DbImpl implements Db {
         }
     }
 
-    private class QueryProxy implements InvocationHandler {
+    private class SqlProxy implements InvocationHandler {
         @SuppressWarnings("unchecked")
         @Override
         public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {

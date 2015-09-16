@@ -12,12 +12,12 @@ mvn -DskipTests=true clean package install
 
 Documentation is under development. Please check [unit tests](https://github.com/mfursov/mini-jdbc/blob/master/src/test/java/mini/jdbc/test/SamplesTest.java) to see API in action.
 
-You may find useful to see [the recommended way of writing SQL queries](https://github.com/mfursov/mini-jdbc/blob/master/src/test/java/mini/jdbc/test/asset/SampleQueries.java) and
+You may find useful to see the recommended way of writing [SQL query interfaces](https://github.com/mfursov/mini-jdbc/blob/master/src/test/java/mini/jdbc/test/asset/UserSql.java) and
 [transactions](https://github.com/mfursov/mini-jdbc/blob/master/src/test/java/mini/jdbc/test/asset/dbi/SampleDbi.java) in tests.
 
 ### Requirements
 
-Java 1.8+
+Java8+
 
 
 ### License

@@ -12,7 +12,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public interface SampleQueries {
+public interface UserSql {
 
     @Nullable
     @Sql("SELECT * FROM users WHERE id = :id")

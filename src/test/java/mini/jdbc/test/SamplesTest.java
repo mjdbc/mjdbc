@@ -5,7 +5,7 @@ import junit.framework.Assert;
 import mini.jdbc.Db;
 import mini.jdbc.DbImpl;
 import mini.jdbc.DbTimer;
-import mini.jdbc.test.asset.SampleQueries;
+import mini.jdbc.test.asset.UserSql;
 import mini.jdbc.test.asset.dbi.SampleDbi;
 import mini.jdbc.test.asset.dbi.SampleDbiImpl;
 import mini.jdbc.test.asset.model.Gender;
@@ -42,7 +42,7 @@ public class SamplesTest extends org.junit.Assert {
     /**
      * Set of queries.
      */
-    private SampleQueries sampleQueries;
+    private UserSql sampleQueries;
 
     @Before
     public void setUp() {
@@ -52,7 +52,7 @@ public class SamplesTest extends org.junit.Assert {
 
         // Usually DB must be accessed by calling dbi interface method.
         // But for testing we create a separate queries interface here.
-        sampleQueries = db.attachQueries(SampleQueries.class);
+        sampleQueries = db.attachSql(UserSql.class);
     }
 
     @After
@@ -172,7 +172,7 @@ public class SamplesTest extends org.junit.Assert {
     @Test
     public void checkSqlTimer() throws NoSuchMethodException {
         sampleQueries.countUsers();
-        Method method = SampleQueries.class.getMethod("countUsers");
+        Method method = UserSql.class.getMethod("countUsers");
         DbTimer timer = db.getTimers().get(method);
         assertNotNull(timer);
         assertTrue(timer.getInvocationCount() > 0);
