@@ -31,7 +31,7 @@ Add project dependency:
 
 ## Brief API overview
 
-#### Raw SQL queries
+##### Raw SQL queries
 ```java
     DataSource ds = ...; // have a DataSource first.
     Db db = new Db(ds);  // wrap DataSource with Db class instance.
@@ -47,7 +47,7 @@ public interface MySqlQueries {
 }
 ```
 
-#### Transactions
+##### Transactions
 To run multiple SQL queries within a single transaction create a dedicated dbi (db-interface) interface with methods that have @Tx annotation.
 ```java
     DataSource ds = ...;
@@ -76,14 +76,16 @@ public class MyDbiImpl implements MyDbi {
 }
 ```
 Note:
- * If @Tx method is called from within another @Tx method no new nested transaction is started. Child method call borrows the context of parent transaction.
+ * If @Tx method is called from within another @Tx method no new transaction is started. Child method call shares transaction context with parent method.
+ Transaction is committed/rolled back when top-level method is finished.
  * All @Sql (raw SQL) methods are processed as @Tx methods when no dbi interface is used.
 
 
-#### Result set mappers
+
+##### Result set mappers
 
 Extend [DbMapper](https://github.com/mjdbc/mjdbc/blob/master/src/main/java/com/github/mjdbc/DbMapper.java) class.
-It may be convenient to put the implementation into the Java class it maps: [example](https://github.com/mjdbc/mjdbc/blob/master/src/test/java/com/github/mjdbc/test/asset/model/User.java).
+It may be convenient to put the implementation into the Java class it maps [(example)](https://github.com/mjdbc/mjdbc/blob/master/src/test/java/com/github/mjdbc/test/asset/model/User.java).
 
 ```java
 public static DbMapper<User> MAPPER = (r) -> {
@@ -92,7 +94,7 @@ public static DbMapper<User> MAPPER = (r) -> {
     user.login = r.getString("login");
     ...
     return user;
-    };
+};
 ```
 
 Register this mapper in Db interface during initialization;
@@ -101,36 +103,41 @@ Register this mapper in Db interface during initialization;
     db.registerMapper(User.class, User.MAPPER)
 ```
 Now use User.class in all queries attached to Db.
-Mappers for native Java types are supported by default: [source](https://github.com/mjdbc/mjdbc/blob/master/src/main/java/com/github/mjdbc/util/Mappers.java) and can be overridden if needed..
+Mappers for native Java types are supported by default [(source)](https://github.com/mjdbc/mjdbc/blob/master/src/main/java/com/github/mjdbc/util/Mappers.java) and can be overridden if needed..
 
-#### Parameter binders.
-Parameters in SQL queries can be bound with @Bind or @BindBean annotations. @Bind is used to map single parameter in a query.
-@BindBean is used to map all parameters from public field values or getters of the object passed as parameter.
-Binders for native Java types are supported by default: [source](https://github.com/mjdbc/mjdbc/blob/master/src/main/java/com/github/mjdbc/util/Binders.java)
+
+##### Parameter binders
+Parameters in @Sql interfaces can be bound with @Bind or @BindBean annotations. @Bind is used to map single parameter,
+@BindBean is to map all parameters from public field values or getters of the object passed as parameter.
+
+Binders for native Java types are supported by default [(source)](https://github.com/mjdbc/mjdbc/blob/master/src/main/java/com/github/mjdbc/util/Binders.java).
+
 In most cases you do not need to create your own binder. All you need is to make your class to implement one of these interfaces: DbInt, DbLong or DbString [(example)](https://github.com/mjdbc/mjdbc/blob/master/src/test/java/com/github/mjdbc/test/asset/model/UserId.java).
 
-#### Low level API
+##### Low level API
 Usage of java.sql.* API is transparent in mjdbc. You can always get statements, connections, result sets and have a full power of native JDBC driver.
 Example:
 ```java
-    Db db = new Db(ds);
-    db.execute(c -> { // wraps method into transaction
-            try (java.sql.Statement statement = c.sqlConnection.createStatement()) {
-                ...
-            }
-        });
+Db db = new Db(ds);
+db.execute(c -> { // wraps method into transaction
+    try (java.sql.Statement statement = c.sqlConnection.createStatement()) {
+        ...
+    }
+});
 ```
 
-#### Timers
-For all methods annotated with @Sql or @Tx mjdbc automatically collects statistics for method invocation count and total time spent in the method.
+##### Timers
+For all methods annotated with @Sql or @Tx mjdbc automatically collects statistics: method invocation count and total time spent in the method.
+
 Check [checkTxTimer/checkSqlTimer](https://github.com/mjdbc/mjdbc/blob/master/src/test/java/com/github/mjdbc/test/SamplesTest.java) tests for details.
 
 
-#### More
-For more examples please check [unit tests](https://github.com/mjdbc/mjdbc/blob/master/src/test/java/com/github/mjdbc/test/) to see API in action.
+##### More
+For more examples check [unit tests](https://github.com/mjdbc/mjdbc/blob/master/src/test/java/com/github/mjdbc/test/) to see API in action.
 
 You may find useful to see the recommended way of writing [raw SQL interfaces](https://github.com/mjdbc/mjdbc/blob/master/src/test/java/com/github/mjdbc/test/asset/UserSql.java) and
 [transactional database interfaces](https://github.com/mjdbc/mjdbc/blob/master/src/test/java/com/github/mjdbc/test/asset/dbi/SampleDbi.java) in tests.
+
 
 ### Requirements
 
