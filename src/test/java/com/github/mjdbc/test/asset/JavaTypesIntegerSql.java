@@ -6,7 +6,8 @@ import com.github.mjdbc.Sql;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public interface JavaTypesSql {
+public interface JavaTypesIntegerSql {
+
     @Sql("SELECT integer_field FROM custom_types")
     int getNullableIntegerAsInt();
 

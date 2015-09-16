@@ -1,38 +1,14 @@
 package com.github.mjdbc.test;
 
-import com.github.mjdbc.DbImpl;
-import com.github.mjdbc.test.asset.JavaTypesSql;
-import com.github.mjdbc.test.util.DbUtils;
-import com.zaxxer.hikari.HikariDataSource;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
+import com.github.mjdbc.test.asset.JavaTypesIntegerSql;
 import org.junit.Test;
 
 import java.sql.SQLException;
 
-public class JavaTypesTest extends Assert {
-    /**
-     * Low level connection pool.
-     */
-    private HikariDataSource ds;
+public class JavaTypesIntegerTest extends BaseJavaTypesTest<JavaTypesIntegerSql> {
 
-
-    /**
-     * Set of raw SQL queries.
-     */
-    private JavaTypesSql typesSql;
-
-    @Before
-    public void setUp() {
-        ds = DbUtils.prepareDataSource("types");
-        DbImpl db = new DbImpl(ds);
-        typesSql = db.attachSql(JavaTypesSql.class);
-    }
-
-    @After
-    public void tearDown() {
-        ds.close();
+    public JavaTypesIntegerTest() {
+        super(JavaTypesIntegerSql.class);
     }
 
     @Test
@@ -77,5 +53,4 @@ public class JavaTypesTest extends Assert {
             assertTrue(e.getCause() instanceof SQLException);
         }
     }
-
 }
