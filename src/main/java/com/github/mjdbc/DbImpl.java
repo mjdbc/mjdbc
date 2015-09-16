@@ -1,9 +1,9 @@
 package com.github.mjdbc;
 
-import com.github.mjdbc.mapper.VoidMapper;
-import com.github.mjdbc.util.Mappers;
 import com.github.mjdbc.mapper.ListMapper;
+import com.github.mjdbc.mapper.VoidMapper;
 import com.github.mjdbc.util.Binders;
+import com.github.mjdbc.util.Mappers;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -208,7 +208,7 @@ public class DbImpl implements Db {
             }
             DbBinder binder = findBinderByType(parameterType);
             if (binder == null) {
-                throw new IllegalArgumentException("No parameter binder for: " + parameterType + ", method: " + m + ", position: " + i + ", type: " + parameterType);
+                throw new IllegalArgumentException("No parameter binder for: '" + parameterType + "', method: " + m + ", position: " + i + ", type: " + parameterType);
             }
             bindings.add(new BindInfo(name, binder, i, null, null));
         }
@@ -217,7 +217,7 @@ public class DbImpl implements Db {
         for (String name : parametersMapping.keySet()) {
             BindInfo info = bindings.stream().filter(b -> b.mappedName.equals(name)).findAny().orElse(null);
             if (info == null) {
-                throw new RuntimeException("No binding found for " + name + ", method: " + m);
+                throw new RuntimeException("No binding found for '" + name + "', method: " + m);
             }
         }
 

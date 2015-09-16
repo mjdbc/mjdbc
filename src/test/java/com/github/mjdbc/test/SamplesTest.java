@@ -2,13 +2,13 @@ package com.github.mjdbc.test;
 
 import com.github.mjdbc.DbImpl;
 import com.github.mjdbc.DbTimer;
+import com.github.mjdbc.test.asset.UserSql;
+import com.github.mjdbc.test.asset.dbi.SampleDbi;
 import com.github.mjdbc.test.asset.dbi.SampleDbiImpl;
 import com.github.mjdbc.test.asset.model.Gender;
 import com.github.mjdbc.test.asset.model.User;
 import com.github.mjdbc.test.util.DbUtils;
 import com.zaxxer.hikari.HikariDataSource;
-import com.github.mjdbc.test.asset.UserSql;
-import com.github.mjdbc.test.asset.dbi.SampleDbi;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

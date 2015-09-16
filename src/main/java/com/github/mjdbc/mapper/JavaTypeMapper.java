@@ -3,6 +3,7 @@ package com.github.mjdbc.mapper;
 import com.github.mjdbc.DbMapper;
 import com.github.mjdbc.util.JavaType;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -18,38 +19,54 @@ public final class JavaTypeMapper implements DbMapper {
         this.type = type;
     }
 
-    @NotNull
+    @Nullable
     @Override
     public Object map(ResultSet r) throws SQLException {
+        Object result;
         switch (type) {
             case BigDecimal:
-                return r.getBigDecimal(1);
+                result = r.getBigDecimal(1);
+                break;
             case Boolean:
-                return r.getBoolean(1);
+                result = r.getBoolean(1);
+                break;
             case Byte:
-                return r.getByte(1);
+                result = r.getByte(1);
+                break;
             case Character:
-                return (char) r.getInt(1);
+                result = (char) r.getInt(1);
+                break;
             case Date:
-                return r.getDate(1);
+                result = r.getDate(1);
+                break;
             case Double:
-                return r.getDouble(1);
+                result = r.getDouble(1);
+                break;
             case Short:
-                return r.getShort(1);
+                result = r.getShort(1);
+                break;
             case Float:
-                return r.getFloat(1);
+                result = r.getFloat(1);
+                break;
             case Integer:
-                return r.getInt(1);
+                result = r.getInt(1);
+                break;
             case Long:
-                return r.getLong(1);
+                result = r.getLong(1);
+                break;
             case SqlDate:
-                return r.getDate(1);
+                result = r.getDate(1);
+                break;
             case String:
-                return r.getString(1);
+                result = r.getString(1);
+                break;
             case Timestamp:
-                return r.getTimestamp(1);
+                result = r.getTimestamp(1);
+                break;
+            default:
+                throw new IllegalArgumentException("Unsupported type: " + type);
         }
-        throw new IllegalArgumentException("Unsupported type: " + type);
+        return r.wasNull() ? null : result;
     }
 
     @Override
