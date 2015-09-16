@@ -10,7 +10,7 @@ mvn -DskipTests=true clean package install
 
 ## Maven
 
-Add snapshots repository to your pom.xml file. The project now is in alpha stage so there are no public releases to maven central yet.
+Add snapshots repository to your pom.xml file. The project now is in alpha stage and has no public releases to Central Repository yet.
 ```xml
 <repositories>
     <repository>
@@ -33,7 +33,7 @@ Add project dependency:
 
 ##### Raw SQL queries
 ```java
-    DataSource ds = ...; // have a DataSource first.
+    java.sql.DataSource ds = ...; // have a DataSource first.
     Db db = new Db(ds);  // wrap DataSource with Db class instance.
     db.registerMapper(User.class, User.MAPPER); // register your ResultSet mappers. Do it once on startup.
     MySqlQueries q = db.attachSql(MySqlQueries.class) // attach query interface. It will parse and validate all queries at this moment.
@@ -50,7 +50,7 @@ public interface MySqlQueries {
 ##### Transactions
 To run multiple SQL queries within a single transaction create a dedicated dbi (db-interface) interface with methods that have @Tx annotation.
 ```java
-    DataSource ds = ...;
+    java.sql.DataSource ds = ...;
     Db db = new Db(ds);
     MyDbi dbi = db.attachDbi(MyDbiImpl(), MyDbi.class); // all MyDbi method calls will be proxied to MyDbiImpl wrapped with transactions.
     User user = dbi.getUserByLoginCreateIfNotFound('login');
