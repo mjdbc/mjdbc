@@ -1,6 +1,6 @@
-__mini-jdbc__  - Small and efficient JDBC wrapper.
+__mjdbc__  - Small and efficient JDBC wrapper.
 
-[![Build Status](https://travis-ci.org/mfursov/mini-jdbc.svg?branch=master)]	(https://travis-ci.org/mfursov/mini-jdbc)
+[![Build Status](https://travis-ci.org/mjdbc/mjdbc.svg?branch=master)]	(https://travis-ci.org/mjdbc/mjdbc)
 
 ## Building
 
@@ -10,10 +10,10 @@ mvn -DskipTests=true clean package install
 
 ## Usage
 
-Documentation is under development. Please check [unit tests](https://github.com/mfursov/mini-jdbc/blob/master/src/test/java/mini/jdbc/test/SamplesTest.java) to see API in action.
+Documentation is under development. Please check [unit tests](https://github.com/mjdbc/mjdbc/blob/master/src/test/java/com/github/mjdbc/test/SamplesTest.java) to see API in action.
 
-You may find useful to see the recommended way of writing [SQL query interfaces](https://github.com/mfursov/mini-jdbc/blob/master/src/test/java/mini/jdbc/test/asset/UserSql.java) and
-[transactions](https://github.com/mfursov/mini-jdbc/blob/master/src/test/java/mini/jdbc/test/asset/dbi/SampleDbi.java) in tests.
+You may find useful to see the recommended way of writing [SQL query interfaces](https://github.com/mjdbc/mjdbc/blob/master/src/test/java/com/github/mjdbc/test/asset/UserSql.java) and
+[transactions](https://github.com/mjdbc/mjdbc/blob/master/src/test/java/com/github/mjdbc/test/asset/dbi/SampleDbi.java) in tests.
 
 ### Requirements
 

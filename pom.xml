@@ -2,13 +2,13 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>mini.jdbc</groupId>
-    <artifactId>mini-jdbc</artifactId>
+    <groupId>com.github.mjdbc</groupId>
+    <artifactId>mjdbc</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
-    <name>mini-jdbc</name>
+    <name>mjdbc</name>
     <description>Small and efficient JDBC wrapper.</description>
-    <url>https://github.com/mfursov/mini-jdbc</url>
+    <url>https://github.com/mjdbc</url>
 
     <licenses>
         <license>
@@ -19,9 +19,9 @@
     </licenses>
 
     <scm>
-        <connection>scm:git:git://github.com/mfursov/mini-jdbc.git</connection>
-        <developerConnection>scm:git:git@github.com:/mfursov/mini-jdbc.git</developerConnection>
-        <url>https://github.com/mfursov/mini-jdbc</url>
+        <connection>scm:git:git://github.com/mjdbc/mjdbc.git</connection>
+        <developerConnection>scm:git:git@github.com:/mjdbc/mjdbc.git</developerConnection>
+        <url>https://github.com/mjdbc/mjdbc</url>
         <tag>HEAD</tag>
     </scm>
 
@@ -56,9 +56,6 @@
     <dependencies>
 
         <!-- Compile-time -->
-
-        <!-- Mini-JDBC supports Java7, so has no Java8 annotations available.
-        To minimize the result size Jetbrains annotations are used (20kb) -->
         <dependency>
             <groupId>com.intellij</groupId>
             <artifactId>annotations</artifactId>
