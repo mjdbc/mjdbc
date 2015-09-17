@@ -37,7 +37,7 @@ Add project dependency:
     Db db = new Db(ds);  // wrap DataSource with Db class instance.
     db.registerMapper(User.class, User.MAPPER); // register your ResultSet mappers. Do it once on startup.
     MySqlQueries q = db.attachSql(MySqlQueries.class) // attach query interface. It will parse and validate all queries at this moment.
-    User user = q.getUserByLogin('login'); // run any query method.
+    User user = q.getUserByLogin('login'); // run any query method
 ```
 where MySqlQueries:
 ```java
@@ -75,7 +75,7 @@ public class MyDbiImpl implements MyDbi {
     }
 }
 ```
-Note:
+Notes:
  * If @Tx method is called from within another @Tx method no new transaction is started. Child method call shares transaction context with parent method.
  Transaction is committed/rolled back when top-level method is finished.
  * All @Sql (raw SQL) methods are processed as @Tx methods when no dbi interface is used.
@@ -102,13 +102,14 @@ Register this mapper in Db interface during initialization;
     Db db = new Db(ds);
     db.registerMapper(User.class, User.MAPPER)
 ```
-Now use User.class in all queries attached to Db.
+Now use User type in all queries attached to Db instance.
 Mappers for native Java types are supported by default [(source)](https://github.com/mjdbc/mjdbc/blob/master/src/main/java/com/github/mjdbc/util/Mappers.java) and can be overridden if needed..
 
 
 ##### Parameter binders
-Parameters in @Sql interfaces can be bound with @Bind or @BindBean annotations. @Bind is used to map single parameter,
-@BindBean is to map all parameters from public field values or getters of the object passed as parameter.
+Parameters in @Sql interfaces can be bound with @Bind or @BindBean annotations.
+* @Bind maps single named parameter.
+* @BindBean maps all parameters from public fields or getters of the object passed as parameter.
 
 Binders for native Java types are supported by default [(source)](https://github.com/mjdbc/mjdbc/blob/master/src/main/java/com/github/mjdbc/util/Binders.java).
 
@@ -127,7 +128,9 @@ db.execute(c -> { // wraps method into transaction
 ```
 
 ##### Timers
-For all methods annotated with @Sql or @Tx mjdbc automatically collects statistics: method invocation count and total time spent in the method.
+For all methods annotated with @Sql or @Tx mjdbc automatically collects statistics:
+* method invocation count
+* total time spent in the method in nanoseconds.
 
 Check [checkTxTimer/checkSqlTimer](https://github.com/mjdbc/mjdbc/blob/master/src/test/java/com/github/mjdbc/test/SamplesTest.java) tests for details.
 
