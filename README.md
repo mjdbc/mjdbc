@@ -48,7 +48,7 @@ Add project dependency:
     java.sql.DataSource ds = ...; // have a DataSource first.
     Db db = new Db(ds);  // wrap DataSource with Db class instance.
     db.registerMapper(User.class, User.MAPPER); // register your ResultSet mappers. Do it once on startup.
-    MySqlQueries q = db.attachSql(MySqlQueries.class) // attach query interface. It will parse and validate all queries at this moment.
+    MySqlQueries q = db.attachSql(MySqlQueries.class) // attach query interface. All queries are parsed and validated at this moment.
     User user = q.getUserByLogin('login'); // run any query method
 ```
 where MySqlQueries:
