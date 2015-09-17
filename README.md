@@ -145,11 +145,14 @@ User user = db.execute(c -> { // wraps method into transaction
     DbStatement s = new DbStatement(c, "SELECT * FROM users WHERE login = :login", User.MAPPER)
     s.setString("login", login);
 
-    // direct access to JDBC starts here:
-    Map<String, Integer> namedParametersMapping = s.parametersMapping; // JDBC supports parameter binding by index only. Here is the mapping.
+    // Direct access to JDBC starts here
+    // JDBC supports parameter binding by index only. Here is the name -> indexes mapping.
+    Map<String, List<Integer>> namedParametersMapping = s.parametersMapping;
+    // Original JDBC PreparedStatement
     java.sql.PreparedStatement ps = s.statement;
-    ... // write some low-level code with java.sql.PreparedStatement, like bind data streams, even execute it...
+    ... // write some low-level code with java.sql.PreparedStatement: bind data streams, execute and check result set...
 
+    // or simply return the result using mapper class provided in DbStatement constructor.
     return s.query();
 });
 ```
