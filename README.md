@@ -138,7 +138,7 @@ db.execute(c -> { // wraps method into transaction
     }
 });
 ```
-or if you need named parameters and object/collections mappers support:
+If named parameters or object/collections mappers support is needed:
 ```java
 Db db = new Db(ds);
 User user = db.execute(c -> { // wraps method into transaction
