@@ -88,7 +88,7 @@ public class MyDbiImpl implements MyDbi {
 }
 ```
 Notes:
- * If @Tx method is called from within another @Tx method no new transaction is started. Child method call shares transaction context with parent method.
+ * If @Tx method is called from within another @Tx method no new transaction is started. Child method shares transaction context with a parent method.
  Transaction is committed/rolled back when top-level method is finished.
  * All @Sql (raw SQL) methods are processed as @Tx methods when no dbi interface is used.
 
