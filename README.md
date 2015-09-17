@@ -157,7 +157,7 @@ User user = db.execute(c -> { // wraps method into transaction
 });
 ```
 
-Note: that when you use (DbStatement)[https://github.com/mjdbc/mjdbc/blob/master/src/main/java/com/github/mjdbc/DbStatement.java] class it is not necessary to close it manually.
+Note: that when you use [DbStatement](https://github.com/mjdbc/mjdbc/blob/master/src/main/java/com/github/mjdbc/DbStatement.java) class it is not necessary to close it manually.
 It will be closed automatically when connection is closed (returned to pool). In this example the connection is closed when *db.execute()* method is returned.
 
 
