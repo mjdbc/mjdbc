@@ -138,6 +138,25 @@ db.execute(c -> { // wraps method into transaction
     }
 });
 ```
+or if you need named parameters:
+```java
+Db db = new Db(ds);
+User user = db.execute(c -> { // wraps method into transaction
+    DbStatement s = new DbStatement(c, "SELECT * FROM users WHERE login = :login", User.MAPPER)
+    s.setString("login", login);
+
+    // direct access to JDBC starts here:
+    Map<String, Integer> namedParametersMapping = s.parametersMapping; // JDBC supports parameter binding by index only. Here is the mapping.
+    java.sql.PreparedStatement ps = s.statement;
+    ... // write some low-level code with java.sql.PreparedStatement, like bind data streams, even execute it...
+
+    return s.query();
+});
+```
+
+Note: that when you use (DbStatement)[https://github.com/mjdbc/mjdbc/blob/master/src/main/java/com/github/mjdbc/DbStatement.java] class it is not necessary to close it manually.
+It will be closed automatically when connection is closed (returned to pool). In this example the connection is closed when *db.execute()* method is returned.
+
 
 ##### Timers
 For all methods annotated with @Sql or @Tx mjdbc automatically collects statistics:
