@@ -4,12 +4,12 @@ __mjdbc__  - Small and efficient JDBC wrapper.
 * *Small:* no external dependencies. Distribution size is  less than 50kb.
 * *Simple:* no special configuration is needed. Start using it after 1 line of initialization code.
 * *Reliable:* all SQL statements are parsed and validated during application startup.
-* *Flexible:* switch and use native JDBC driver directly when you need.
-* *Fast:* no additional overhead in runtime if compared to JDBC.
+* *Flexible:* switch and use native JDBC driver directly when needed.
+* *Fast:* no overhead in runtime when compared to JDBC.
 * *Transactional:* wrap any method into transaction by adding 1 annotation to it.
-* *Extensible:* add support for new types or override the way basic types are handled.
-* *Measurable:* provides timings for all your SQL queries and transactions.
-* *Open source:* fork it and apply changes you need.
+* *Extensible:* add support for new data types or override the way built-in types are handled.
+* *Measurable:* check timings for all SQL queries and transactions.
+* *Open source:* fork and change it.
 * *Bug free*... not yet... still in alpha, but number of tests is growing.
 
 [![Build Status](https://travis-ci.org/mjdbc/mjdbc.svg?branch=master)]	(https://travis-ci.org/mjdbc/mjdbc)
