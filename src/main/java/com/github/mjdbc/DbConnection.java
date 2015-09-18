@@ -21,7 +21,7 @@ public class DbConnection {
      * List of statements to close when connection is closed.
      */
     @NotNull
-    protected List<DbStatement> statementsToClose = new ArrayList<>();
+    protected final List<DbStatement> statementsToClose = new ArrayList<>();
 
     public DbConnection(@NotNull Connection sqlConnection) {
         this.sqlConnection = sqlConnection;

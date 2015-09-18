@@ -18,5 +18,5 @@ public final class UserId extends AbstractDbInt {
         return val;
     }
 
-    public static DbMapper<UserId> MAPPER = (r) -> new UserId(r.getInt(1));
+    public static final DbMapper<UserId> MAPPER = (r) -> new UserId(r.getInt(1));
 }

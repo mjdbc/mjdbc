@@ -11,7 +11,5 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.PARAMETER})
 public @interface Bind {
-    String DEFAULT_VALUE = "";
-
-    String value() default DEFAULT_VALUE;
+    String value() default "";
 }

@@ -12,7 +12,5 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.METHOD})
 public @interface Sql {
-    String DEFAULT_VALUE = "";
-
-    String value() default DEFAULT_VALUE;
+    String value() default "";
 }

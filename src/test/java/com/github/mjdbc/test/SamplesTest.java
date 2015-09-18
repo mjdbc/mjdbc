@@ -146,7 +146,7 @@ public class SamplesTest extends org.junit.Assert {
     }
 
     /**
-     * Let's update some field using beans: User fields from query are mapped automagically.
+     * Let's update some field using beans and check that object fields were automatically mapped to query parameters.
      */
     @Test
     public void checkBeanBinder() {

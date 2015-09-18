@@ -100,7 +100,7 @@ Extend [DbMapper](https://github.com/mjdbc/mjdbc/blob/master/src/main/java/com/g
 It may be convenient to put the implementation into the Java class it maps [(example)](https://github.com/mjdbc/mjdbc/blob/master/src/test/java/com/github/mjdbc/test/asset/model/User.java).
 
 ```java
-public static DbMapper<User> MAPPER = (r) -> {
+public static final DbMapper<User> MAPPER = (r) -> {
     User user = new User();
     user.id = new UserId(r.getInt("id"));
     user.login = r.getString("login");

@@ -33,7 +33,7 @@ import static java.util.Objects.requireNonNull;
  */
 public class DbImpl implements Db {
 
-    private ThreadLocal<DbConnection> activeConnections = new ThreadLocal<>();
+    private final ThreadLocal<DbConnection> activeConnections = new ThreadLocal<>();
 
     private final Map<Method, OpRef> opByMethod = new ConcurrentHashMap<>();
 
@@ -46,7 +46,7 @@ public class DbImpl implements Db {
     private final Map<Method, DbTimer> timersByMethod = new ConcurrentHashMap<>();
 
     @NotNull
-    private DataSource dataSource;
+    private final DataSource dataSource;
 
     public DbImpl(@NotNull DataSource dataSource) {
         this.dataSource = dataSource;
@@ -326,17 +326,18 @@ public class DbImpl implements Db {
 
     private static class BindInfo {
         @NotNull
-        String mappedName;
+        final String mappedName;
+
         @NotNull
-        DbBinder binder;
+        final DbBinder binder;
 
-        public final int argumentIdx;
-
-        @Nullable
-        private final Field field;
+        final int argumentIdx;
 
         @Nullable
-        private final Method getter;
+        final Field field;
+
+        @Nullable
+        final Method getter;
 
         public BindInfo(@NotNull String mappedName, @NotNull DbBinder binder, int argumentIdx, @Nullable Field field, @Nullable Method getter) {
             this.mappedName = mappedName;

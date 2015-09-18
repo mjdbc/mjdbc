@@ -21,7 +21,7 @@ public final class User {
     /**
      * Class to create User object from result set.
      */
-    public static DbMapper<User> MAPPER = (r) -> {
+    public static final DbMapper<User> MAPPER = (r) -> {
         User user = new User();
         user.id = new UserId(r.getInt("id"));
         user.login = r.getString("login");
