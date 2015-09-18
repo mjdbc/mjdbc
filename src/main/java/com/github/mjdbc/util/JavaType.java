@@ -16,11 +16,12 @@ public enum JavaType {
     Character,
     Date,
     Double,
-    Short,
     Float,
     Integer,
     Long,
+    Short,
     SqlDate,
+    SqlTime,
     String,
     Timestamp;
 

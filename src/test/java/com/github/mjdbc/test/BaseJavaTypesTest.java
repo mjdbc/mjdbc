@@ -18,7 +18,7 @@ public abstract class BaseJavaTypesTest<S> extends Assert {
     /**
      * Set of raw SQL queries.
      */
-    protected S typesSql;
+    protected S sql;
 
     @NotNull
     protected final Class<S> type;
@@ -31,7 +31,7 @@ public abstract class BaseJavaTypesTest<S> extends Assert {
     public void setUp() {
         ds = DbUtils.prepareDataSource("types");
         DbImpl db = new DbImpl(ds);
-        typesSql = db.attachSql(type);
+        sql = db.attachSql(type);
     }
 
     @After

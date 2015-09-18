@@ -64,6 +64,9 @@ public class JavaTypeBinder implements DbBinder {
             case SqlDate:
                 statement.setDate(idx, (java.sql.Date) value);
                 break;
+            case SqlTime:
+                statement.setTime(idx, (java.sql.Time) value);
+                break;
             case String:
                 statement.setString(idx, value.toString());
                 break;
@@ -109,6 +112,9 @@ public class JavaTypeBinder implements DbBinder {
                 break;
             case SqlDate:
                 statement.setNull(idx, Types.DATE);
+                break;
+            case SqlTime:
+                statement.setNull(idx, Types.TIME);
                 break;
             case String:
                 statement.setString(idx, null);

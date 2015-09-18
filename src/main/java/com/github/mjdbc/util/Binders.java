@@ -2,12 +2,12 @@ package com.github.mjdbc.util;
 
 import com.github.mjdbc.DbBinder;
 import com.github.mjdbc.binder.DbValueBinder;
-import com.github.mjdbc.type.DbLong;
 import com.github.mjdbc.type.DbInt;
+import com.github.mjdbc.type.DbLong;
 import com.github.mjdbc.type.DbString;
 
 import java.math.BigDecimal;
-import java.security.Timestamp;
+import java.sql.Timestamp;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -41,6 +41,7 @@ public final class Binders {
         put(BigDecimal.class, JavaType.BigDecimal.binder);
         put(java.util.Date.class, JavaType.Date.binder);
         put(java.sql.Date.class, JavaType.SqlDate.binder);
+        put(java.sql.Time.class, JavaType.SqlTime.binder);
         put(Timestamp.class, JavaType.Timestamp.binder);
 
         // Strings

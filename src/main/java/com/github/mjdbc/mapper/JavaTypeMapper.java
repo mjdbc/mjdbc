@@ -57,6 +57,9 @@ public final class JavaTypeMapper implements DbMapper {
             case SqlDate:
                 result = r.getDate(1);
                 break;
+            case SqlTime:
+                result = r.getTime(1);
+                break;
             case String:
                 result = r.getString(1);
                 break;

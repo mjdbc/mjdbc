@@ -13,59 +13,59 @@ public class JavaTypesStringTest extends BaseJavaTypesTest<JavaTypesStringSql> {
 
     @Test
     public void checkNullableVarcharStringRead() {
-        String v = typesSql.getNullableVarcharString();
+        String v = sql.getNullableVarcharString();
         assertNull(v);
     }
 
     @Test
     public void checkNullableCharStringRead() {
-        String v = typesSql.getNullableCharString();
+        String v = sql.getNullableCharString();
         assertNull(v);
     }
 
     @Test
     public void checkNotNullableVarcharStringRead() {
-        String v = typesSql.getNotNullableVarcharString();
+        String v = sql.getNotNullableVarcharString();
         assertEquals("value", v);
     }
 
     @Test
     public void checkNotNullableCharStringRead() {
-        String v = typesSql.getNotNullableCharString();
+        String v = sql.getNotNullableCharString();
         assertEquals("value     ", v);
     }
 
     @Test
     public void checkNullableVarcharStringWrite() {
-        typesSql.setNullableVarcharString("x");
-        String v = typesSql.getNullableVarcharString();
+        sql.setNullableVarcharString("x");
+        String v = sql.getNullableVarcharString();
         assertEquals("x", v);
 
-        typesSql.setNullableVarcharString(null);
-        v = typesSql.getNullableVarcharString();
+        sql.setNullableVarcharString(null);
+        v = sql.getNullableVarcharString();
         assertNull(v);
     }
 
     @Test
     public void checkNullableCharStringWrite() {
-        typesSql.setNullableCharString("x");
-        String v = typesSql.getNullableCharString();
+        sql.setNullableCharString("x");
+        String v = sql.getNullableCharString();
         assertEquals("x         ", v);
 
-        typesSql.setNullableCharString(null);
-        v = typesSql.getNullableCharString();
+        sql.setNullableCharString(null);
+        v = sql.getNullableCharString();
         assertNull(v);
     }
 
     @Test
     public void checkNotNullableVarcharStringWrite() {
-        typesSql.setNotNullableVarcharString("x");
-        String v = typesSql.getNotNullableVarcharString();
+        sql.setNotNullableVarcharString("x");
+        String v = sql.getNotNullableVarcharString();
         assertEquals("x", v);
 
         try {
             //noinspection ConstantConditions
-            typesSql.setNotNullableVarcharString(null);
+            sql.setNotNullableVarcharString(null);
             fail();
         } catch (Exception e) {
             assertTrue(e.getCause() instanceof SQLException);
@@ -74,12 +74,12 @@ public class JavaTypesStringTest extends BaseJavaTypesTest<JavaTypesStringSql> {
 
     @Test
     public void checkNotNullableCharStringWrite() {
-        typesSql.setNotNullableCharString("x");
-        String v = typesSql.getNotNullableCharString();
+        sql.setNotNullableCharString("x");
+        String v = sql.getNotNullableCharString();
         assertEquals("x         ", v);
         try {
             //noinspection ConstantConditions
-            typesSql.setNotNullableCharString(null);
+            sql.setNotNullableCharString(null);
             fail();
         } catch (Exception e) {
             assertTrue(e.getCause() instanceof SQLException);
@@ -89,7 +89,7 @@ public class JavaTypesStringTest extends BaseJavaTypesTest<JavaTypesStringSql> {
     @Test
     public void checkVarcharFieldOverflow() {
         try {
-            typesSql.setNullableCharString("12345678901");
+            sql.setNullableCharString("12345678901");
             fail();
         } catch (Exception e) {
             assertTrue(e.getCause() instanceof SQLException);
@@ -99,7 +99,7 @@ public class JavaTypesStringTest extends BaseJavaTypesTest<JavaTypesStringSql> {
     @Test
     public void checkCharFieldOverflow() {
         try {
-            typesSql.setNullableCharString("12345678901");
+            sql.setNullableCharString("12345678901");
             fail();
         } catch (Exception e) {
             assertTrue(e.getCause() instanceof SQLException);

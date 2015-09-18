@@ -13,33 +13,33 @@ public class JavaTypesIntegerTest extends BaseJavaTypesTest<JavaTypesIntegerSql>
 
     @Test
     public void checkNullableIntegerRead() {
-        Integer v = typesSql.getNullableInteger();
+        Integer v = sql.getNullableInteger();
         assertNull(v);
     }
 
     @Test(expected = NullPointerException.class)
     public void checkNullIntegerReadAsIntThrowsException() {
-        typesSql.getNullableIntegerAsInt();
+        sql.getNullableIntegerAsInt();
     }
 
     @Test
     public void checkNullableIntegerWrite() {
-        typesSql.setNullableInteger(10);
-        assertEquals(new Integer(10), typesSql.getNullableInteger());
+        sql.setNullableInteger(10);
+        assertEquals(new Integer(10), sql.getNullableInteger());
 
-        typesSql.setNullableInteger(null);
-        assertNull(typesSql.getNullableInteger());
+        sql.setNullableInteger(null);
+        assertNull(sql.getNullableInteger());
     }
 
     @Test
     public void checkNotNullableIntegerRead() {
-        Integer v = typesSql.getNotNullableInteger();
+        Integer v = sql.getNotNullableInteger();
         assertEquals(new Integer(1), v);
     }
 
     @Test
     public void checkNotNullableIntegerReadAsInt() {
-        int v = typesSql.getNotNullableIntegerAsInt();
+        int v = sql.getNotNullableIntegerAsInt();
         assertEquals(1, v);
     }
 
@@ -47,7 +47,7 @@ public class JavaTypesIntegerTest extends BaseJavaTypesTest<JavaTypesIntegerSql>
     public void checkNotNullableIntegerWriteNullThrowsSqlException() {
         try {
             //noinspection ConstantConditions
-            typesSql.setNotNullableInteger(null);
+            sql.setNotNullableInteger(null);
             fail();
         } catch (Exception e) {
             assertTrue(e.getCause() instanceof SQLException);

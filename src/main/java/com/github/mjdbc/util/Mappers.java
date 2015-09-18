@@ -1,10 +1,10 @@
 package com.github.mjdbc.util;
 
-import com.github.mjdbc.mapper.VoidMapper;
 import com.github.mjdbc.DbMapper;
+import com.github.mjdbc.mapper.VoidMapper;
 
 import java.math.BigDecimal;
-import java.security.Timestamp;
+import java.sql.Timestamp;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -42,6 +42,7 @@ public final class Mappers {
         put(BigDecimal.class, JavaType.BigDecimal.mapper);
         put(java.util.Date.class, JavaType.Date.mapper);
         put(java.sql.Date.class, JavaType.SqlDate.mapper);
+        put(java.sql.Time.class, JavaType.SqlTime.mapper);
         put(Timestamp.class, JavaType.Timestamp.mapper);
 
         // Strings
