@@ -17,6 +17,7 @@ import java.lang.reflect.Proxy;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -56,11 +57,17 @@ public class DbImpl implements Db {
     public <T> void registerMapper(@NotNull Class<T> mapperClass, @NotNull DbMapper<T> mapper) {
         requireNonNull(mapperClass);
         requireNonNull(mapper);
-        mapperByClass.put(mapperClass, mapper);
+        if (Collection.class.isAssignableFrom(mapperClass)) {
+            throw new IllegalArgumentException("Collection mappers override is not supported.");
+        }
+        DbMapper oldMapper = mapperByClass.put(mapperClass, mapper);
+        if (oldMapper != null) { //update all old cached mappings
+            opByMethod.values().stream().filter(r -> r.resultMapper.equals(oldMapper)).forEach(r -> r.resultMapper = mapper);
+        }
     }
 
     @Override
-    public void registerBinder(@NotNull Class binderClass, @NotNull DbBinder binder) {
+    public <T> void registerBinder(@NotNull Class<? extends T> binderClass, @NotNull DbBinder<T> binder) {
         requireNonNull(binderClass);
         requireNonNull(binder);
         binderByClass.put(binderClass, binder);
@@ -303,7 +310,7 @@ public class DbImpl implements Db {
         final String parsedSql;
 
         @NotNull
-        final DbMapper resultMapper;
+        DbMapper resultMapper;
 
         @NotNull
         final Map<String, List<Integer>> parametersNamesMapping;

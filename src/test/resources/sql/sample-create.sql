@@ -10,3 +10,4 @@ CREATE TABLE users (
 
 INSERT INTO users (login, first_name, last_name, gender, score) VALUES ('u1', 'First1', 'Last1', 1, 0);
 INSERT INTO users (login, first_name, last_name, gender, score) VALUES ('u2', 'First2', 'Last2', 0, 0);
+

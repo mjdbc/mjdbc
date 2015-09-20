@@ -27,7 +27,7 @@ public interface Db {
      * @param binderClass - parameter class to be processed by this binder.
      * @param binder      - binder implementation.
      */
-    void registerBinder(@NotNull Class binderClass, @NotNull DbBinder binder);
+    <T> void registerBinder(@NotNull Class<? extends T> binderClass, @NotNull DbBinder<T> binder);
 
     /**
      * Attaches Dbi (Database Interface) implementation to the database.
@@ -87,4 +87,6 @@ public interface Db {
      * if timer is removed from the map -> it restarts.
      */
     Map<Method, DbTimer> getTimers();
+
+
 }

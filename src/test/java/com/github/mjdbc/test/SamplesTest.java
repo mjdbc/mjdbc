@@ -107,7 +107,7 @@ public class SamplesTest extends org.junit.Assert {
      */
     @Test
     public void checkListMapper() {
-        List<User> users = sampleQueries.selectAllUsers();
+        List<User> users = sampleQueries.getAllUsers();
         assertEquals(2, users.size());
     }
 
