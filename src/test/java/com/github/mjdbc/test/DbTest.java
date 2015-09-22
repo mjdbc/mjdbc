@@ -75,8 +75,8 @@ public class DbTest extends Assert {
     /**
      * Check that registration of null mapper triggers null pointer exception.
      */
-    @Test(expected = IllegalArgumentException.class)
-    public void checkNullMapperThrowsIllegalArgumentException() {
+    @Test(expected = NullPointerException.class)
+    public void checkNullMapperThrowsNullPointerException() {
         //noinspection ConstantConditions
         db.registerMapper(String.class, null);
     }
@@ -84,8 +84,8 @@ public class DbTest extends Assert {
     /**
      * Check that registration of mapped class = null triggers null pointer exception.
      */
-    @Test(expected = IllegalArgumentException.class)
-    public void checkNullMappedClassThrowsIllegalArgumentException() {
+    @Test(expected = NullPointerException.class)
+    public void checkNullMappedClassThrowsNullPointerException() {
         //noinspection ConstantConditions
         db.registerMapper(null, JavaType.String.mapper);
     }
@@ -109,14 +109,14 @@ public class DbTest extends Assert {
     /**
      * Check that registration of null binder triggers IllegalArgumentException
      */
-    @Test(expected = IllegalArgumentException.class)
-    public void checkNullBinderTriggersIllegalArgumentException() {
+    @Test(expected = NullPointerException.class)
+    public void checkNullBinderTriggersNullPointerException() {
         //noinspection ConstantConditions
         db.registerBinder((Class<Reader>) null, PreparedStatement::setCharacterStream);
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void checkNullBinderFunctionTriggersIllegalArgumentException() {
+    @Test(expected = NullPointerException.class)
+    public void checkNullBinderFunctionTriggersNullPointerException() {
         //noinspection ConstantConditions
         db.registerBinder(Reader.class, null);
     }
