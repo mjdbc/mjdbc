@@ -155,6 +155,9 @@ public class DbImpl implements Db {
     @Override
     public <T> T attachSql(@NotNull Class<T> sqlInterface) {
         requireNonNull(sqlInterface);
+        if (!sqlInterface.isInterface()) {
+            throw new IllegalArgumentException("Not interface: " + sqlInterface);
+        }
         for (Method m : sqlInterface.getMethods()) {
             registerMethod(m);
         }
@@ -162,7 +165,7 @@ public class DbImpl implements Db {
         return (T) Proxy.newProxyInstance(sqlInterface.getClassLoader(), new Class[]{sqlInterface}, new SqlProxy());
     }
 
-    private void registerMethod(Method m) {
+    private void registerMethod(@NotNull Method m) {
         // return type
         DbMapper resultMapper = null;
         Class<?> returnType = m.getReturnType();
@@ -177,17 +180,17 @@ public class DbImpl implements Db {
             resultMapper = mapperByClass.get(returnType);
         }
         if (resultMapper == null) {
-            throw new RuntimeException("Not supported query result type: " + returnType);
+            throw new IllegalArgumentException("Not supported query result type: " + returnType);
         }
 
         // sql named params
         Sql sqlAnnotation = m.getAnnotation(Sql.class);
         if (sqlAnnotation == null) {
-            throw new RuntimeException("Method has no @Sql annotation: " + m);
+            throw new IllegalArgumentException("Method has no @Sql annotation: " + m);
         }
         String sql = sqlAnnotation.value();
         if (sql.isEmpty()) {
-            throw new RuntimeException("Illegal SQL: '" + sql + "' in method: " + m);
+            throw new IllegalArgumentException("Illegal SQL: '" + sql + "' in method: " + m);
         }
         Map<String, List<Integer>> parametersMapping = new HashMap<>();
         String parsedSql = DbStatement.parse(sql, parametersMapping);
@@ -204,7 +207,7 @@ public class DbImpl implements Db {
                     throw new IllegalArgumentException("Unbound parameter: " + i + ", method: " + m);
                 }
                 if (m.getParameterCount() != 1) {
-                    throw new RuntimeException("@BindBean must be the only parameter! Method: " + m);
+                    throw new IllegalArgumentException("@BindBean must be the only parameter! Method: " + m);
                 }
                 bindings.addAll(getBeanBinders(parameterType));
                 break;
@@ -224,7 +227,7 @@ public class DbImpl implements Db {
         for (String name : parametersMapping.keySet()) {
             BindInfo info = bindings.stream().filter(b -> b.mappedName.equals(name)).findAny().orElse(null);
             if (info == null) {
-                throw new RuntimeException("No binding found for '" + name + "', method: " + m);
+                throw new IllegalArgumentException("No binding found for '" + name + "', method: " + m);
             }
         }
 

@@ -1,11 +1,15 @@
 package com.github.mjdbc.test;
 
 import com.github.mjdbc.DbImpl;
+import com.github.mjdbc.test.asset.EmptyQuerySql;
+import com.github.mjdbc.test.asset.EmptySql;
+import com.github.mjdbc.test.asset.MissedParameterSql;
 import com.github.mjdbc.test.asset.ReaderSql;
 import com.github.mjdbc.test.asset.UserSql;
 import com.github.mjdbc.test.asset.model.User;
 import com.github.mjdbc.test.asset.model.UserId;
 import com.github.mjdbc.test.util.DbUtils;
+import com.github.mjdbc.util.JavaType;
 import com.zaxxer.hikari.HikariDataSource;
 import org.junit.After;
 import org.junit.Assert;
@@ -69,7 +73,26 @@ public class DbTest extends Assert {
     }
 
     /**
-     * Check that mapper type is validated during registration
+     * Check that registration of null mapper triggers null pointer exception.
+     */
+    @Test(expected = IllegalArgumentException.class)
+    public void checkNullMapperThrowsIllegalArgumentException() {
+        //noinspection ConstantConditions
+        db.registerMapper(String.class, null);
+    }
+
+    /**
+     * Check that registration of mapped class = null triggers null pointer exception.
+     */
+    @Test(expected = IllegalArgumentException.class)
+    public void checkNullMappedClassThrowsIllegalArgumentException() {
+        //noinspection ConstantConditions
+        db.registerMapper(null, JavaType.String.mapper);
+    }
+
+
+    /**
+     * Check that new binder class can be registered and used.
      */
     @Test
     public void checkBinderRegistration() {
@@ -81,5 +104,61 @@ public class DbTest extends Assert {
         User u = q2.getUserByLogin("u1");
         assertNotNull(u);
         assertEquals("x", u.firstName);
+    }
+
+    /**
+     * Check that registration of null binder triggers IllegalArgumentException
+     */
+    @Test(expected = IllegalArgumentException.class)
+    public void checkNullBinderTriggersIllegalArgumentException() {
+        //noinspection ConstantConditions
+        db.registerBinder((Class<Reader>) null, PreparedStatement::setCharacterStream);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void checkNullBinderFunctionTriggersIllegalArgumentException() {
+        //noinspection ConstantConditions
+        db.registerBinder(Reader.class, null);
+    }
+
+    /**
+     * Check that empty Sql interface is OK.
+     */
+    @Test
+    public void checkAttachEmptySql() {
+        EmptySql sql = db.attachSql(EmptySql.class);
+        assertNotNull(sql);
+    }
+
+    /**
+     * Check that attach of class triggers IllegalArgumentException.
+     */
+    @Test(expected = IllegalArgumentException.class)
+    public void checkAttachClassThrowsIllegalArgumentException() {
+        db.attachSql(String.class);
+    }
+
+    /**
+     * Check that empty Sql method triggers IllegalArgumentException.
+     */
+    @Test(expected = IllegalArgumentException.class)
+    public void checkEmptySqlQueryThrowsIllegalArgumentException() {
+        db.attachSql(EmptyQuerySql.class);
+    }
+
+    /**
+     * Check that empty Sql method triggers IllegalArgumentException.
+     */
+    @Test(expected = IllegalArgumentException.class)
+    public void checkMissedParameterSqlThrowsIllegalArgumentException() {
+        db.attachSql(MissedParameterSql.class);
+    }
+
+    /**
+     * Check that empty Sql method triggers IllegalArgumentException.
+     */
+    @Test(expected = IllegalArgumentException.class)
+    public void checkMissedBeanParameterSqlThrowsIllegalArgumentException() {
+        db.attachSql(MissedParameterSql.class);
     }
 }
