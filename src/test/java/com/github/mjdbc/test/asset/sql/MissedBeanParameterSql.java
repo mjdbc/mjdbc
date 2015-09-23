@@ -1,4 +1,4 @@
-package com.github.mjdbc.test.asset;
+package com.github.mjdbc.test.asset.sql;
 
 
 import com.github.mjdbc.BindBean;
@@ -6,7 +6,7 @@ import com.github.mjdbc.Sql;
 import com.github.mjdbc.test.asset.model.User;
 
 /**
- * Set of raw SQL method to access to 'user' table data.
+ * Sql interface used to test missed bean-level parameters.
  */
 public interface MissedBeanParameterSql {
 

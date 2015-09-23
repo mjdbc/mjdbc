@@ -1,6 +1,6 @@
 package com.github.mjdbc.test;
 
-import com.github.mjdbc.test.asset.JavaTypesOthersSql;
+import com.github.mjdbc.test.asset.sql.JavaTypesOthersSql;
 import org.junit.Test;
 
 import java.math.BigDecimal;

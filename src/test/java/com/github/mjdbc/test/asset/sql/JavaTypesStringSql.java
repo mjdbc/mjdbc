@@ -1,10 +1,14 @@
-package com.github.mjdbc.test.asset;
+package com.github.mjdbc.test.asset.sql;
 
 
 import com.github.mjdbc.Bind;
 import com.github.mjdbc.Sql;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+/**
+ * Sql interface to test Java String type.
+ */
 
 public interface JavaTypesStringSql {
 

@@ -74,12 +74,12 @@ public class DbImpl implements Db {
     }
 
     @NotNull
-    public <T> T attachDbi(@NotNull final T impl, @NotNull Class<T> daoInterface) {
+    public <T> T attachDbi(@NotNull final T impl, @NotNull Class<T> dbiInterface) {
         requireNonNull(impl);
-        requireNonNull(daoInterface);
+        requireNonNull(dbiInterface);
 
         //noinspection unchecked
-        return (T) Proxy.newProxyInstance(impl.getClass().getClassLoader(), new Class[]{daoInterface}, new DbiProxy<>(impl));
+        return (T) Proxy.newProxyInstance(impl.getClass().getClassLoader(), new Class[]{dbiInterface}, new DbiProxy<>(impl));
     }
 
 

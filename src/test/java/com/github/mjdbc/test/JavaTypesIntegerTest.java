@@ -1,6 +1,6 @@
 package com.github.mjdbc.test;
 
-import com.github.mjdbc.test.asset.JavaTypesIntegerSql;
+import com.github.mjdbc.test.asset.sql.JavaTypesIntegerSql;
 import org.junit.Test;
 
 import java.sql.SQLException;

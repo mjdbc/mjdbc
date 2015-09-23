@@ -1,4 +1,4 @@
-package com.github.mjdbc.test.asset;
+package com.github.mjdbc.test.asset.sql;
 
 
 import com.github.mjdbc.Bind;
@@ -6,6 +6,9 @@ import com.github.mjdbc.Sql;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+/**
+ * Sql interface to test Integer type.
+ */
 public interface JavaTypesIntegerSql {
 
     @Sql("SELECT integer_field FROM custom_types")

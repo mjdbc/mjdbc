@@ -1,10 +1,10 @@
-package com.github.mjdbc.test.asset;
+package com.github.mjdbc.test.asset.sql;
 
 
 import com.github.mjdbc.Sql;
 
 /**
- * Set of raw SQL method to access to 'user' table data.
+ * Sql interface to check empty query .
  */
 public interface EmptyQuerySql {
 

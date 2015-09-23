@@ -1,4 +1,4 @@
-package com.github.mjdbc.test.asset;
+package com.github.mjdbc.test.asset.sql;
 
 
 import com.github.mjdbc.Bind;
@@ -7,7 +7,7 @@ import com.github.mjdbc.Sql;
 import java.io.Reader;
 
 /**
- * Set of raw SQL method to access to 'user' table data.
+ * Sql interface used to test custom binders.
  */
 public interface ReaderSql {
 

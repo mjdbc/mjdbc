@@ -4,7 +4,7 @@ import com.github.mjdbc.DbStatement;
 import com.github.mjdbc.Tx;
 import com.github.mjdbc.test.asset.model.User;
 import com.github.mjdbc.Db;
-import com.github.mjdbc.test.asset.UserSql;
+import com.github.mjdbc.test.asset.sql.UserSql;
 import com.github.mjdbc.test.asset.model.UserId;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

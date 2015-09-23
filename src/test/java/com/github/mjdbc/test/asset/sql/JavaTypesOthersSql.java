@@ -1,4 +1,4 @@
-package com.github.mjdbc.test.asset;
+package com.github.mjdbc.test.asset.sql;
 
 
 import com.github.mjdbc.Bind;
@@ -9,6 +9,9 @@ import java.math.BigDecimal;
 import java.sql.Time;
 import java.sql.Timestamp;
 
+/**
+ * Sql interface to test various Java types.
+ */
 public interface JavaTypesOthersSql {
 
     /* BigDecimal */

@@ -2,7 +2,7 @@ package com.github.mjdbc.test;
 
 import com.github.mjdbc.DbImpl;
 import com.github.mjdbc.DbTimer;
-import com.github.mjdbc.test.asset.UserSql;
+import com.github.mjdbc.test.asset.sql.UserSql;
 import com.github.mjdbc.test.asset.dbi.SampleDbi;
 import com.github.mjdbc.test.asset.dbi.SampleDbiImpl;
 import com.github.mjdbc.test.asset.model.Gender;
