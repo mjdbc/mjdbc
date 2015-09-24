@@ -67,7 +67,7 @@ public final class JavaTypeMapper implements DbMapper {
                 result = r.getTimestamp(1);
                 break;
             default:
-                throw new IllegalArgumentException("Unsupported type: " + type);
+                throw new IllegalArgumentException("Mapping is not supported for " + type);
         }
         return r.wasNull() ? null : result;
     }

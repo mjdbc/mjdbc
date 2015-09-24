@@ -37,6 +37,7 @@ public final class Mappers {
         put(Integer.class, JavaType.Integer.mapper);
         put(Long.TYPE, JavaType.Long.mapper);
         put(Long.class, JavaType.Long.mapper);
+        put(Void.class, JavaType.Void.mapper);
 
         // jdbc related types
         put(BigDecimal.class, JavaType.BigDecimal.mapper);

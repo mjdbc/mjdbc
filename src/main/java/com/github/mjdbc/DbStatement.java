@@ -3,6 +3,7 @@ package com.github.mjdbc;
 import com.github.mjdbc.type.DbInt;
 import com.github.mjdbc.type.DbLong;
 import com.github.mjdbc.type.DbString;
+import com.github.mjdbc.util.JavaType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -31,6 +32,11 @@ public class DbStatement<T> implements AutoCloseable {
     public final DbMapper<T> resultMapper;
 
     private final Map<String, List<Integer>> parametersMapping;
+
+    public DbStatement(@NotNull DbConnection c, @NotNull String sql) throws SQLException {
+        //noinspection unchecked
+        this(c, sql, JavaType.Void.mapper, false);
+    }
 
     public DbStatement(@NotNull DbConnection c, @NotNull String sql, @NotNull DbMapper<T> resultMapper) throws SQLException {
         this(c, sql, resultMapper, false);
@@ -81,7 +87,7 @@ public class DbStatement<T> implements AutoCloseable {
     }
 
     @NotNull
-    public DbStatement<T> setInt(@NotNull String name, @Nullable DbInt value) throws SQLException {
+    public DbStatement<T> set(@NotNull String name, @Nullable DbInt value) throws SQLException {
         return value == null ? setNull(name, JDBCType.INTEGER) : setInt(name, value.getDbValue());
     }
 
@@ -94,7 +100,7 @@ public class DbStatement<T> implements AutoCloseable {
     }
 
     @NotNull
-    public DbStatement<T> setLong(@NotNull String name, @Nullable DbLong value) throws SQLException {
+    public DbStatement<T> set(@NotNull String name, @Nullable DbLong value) throws SQLException {
         return value == null ? setNull(name, JDBCType.BIGINT) : setLong(name, value.getDbValue());
     }
 
@@ -131,7 +137,7 @@ public class DbStatement<T> implements AutoCloseable {
     }
 
     @NotNull
-    public DbStatement<T> setString(@NotNull String name, @Nullable DbString value) throws SQLException {
+    public DbStatement<T> set(@NotNull String name, @Nullable DbString value) throws SQLException {
         return setString(name, value == null ? null : value.getDbValue());
     }
 

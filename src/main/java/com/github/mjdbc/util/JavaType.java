@@ -23,7 +23,8 @@ public enum JavaType {
     SqlDate,
     SqlTime,
     String,
-    Timestamp;
+    Timestamp,
+    Void;
 
     @NotNull
     public final DbBinder binder;

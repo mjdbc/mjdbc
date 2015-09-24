@@ -74,7 +74,7 @@ public class JavaTypeBinder implements DbBinder {
                 statement.setTimestamp(idx, (Timestamp) value);
                 break;
             default:
-                throw new IllegalArgumentException("Illegal type: " + type);
+                throw new IllegalArgumentException("Binding is not supported for " + type);
         }
     }
 

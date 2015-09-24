@@ -36,6 +36,7 @@ public final class Binders {
         put(Integer.class, JavaType.Integer.binder);
         put(Long.TYPE, JavaType.Long.binder);
         put(Long.class, JavaType.Long.binder);
+        put(Void.class, JavaType.Void.binder);
 
         // jdbc related types
         put(BigDecimal.class, JavaType.BigDecimal.binder);
