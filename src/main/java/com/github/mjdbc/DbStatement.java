@@ -1,10 +1,14 @@
 package com.github.mjdbc;
 
+import com.github.mjdbc.type.DbInt;
+import com.github.mjdbc.type.DbLong;
+import com.github.mjdbc.type.DbString;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.math.BigDecimal;
 import java.sql.Connection;
+import java.sql.JDBCType;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -77,11 +81,21 @@ public class DbStatement<T> implements AutoCloseable {
     }
 
     @NotNull
+    public DbStatement<T> setInt(@NotNull String name, @Nullable DbInt value) throws SQLException {
+        return value == null ? setNull(name, JDBCType.INTEGER) : setInt(name, value.getDbValue());
+    }
+
+    @NotNull
     public DbStatement<T> setLong(@NotNull String name, long value) throws SQLException {
         for (int i : getIndexes(name)) {
             statement.setLong(i, value);
         }
         return this;
+    }
+
+    @NotNull
+    public DbStatement<T> setLong(@NotNull String name, @Nullable DbLong value) throws SQLException {
+        return value == null ? setNull(name, JDBCType.BIGINT) : setLong(name, value.getDbValue());
     }
 
     @NotNull
@@ -114,6 +128,11 @@ public class DbStatement<T> implements AutoCloseable {
             statement.setString(i, value);
         }
         return this;
+    }
+
+    @NotNull
+    public DbStatement<T> setString(@NotNull String name, @Nullable DbString value) throws SQLException {
+        return setString(name, value == null ? null : value.getDbValue());
     }
 
     @NotNull
