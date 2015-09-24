@@ -11,7 +11,6 @@ public abstract class AbstractDbInt implements DbInt {
 
     @Override
     public boolean equals(Object o) {
-        return this == o || !(o == null || getClass() != o.getClass()) && getDbValue() == ((DbInt) o).getDbValue();
-
+        return this == o || (o != null && o instanceof DbInt && getDbValue() == ((DbInt) o).getDbValue());
     }
 }

@@ -13,10 +13,10 @@ public abstract class AbstractDbString implements DbString {
 
     @Override
     public boolean equals(Object o) {
-        return this == o || !(o == null || getClass() != o.getClass()) && equals(getDbValue(), ((DbString) o).getDbValue());
+        return this == o || (o != null && o instanceof DbString && equals(getDbValue(), ((DbString) o).getDbValue()));
     }
 
-    private boolean equals(@Nullable String v1, @Nullable String v2) {
+    private static boolean equals(@Nullable String v1, @Nullable String v2) {
         //noinspection StringEquality
         return v1 == v2 || (v1 != null && v1.equals(v2));
     }

@@ -11,6 +11,6 @@ public abstract class AbstractDbLong implements DbLong {
 
     @Override
     public boolean equals(Object o) {
-        return this == o || !(o == null || getClass() != o.getClass()) && getDbValue() == ((DbLong) o).getDbValue();
+        return this == o || (o != null && o instanceof DbLong && getDbValue() == ((DbLong) o).getDbValue());
     }
 }
