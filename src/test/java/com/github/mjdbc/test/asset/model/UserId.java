@@ -1,21 +1,14 @@
 package com.github.mjdbc.test.asset.model;
 
-import com.github.mjdbc.type.impl.AbstractDbInt;
 import com.github.mjdbc.DbMapper;
+import com.github.mjdbc.type.impl.DbIntValue;
 
 /**
- * Type safe id for User objects
+ * Type safe id for User objects.
  */
-public final class UserId extends AbstractDbInt {
-    private final int val;
-
+public final class UserId extends DbIntValue {
     public UserId(int val) {
-        this.val = val;
-    }
-
-    @Override
-    public int getDbValue() {
-        return val;
+        super(val);
     }
 
     public static final DbMapper<UserId> MAPPER = (r) -> new UserId(r.getInt(1));
