@@ -83,10 +83,9 @@ public interface Db {
      * Returns per-method timers. Statistics is collected for all @Tx methods of attached Dbi interfaces
      * and for all @Sql methods of attached query interfaces.
      *
-     * @return per-method statistics. Note: This is direct access to the timers map. The timers are updated concurrently.
-     * if timer is removed from the map -> it restarts.
+     * @return per-method statistics. Note: This is direct access to the timers map. Timers are updated concurrently.
+     * if timer is removed from the map -> it will be restarted.
      */
     Map<Method, DbTimer> getTimers();
-
 
 }
