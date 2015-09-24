@@ -3,6 +3,7 @@ package com.github.mjdbc;
 import com.github.mjdbc.type.DbInt;
 import com.github.mjdbc.type.DbLong;
 import com.github.mjdbc.type.DbString;
+import com.github.mjdbc.type.DbTimestamp;
 import com.github.mjdbc.util.JavaType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -155,6 +156,11 @@ public class DbStatement<T> implements AutoCloseable {
             statement.setTimestamp(i, value);
         }
         return this;
+    }
+
+    @NotNull
+    public DbStatement<T> set(@NotNull String name, DbTimestamp value) throws SQLException {
+        return setTimestamp(name, value == null ? null : value.getDbValue());
     }
 
     @NotNull
