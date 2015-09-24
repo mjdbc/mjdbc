@@ -60,7 +60,7 @@ public class SampleDbiImpl implements SampleDbi {
     @Override
     public User getUserByLogin(@NotNull String login) {
         Objects.requireNonNull(login);
-        return db.execute(c -> new DbStatement<>(c, "SELECT * FROM users WHERE login = :login", User.MAPPER).setString("login", login).query());
+        return db.execute(c -> new DbStatement<>(c, "SELECT * FROM users WHERE login = :login", User.MAPPER).set("login", login).query());
     }
 
     /**
