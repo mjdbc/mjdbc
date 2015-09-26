@@ -1,6 +1,5 @@
-package com.github.mjdbc.mapper;
+package com.github.mjdbc;
 
-import com.github.mjdbc.DbMapper;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.ResultSet;
@@ -11,12 +10,12 @@ import java.util.List;
 /**
  *
  */
-public class ListMapper implements DbMapper<List> {
+final class ListMapper implements DbMapper<List> {
 
     @NotNull
     private final DbMapper elementMapper;
 
-    public ListMapper(@NotNull DbMapper elementMapper) {
+    ListMapper(@NotNull DbMapper elementMapper) {
         this.elementMapper = elementMapper;
     }
 

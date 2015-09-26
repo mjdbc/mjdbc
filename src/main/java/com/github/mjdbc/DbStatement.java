@@ -4,7 +4,6 @@ import com.github.mjdbc.type.DbInt;
 import com.github.mjdbc.type.DbLong;
 import com.github.mjdbc.type.DbString;
 import com.github.mjdbc.type.DbTimestamp;
-import com.github.mjdbc.util.JavaType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -21,6 +20,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Statement with named parameters support and safe operations to fetch results by hiding result set manipulation.
@@ -36,7 +36,7 @@ public class DbStatement<T> implements AutoCloseable {
 
     public DbStatement(@NotNull DbConnection c, @NotNull String sql) throws SQLException {
         //noinspection unchecked
-        this(c, sql, JavaType.Void.mapper, false);
+        this(c, sql, (DbMapper<T>) Mappers.VoidMapper, false);
     }
 
     public DbStatement(@NotNull DbConnection c, @NotNull String sql, @NotNull DbMapper<T> resultMapper) throws SQLException {
@@ -180,6 +180,18 @@ public class DbStatement<T> implements AutoCloseable {
     }
 
     @NotNull
+    public T queryNN() throws SQLException {
+        T res = null;
+        try (ResultSet r = statement.executeQuery()) {
+            if (r.next()) {
+                res = resultMapper.map(r);
+            }
+            Objects.requireNonNull(res);
+            return res;
+        }
+    }
+
+    @NotNull
     public List<T> queryList() throws SQLException {
         List<T> res = new ArrayList<>();
         try (ResultSet r = statement.executeQuery()) {
@@ -206,7 +218,7 @@ public class DbStatement<T> implements AutoCloseable {
         }
     }
 
-    public int executeUpdate() throws SQLException {
+    public int update() throws SQLException {
         return statement.executeUpdate();
     }
 

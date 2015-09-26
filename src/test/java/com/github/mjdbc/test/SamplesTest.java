@@ -2,11 +2,11 @@ package com.github.mjdbc.test;
 
 import com.github.mjdbc.DbImpl;
 import com.github.mjdbc.DbTimer;
-import com.github.mjdbc.test.asset.sql.UserSql;
 import com.github.mjdbc.test.asset.dbi.SampleDbi;
 import com.github.mjdbc.test.asset.dbi.SampleDbiImpl;
 import com.github.mjdbc.test.asset.model.Gender;
 import com.github.mjdbc.test.asset.model.User;
+import com.github.mjdbc.test.asset.sql.UserSql;
 import com.github.mjdbc.test.util.DbUtils;
 import com.zaxxer.hikari.HikariDataSource;
 import org.junit.After;
@@ -16,6 +16,7 @@ import org.junit.Test;
 import java.lang.reflect.Method;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.sql.Timestamp;
 import java.util.List;
 
 /**
@@ -116,13 +117,13 @@ public class SamplesTest extends org.junit.Assert {
      */
     @Test
     public void checkMultipleQueriesSameTransaction() {
-        int originalScore = 0; // default value for new database.
-        int oldScore = dbi.updateScore("u1", 1);
+        long originalScore = 0; // default value for new database.
+        long oldScore = dbi.updateScore("u1", 1);
         assertEquals(originalScore, oldScore);
 
         User user = dbi.getUserByLogin("u1");
         assertNotNull(user);
-        assertEquals(1, user.score);
+        assertEquals(1L, user.score);
     }
 
     /**
@@ -171,6 +172,7 @@ public class SamplesTest extends org.junit.Assert {
         u.firstName = "First3";
         u.lastName = "Last3";
         u.gender = Gender.FEMALE;
+        u.registrationDate = new Timestamp(System.currentTimeMillis());
         dbi.createUser(u);
 
         // check that valid id is assigned.

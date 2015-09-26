@@ -16,7 +16,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 /**
- * Set of tests for Db::attachSql method.
+ * Tests for Db::attachSql method.
  */
 public class DbAttachSqlTest extends Assert {
     /**

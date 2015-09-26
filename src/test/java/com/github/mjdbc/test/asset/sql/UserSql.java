@@ -40,6 +40,6 @@ public interface UserSql {
 
     @NotNull
     @UseGeneratedKeys
-    @Sql("INSERT INTO users(login, first_name, last_name, gender, score) VALUES (:login, :firstName, :lastName, :gender, :score)")
+    @Sql("INSERT INTO users(login, first_name, last_name, gender, score, reg_date) VALUES (:login, :firstName, :lastName, :gender, :score, :registrationDate)")
     UserId insertUser(@BindBean User user);
 }

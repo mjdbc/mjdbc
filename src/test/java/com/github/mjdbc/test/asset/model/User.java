@@ -2,6 +2,9 @@ package com.github.mjdbc.test.asset.model;
 
 import com.github.mjdbc.DbMapper;
 
+import java.sql.Timestamp;
+
+
 /**
  * Sample class for user record in DB.
  * Fields are public because it's hard to find a reason to write both getters and setters.
@@ -16,7 +19,8 @@ public final class User {
     public String firstName;
     public String lastName;
     public Gender gender;
-    public int score;
+    public long score;
+    public Timestamp registrationDate;
 
     /**
      * Class to create User object from result set.
@@ -28,7 +32,7 @@ public final class User {
         user.firstName = r.getString("first_name");
         user.lastName = r.getString("last_name");
         user.gender = Gender.fromDbValue(r.getInt("gender"));
-        user.score = r.getInt("score");
+        user.score = r.getLong("score");
         return user;
     };
 }

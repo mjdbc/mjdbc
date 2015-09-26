@@ -1,11 +1,11 @@
 package com.github.mjdbc.test;
 
 import com.github.mjdbc.DbImpl;
-import com.github.mjdbc.test.asset.sql.UserSql;
 import com.github.mjdbc.test.asset.model.User;
 import com.github.mjdbc.test.asset.model.UserId;
+import com.github.mjdbc.test.asset.sql.UserSql;
 import com.github.mjdbc.test.util.DbUtils;
-import com.github.mjdbc.util.JavaType;
+import com.github.mjdbc.Mappers;
 import com.zaxxer.hikari.HikariDataSource;
 import org.junit.After;
 import org.junit.Assert;
@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Set of tests for Db::registerMapper method.
+ * Tests for Db::registerMapper method.
  */
 public class DbRegisterMapperTest extends Assert {
     /**
@@ -80,7 +80,7 @@ public class DbRegisterMapperTest extends Assert {
     @Test(expected = NullPointerException.class)
     public void checkNullMappedClassThrowsNullPointerException() {
         //noinspection ConstantConditions
-        db.registerMapper(null, JavaType.String.mapper);
+        db.registerMapper(null, Mappers.StringMapper);
     }
 
 }

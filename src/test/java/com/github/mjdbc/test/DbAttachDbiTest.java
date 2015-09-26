@@ -15,7 +15,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 /**
- * Set of tests for Db::attachDbi method.
+ * Tests for Db::attachDbi method.
  */
 public class DbAttachDbiTest extends Assert {
     /**

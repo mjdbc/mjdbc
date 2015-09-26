@@ -17,7 +17,7 @@ import java.io.StringReader;
 import java.sql.PreparedStatement;
 
 /**
- * Set of tests for Db::registerBinder method.
+ * Tests for Db::registerBinder method.
  */
 public class DbRegisterBinderTest extends Assert {
     /**

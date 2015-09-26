@@ -42,7 +42,7 @@ public interface SampleDbi {
      * Updates user's score, returns old value.
      */
     @Tx
-    int updateScore(@NotNull String login, int newScore);
+    long updateScore(@NotNull String login, int newScore);
 
 
     /**

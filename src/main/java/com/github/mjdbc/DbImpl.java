@@ -1,9 +1,5 @@
 package com.github.mjdbc;
 
-import com.github.mjdbc.mapper.ListMapper;
-import com.github.mjdbc.mapper.VoidMapper;
-import com.github.mjdbc.util.Binders;
-import com.github.mjdbc.util.Mappers;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -385,14 +381,14 @@ public class DbImpl implements Db {
                             }
                         }
                     }
-                    if (p.resultMapper != VoidMapper.INSTANCE) {
+                    if (p.resultMapper != Mappers.VoidMapper) {
                         if (p.useGeneratedKeys) {
                             return s.updateAndGetGeneratedKeys();
                         } else {
                             return s.query();
                         }
                     }
-                    s.executeUpdate();
+                    s.update();
                     return null;
                 });
             } finally {

@@ -78,7 +78,7 @@ public class SampleDbiImpl implements SampleDbi {
      */
     @Tx
     @Override
-    public int updateScore(@NotNull String login, int newScore) {
+    public long updateScore(@NotNull String login, int newScore) {
         // use sql interface to perform sql query.
         // mapper registered in the constructor will be used to map result class.
         User user = userSql.getUserByLogin(login);
@@ -86,7 +86,7 @@ public class SampleDbiImpl implements SampleDbi {
             return -1;
         }
 
-        int oldScore = user.score;
+        long oldScore = user.score;
         // use sql interface again. Note: this call is in the same transaction!
         userSql.updateScore(user.login, newScore);
         return oldScore;
