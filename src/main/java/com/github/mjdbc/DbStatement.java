@@ -122,7 +122,7 @@ public class DbStatement<T> implements AutoCloseable {
     }
 
     @NotNull
-    public DbStatement<T> set(@NotNull String name, BigDecimal value) throws SQLException {
+    public DbStatement<T> set(@NotNull String name, @Nullable BigDecimal value) throws SQLException {
         for (int i : getIndexes(name)) {
             statement.setBigDecimal(i, value);
         }
@@ -130,7 +130,7 @@ public class DbStatement<T> implements AutoCloseable {
     }
 
     @NotNull
-    public DbStatement<T> set(@NotNull String name, String value) throws SQLException {
+    public DbStatement<T> set(@NotNull String name, @Nullable String value) throws SQLException {
         for (int i : getIndexes(name)) {
             statement.setString(i, value);
         }
@@ -143,7 +143,7 @@ public class DbStatement<T> implements AutoCloseable {
     }
 
     @NotNull
-    public DbStatement<T> set(@NotNull String name, byte[] value) throws SQLException {
+    public DbStatement<T> set(@NotNull String name, @Nullable byte[] value) throws SQLException {
         for (int i : getIndexes(name)) {
             statement.setBytes(i, value);
         }
@@ -151,7 +151,7 @@ public class DbStatement<T> implements AutoCloseable {
     }
 
     @NotNull
-    public DbStatement<T> set(@NotNull String name, Timestamp value) throws SQLException {
+    public DbStatement<T> set(@NotNull String name, @Nullable Timestamp value) throws SQLException {
         for (int i : getIndexes(name)) {
             statement.setTimestamp(i, value);
         }
@@ -159,7 +159,7 @@ public class DbStatement<T> implements AutoCloseable {
     }
 
     @NotNull
-    public DbStatement<T> set(@NotNull String name, DbTimestamp value) throws SQLException {
+    public DbStatement<T> set(@NotNull String name, @Nullable DbTimestamp value) throws SQLException {
         return set(name, value == null ? null : value.getDbValue());
     }
 
