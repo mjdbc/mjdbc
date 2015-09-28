@@ -83,10 +83,10 @@ public final class Binders {
     public static final DbBinder<Timestamp> TimestampBinder = PreparedStatement::setTimestamp;
     public static final DbBinder<java.util.Date> UtilDateBinder = (statement, idx, value) -> statement.setDate(idx, value == null ? null : new java.sql.Date(value.getTime()));
 
-    public static final DbBinder<DbInt> DbIntBinder = (statement, idx, value) -> IntegerBinder.bind(statement, idx, value.getDbValue());
-    public static final DbBinder<DbLong> DbLongBinder = (statement, idx, value) -> LongBinder.bind(statement, idx, value.getDbValue());
-    public static final DbBinder<DbString> DbStringBinder = (statement, idx, value) -> StringBinder.bind(statement, idx, value.getDbValue());
-    public static final DbBinder<DbTimestamp> DbTimestampBinder = (statement, idx, value) -> TimestampBinder.bind(statement, idx, value.getDbValue());
+    public static final DbBinder<DbInt> DbIntBinder = (statement, idx, value) -> IntegerBinder.bind(statement, idx, value == null ? null : value.getDbValue());
+    public static final DbBinder<DbLong> DbLongBinder = (statement, idx, value) -> LongBinder.bind(statement, idx, value == null ? null : value.getDbValue());
+    public static final DbBinder<DbString> DbStringBinder = (statement, idx, value) -> StringBinder.bind(statement, idx, value == null ? null : value.getDbValue());
+    public static final DbBinder<DbTimestamp> DbTimestampBinder = (statement, idx, value) -> TimestampBinder.bind(statement, idx, value == null ? null : value.getDbValue());
 
     public static final Map<Class, DbBinder> BUILT_IN_BINDERS = Collections.unmodifiableMap(new HashMap<Class, DbBinder>() {{
 
