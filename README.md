@@ -47,7 +47,6 @@ Add project dependency:
 ```java
     java.sql.DataSource ds = ...; // have a DataSource first.
     Db db = new Db(ds);  // wrap DataSource with Db class instance.
-    db.registerMapper(User.class, User.MAPPER); // register your ResultSet mappers. Do it once on startup.
     MySqlQueries q = db.attachSql(MySqlQueries.class) // attach query interface. All queries are parsed and validated at this moment.
     User user = q.getUserByLogin('login'); // run any query method
 ```
@@ -109,7 +108,7 @@ public static final DbMapper<User> MAPPER = (r) -> {
 };
 ```
 
-Register this mapper in Db interface during initialization;
+Optional: register this mapper in Db interface during initialization;
 ```java
     Db db = new Db(ds);
     db.registerMapper(User.class, User.MAPPER)
@@ -117,6 +116,7 @@ Register this mapper in Db interface during initialization;
 Now use User type in all queries attached to Db instance.
 Mappers for native Java types are supported by default [(source)](https://github.com/mjdbc/mjdbc/blob/master/src/main/java/com/github/mjdbc/util/Mappers.java) and can be overridden if needed..
 
+Note: If mapper is not registered manually mjdbc will try to derive it from .MAPPER static field of the mapped object.
 
 ##### Parameter binders
 Parameters in @Sql interfaces can be bound with @Bind or @BindBean annotations.

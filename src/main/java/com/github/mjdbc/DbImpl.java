@@ -8,6 +8,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Proxy;
 import java.sql.SQLException;
@@ -168,12 +169,12 @@ public class DbImpl implements Db {
         if (returnType == List.class) {
             ParameterizedType genericReturnType = (ParameterizedType) m.getGenericReturnType();
             Class<?> elementClass = (Class<?>) genericReturnType.getActualTypeArguments()[0];
-            DbMapper elementMapper = mapperByClass.get(elementClass);
+            DbMapper elementMapper = findMapperByType(elementClass);
             if (elementMapper != null) {
                 resultMapper = new ListMapper(elementMapper);
             }
         } else {
-            resultMapper = mapperByClass.get(returnType);
+            resultMapper = findMapperByType(returnType);
         }
         if (resultMapper == null) {
             throw new IllegalArgumentException("Not supported query result type: " + returnType);
@@ -276,6 +277,23 @@ public class DbImpl implements Db {
         }
         beanInfoByClass.put(type, bindings);
         return bindings;
+    }
+
+    @Nullable
+    private DbMapper findMapperByType(Class<?> type) {
+        DbMapper mapper = mapperByClass.get(type);
+        if (mapper == null) {
+            try {
+                Field mapperField = type.getDeclaredField("MAPPER");
+                int mods = mapperField.getModifiers();
+                if (Modifier.isStatic(mods) && Modifier.isPublic(mods) && mapperField.getType().isAssignableFrom(DbMapper.class)) {
+                    mapper = (DbMapper) mapperField.get(type);
+                    mapperByClass.put(type, mapper);
+                }
+            } catch (Exception ignored) {
+            }
+        }
+        return mapper;
     }
 
     @Nullable

@@ -4,11 +4,14 @@ import com.github.mjdbc.Db;
 import com.github.mjdbc.DbImpl;
 import com.github.mjdbc.DbStatement;
 import com.github.mjdbc.Mappers;
+import com.github.mjdbc.test.asset.sql.DbValueSql;
 import com.github.mjdbc.test.util.DbUtils;
 import com.github.mjdbc.type.DbInt;
 import com.github.mjdbc.type.DbLong;
 import com.github.mjdbc.type.DbString;
 import com.github.mjdbc.type.DbTimestamp;
+import com.github.mjdbc.type.impl.DbIntValue;
+import com.github.mjdbc.type.impl.DbLongValue;
 import com.zaxxer.hikari.HikariDataSource;
 import org.junit.After;
 import org.junit.Assert;
@@ -30,7 +33,6 @@ public class DbValuesTest extends Assert {
      * Database instance.
      */
     private Db db;
-
 
     @Before
     public void setUp() {
@@ -99,13 +101,4 @@ public class DbValuesTest extends Assert {
                 .queryNN());
         assertEquals(2, n);
     }
-
-    @Test
-    public void checkDbTimestampNull() {
-        int n = db.executeNN(c -> new DbStatement<>(c, "SELECT COUNT(*) FROM users WHERE reg_date > :reg_date", Mappers.IntegerMapper)
-                .set("reg_date", (DbTimestamp) null)
-                .queryNN());
-        assertEquals(0, n);
-    }
-
 }

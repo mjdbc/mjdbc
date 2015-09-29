@@ -30,7 +30,11 @@ public interface UserSql {
 
     @NotNull
     @Sql("SELECT * FROM users")
-    List<User> getAllUsers();
+    List<User> selectAllUsers();
+
+    @NotNull
+    @Sql("SELECT id FROM users")
+    List<UserId> selectAllUserIds();
 
     @Sql("UPDATE users SET score = :score  WHERE login = :login")
     void updateScore(@Bind("login") String login, @Bind("score") int score);
