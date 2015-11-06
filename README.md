@@ -45,7 +45,7 @@ Add project dependency:
 
 ##### Raw SQL queries
 ```java
-    java.sql.DataSource ds = ...; // have a DataSource first.
+    java.sql.DataSource ds = ...; // have a DataSource first. 
     Db db = new Db(ds);  // wrap DataSource with Db class instance.
     MySqlQueries q = db.attachSql(MySqlQueries.class) // attach query interface. All queries are parsed and validated at this moment.
     User user = q.getUserByLogin('login'); // run any query method
@@ -57,6 +57,7 @@ public interface MySqlQueries {
     User getUserByLogin(@Bind("login") String login)
 }
 ```
+An example of simple and fast pooled data source is [HikariCP](https://github.com/brettwooldridge/HikariCP). 
 
 ##### Transactions
 To run multiple SQL queries within a single transaction create a dedicated dbi (db-interface) interface with methods that have @Tx annotation.
