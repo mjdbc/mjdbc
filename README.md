@@ -46,7 +46,7 @@ Add project dependency:
 ##### Raw SQL queries
 ```java
     java.sql.DataSource ds = ...; // have a DataSource first. 
-    Db db = new Db(ds);  // wrap DataSource with Db class instance.
+    Db db = new DbImpl(ds);  // wrap DataSource with Db class instance.
     MySqlQueries q = db.attachSql(MySqlQueries.class) // attach query interface. All queries are parsed and validated at this moment.
     User user = q.getUserByLogin('login'); // run any query method
 ```
