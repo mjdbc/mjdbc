@@ -51,6 +51,13 @@ public class MapperLookupTest extends Assert {
         assertTrue(!ids.isEmpty());
     }
 
+    @Test
+    public void checkEmptyListIsReturned() {
+        List<User> users = sql.selectAllUserByMinScore(1000);
+        assertNotNull(users);
+        assertTrue(users.isEmpty());
+    }
+
     @Test(expected = IllegalArgumentException.class)
     public void checkInvalidMapperRegistration() {
         db.attachSql(InvalidMapperSql.class);

@@ -19,7 +19,7 @@ public class DbImpl implements Db {
 
     private final ThreadLocal<DbConnection> activeConnections = new ThreadLocal<>();
 
-    private final Map<Method, OpRef> opByMethod = new ConcurrentHashMap<>();
+    final Map<Method, OpRef> opByMethod = new ConcurrentHashMap<>();
 
     private final Map<Class, DbMapper> mapperByClass = new ConcurrentHashMap<>(Mappers.BUILT_IN_MAPPERS);
 
@@ -62,7 +62,7 @@ public class DbImpl implements Db {
         requireNonNull(dbiInterface);
 
         //noinspection unchecked
-        return (T) Proxy.newProxyInstance(impl.getClass().getClassLoader(), new Class[]{dbiInterface}, new DbiProxy<>(impl));
+        return (T) Proxy.newProxyInstance(impl.getClass().getClassLoader(), new Class[]{dbiInterface}, new DbiProxy<>(this, impl));
     }
 
 
@@ -148,7 +148,7 @@ public class DbImpl implements Db {
             registerMethod(m);
         }
         //noinspection unchecked
-        return (T) Proxy.newProxyInstance(sqlInterface.getClassLoader(), new Class[]{sqlInterface}, new SqlProxy(sqlInterface.getSimpleName()));
+        return (T) Proxy.newProxyInstance(sqlInterface.getClassLoader(), new Class[]{sqlInterface}, new SqlProxy(this, sqlInterface.getSimpleName()));
     }
 
     private void registerMethod(@NotNull Method m) {
@@ -319,7 +319,7 @@ public class DbImpl implements Db {
         return null;
     }
 
-    private static class OpRef {
+    static class OpRef {
         @NotNull
         final String parsedSql;
 
@@ -345,7 +345,7 @@ public class DbImpl implements Db {
         }
     }
 
-    private static class BindInfo {
+    static class BindInfo {
         @NotNull
         final String mappedName;
 
@@ -374,80 +374,7 @@ public class DbImpl implements Db {
         }
     }
 
-    private class SqlProxy implements InvocationHandler {
-        @NotNull
-        private String interfaceSimpleName;
-
-        private SqlProxy(@NotNull String interfaceSimpleName) {
-            this.interfaceSimpleName = interfaceSimpleName;
-        }
-
-        @SuppressWarnings("unchecked")
-        @Override
-        public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-            OpRef p = opByMethod.get(method);
-            if (p == null) { // java.lang.Object method.
-                if (method.getName().equals("toString")) {
-                    return interfaceSimpleName + "Proxy";
-                }
-                return method.invoke(this, args);
-            }
-            long t0 = System.nanoTime();
-            try {
-                return DbImpl.this.execute(c -> {
-                    DbStatement s = new DbStatement(c, p.parsedSql, p.resultMapper, p.parametersNamesMapping, p.useGeneratedKeys);
-                    if (args != null) {
-                        for (BindInfo bi : p.bindings) {
-                            List<Integer> sqlIndexes = p.parametersNamesMapping.get(bi.mappedName);
-                            if (sqlIndexes == null) {
-                                continue;
-                            }
-                            for (Integer idx : sqlIndexes) {
-                                Object arg = args[bi.argumentIdx];
-                                Object value = bi.field != null ? bi.field.get(arg) : bi.getter != null ? bi.getter.invoke(arg) : arg;
-                                bi.binder.bind(s.statement, idx, value);
-                            }
-                        }
-                    }
-                    if (p.resultMapper != Mappers.VoidMapper) {
-                        if (p.useGeneratedKeys) {
-                            return s.updateAndGetGeneratedKeys();
-                        } else {
-                            return s.query();
-                        }
-                    }
-                    s.update();
-                    return null;
-                });
-            } finally {
-                updateTimer(method, t0);
-            }
-        }
-    }
-
-    private class DbiProxy<T> implements InvocationHandler {
-        private final T impl;
-
-        private DbiProxy(T impl) {
-            this.impl = impl;
-        }
-
-        @Override
-        public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-            if (method.getAnnotation(Tx.class) == null) {
-                return method.invoke(impl, args);
-            }
-            long t0 = System.nanoTime();
-            try {
-                //noinspection unchecked
-                return DbImpl.this.execute(c -> (T) method.invoke(impl, args));
-            } finally {
-                updateTimer(method, t0);
-            }
-        }
-    }
-
-    private void updateTimer(Method method, long t0) {
+    void updateTimer(Method method, long t0) {
         DbTimer timer = timersByMethod.get(method);
         if (timer == null) {
             synchronized (timersByMethod) {

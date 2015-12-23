@@ -36,6 +36,10 @@ public interface UserSql {
     @Sql("SELECT id FROM users")
     List<UserId> selectAllUserIds();
 
+    @NotNull
+    @Sql("SELECT * FROM users WHERE score >= :minScore")
+    List<User> selectAllUserByMinScore(@Bind("minScore") int score);
+
     @Sql("UPDATE users SET score = :score  WHERE login = :login")
     void updateScore(@Bind("login") String login, @Bind("score") int score);
 
