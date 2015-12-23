@@ -4,26 +4,12 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.sql.DataSource;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Proxy;
+import java.lang.reflect.*;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static java.lang.reflect.Modifier.isFinal;
-import static java.lang.reflect.Modifier.isPublic;
-import static java.lang.reflect.Modifier.isStatic;
-import static java.lang.reflect.Modifier.isTransient;
+import static java.lang.reflect.Modifier.*;
 import static java.util.Objects.requireNonNull;
 
 /**
@@ -129,7 +115,10 @@ public class DbImpl implements Db {
             } finally {
                 if (topLevel) {
                     activeConnections.set(null);
-                    c.close();
+                    try {
+                        c.close();
+                    } catch (Exception ignored) {
+                    }
                 }
             }
         } catch (SQLException e) {
@@ -159,25 +148,27 @@ public class DbImpl implements Db {
             registerMethod(m);
         }
         //noinspection unchecked
-        return (T) Proxy.newProxyInstance(sqlInterface.getClassLoader(), new Class[]{sqlInterface}, new SqlProxy());
+        return (T) Proxy.newProxyInstance(sqlInterface.getClassLoader(), new Class[]{sqlInterface}, new SqlProxy(sqlInterface.getSimpleName()));
     }
 
     private void registerMethod(@NotNull Method m) {
         // return type
-        DbMapper resultMapper = null;
+        DbMapper resultMapper;
         Class<?> returnType = m.getReturnType();
         if (returnType == List.class) {
             ParameterizedType genericReturnType = (ParameterizedType) m.getGenericReturnType();
-            Class<?> elementClass = (Class<?>) genericReturnType.getActualTypeArguments()[0];
-            DbMapper elementMapper = findMapperByType(elementClass);
+            Class<?> elementType = (Class<?>) genericReturnType.getActualTypeArguments()[0];
+            DbMapper elementMapper = findMapperByType(elementType);
             if (elementMapper != null) {
                 resultMapper = new ListMapper(elementMapper);
+            } else {
+                throw new IllegalArgumentException(getNoMapperMessage(elementType));
             }
         } else {
             resultMapper = findMapperByType(returnType);
         }
         if (resultMapper == null) {
-            throw new IllegalArgumentException("Not supported query result type: " + returnType);
+            throw new IllegalArgumentException(getNoMapperMessage(returnType));
         }
 
         // sql named params
@@ -232,6 +223,12 @@ public class DbImpl implements Db {
 
         // construct result mapping
         opByMethod.put(m, new OpRef(parsedSql, resultMapper, useGeneratedKeys, parametersMapping, bindings.toArray(new BindInfo[bindings.size()])));
+    }
+
+    @NotNull
+    private static String getNoMapperMessage(@NotNull Class<?> elementType) {
+        return "Not supported query result type: " + elementType + "." +
+                " Add MAPPER field or register custom DbMapper for the type.";
     }
 
     /**
@@ -338,8 +335,8 @@ public class DbImpl implements Db {
         final boolean useGeneratedKeys;
 
 
-        public OpRef(@NotNull String parsedSql, @NotNull DbMapper resultMapper, boolean useGeneratedKeys,
-                     @NotNull Map<String, List<Integer>> parametersNamesMapping, @NotNull BindInfo[] bindings) {
+        private OpRef(@NotNull String parsedSql, @NotNull DbMapper resultMapper, boolean useGeneratedKeys,
+                      @NotNull Map<String, List<Integer>> parametersNamesMapping, @NotNull BindInfo[] bindings) {
             this.parsedSql = parsedSql;
             this.useGeneratedKeys = useGeneratedKeys;
             this.resultMapper = resultMapper;
@@ -363,7 +360,7 @@ public class DbImpl implements Db {
         @Nullable
         final Method getter;
 
-        public BindInfo(@NotNull String mappedName, @NotNull DbBinder binder, int argumentIdx, @Nullable Field field, @Nullable Method getter) {
+        private BindInfo(@NotNull String mappedName, @NotNull DbBinder binder, int argumentIdx, @Nullable Field field, @Nullable Method getter) {
             this.mappedName = mappedName;
             this.binder = binder;
             this.argumentIdx = argumentIdx;
@@ -378,10 +375,23 @@ public class DbImpl implements Db {
     }
 
     private class SqlProxy implements InvocationHandler {
+        @NotNull
+        private String interfaceSimpleName;
+
+        private SqlProxy(@NotNull String interfaceSimpleName) {
+            this.interfaceSimpleName = interfaceSimpleName;
+        }
+
         @SuppressWarnings("unchecked")
         @Override
         public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
             OpRef p = opByMethod.get(method);
+            if (p == null) { // java.lang.Object method.
+                if (method.getName().equals("toString")) {
+                    return interfaceSimpleName + "Proxy";
+                }
+                return method.invoke(this, args);
+            }
             long t0 = System.nanoTime();
             try {
                 return DbImpl.this.execute(c -> {
@@ -418,22 +428,21 @@ public class DbImpl implements Db {
     private class DbiProxy<T> implements InvocationHandler {
         private final T impl;
 
-        public DbiProxy(T impl) {
+        private DbiProxy(T impl) {
             this.impl = impl;
         }
 
         @Override
         public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-            if (method.getAnnotation(Tx.class) != null) {
-                long t0 = System.nanoTime();
-                try {
-                    //noinspection unchecked
-                    return DbImpl.this.execute(c -> (T) method.invoke(impl, args));
-                } finally {
-                    updateTimer(method, t0);
-                }
-            } else {
+            if (method.getAnnotation(Tx.class) == null) {
                 return method.invoke(impl, args);
+            }
+            long t0 = System.nanoTime();
+            try {
+                //noinspection unchecked
+                return DbImpl.this.execute(c -> (T) method.invoke(impl, args));
+            } finally {
+                updateTimer(method, t0);
             }
         }
     }

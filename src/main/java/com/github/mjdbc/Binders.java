@@ -16,6 +16,7 @@ import java.util.Map;
 /**
  * Map of all 'mjdbc' binders in a single place.
  */
+@SuppressWarnings("AccessCanBeTightened")
 public final class Binders {
 
     public static final DbBinder<BigDecimal> BigDecimalBinder = PreparedStatement::setBigDecimal;
