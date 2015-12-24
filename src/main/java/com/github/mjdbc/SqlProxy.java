@@ -25,7 +25,7 @@ class SqlProxy implements InvocationHandler {
         DbImpl.OpRef p = db.opByMethod.get(method);
         if (p == null) { // java.lang.Object methods
             if (method.getName().equals("toString")) {
-                return interfaceSimpleName + "Proxy";
+                return interfaceSimpleName + "$Proxy";
             }
             return method.invoke(this, args);
         }

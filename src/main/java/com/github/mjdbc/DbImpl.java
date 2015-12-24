@@ -280,15 +280,31 @@ public class DbImpl implements Db {
     private DbMapper findMapperByType(Class<?> type) {
         DbMapper mapper = mapperByClass.get(type);
         if (mapper == null) {
-            try {
-                Field mapperField = type.getDeclaredField("MAPPER");
-                int mods = mapperField.getModifiers();
-                if (Modifier.isStatic(mods) && Modifier.isPublic(mods) && mapperField.getType().isAssignableFrom(DbMapper.class)) {
-                    mapper = (DbMapper) mapperField.get(type);
-                    mapperByClass.put(type, mapper);
+            // search for a field marked as mapper with valid parameter type
+            for (Field f : type.getDeclaredFields()) {
+                int mods = f.getModifiers();
+                if (Modifier.isStatic(mods) && Modifier.isPublic(mods) && f.getType().isAssignableFrom(DbMapper.class)) {
+                    AnnotatedType at = f.getAnnotatedType();
+                    if (at instanceof AnnotatedParameterizedType) {
+                        AnnotatedParameterizedType apt = (AnnotatedParameterizedType) at;
+                        AnnotatedType[] args = apt.getAnnotatedActualTypeArguments();
+                        if (args.length == 1 && args[0].getType() == type) {
+                            Mapper a = f.getAnnotation(Mapper.class);
+                            if (a != null || f.getName().equals("MAPPER")) {
+                                try {
+                                    mapper = (DbMapper) f.get(type);
+                                } catch (IllegalAccessException ignored) { // already checked for 'isPublic' before
+                                }
+                                if (mapperByClass.containsKey(type)) {
+                                    throw new IllegalArgumentException("Found multiple mappers per type: " + type);
+                                }
+                                mapperByClass.put(type, mapper);
+                            }
+                        }
+                    }
                 }
-            } catch (Exception ignored) {
             }
+
         }
         return mapper;
     }

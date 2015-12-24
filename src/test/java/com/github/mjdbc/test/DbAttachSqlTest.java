@@ -1,13 +1,11 @@
 package com.github.mjdbc.test;
 
 import com.github.mjdbc.DbImpl;
-import com.github.mjdbc.test.asset.sql.EmptyQuerySql;
-import com.github.mjdbc.test.asset.sql.EmptySql;
-import com.github.mjdbc.test.asset.sql.MissedParameterSql;
-import com.github.mjdbc.test.asset.sql.UnboundBeanParameterSql;
-import com.github.mjdbc.test.asset.sql.UnboundParameterSql;
+import com.github.mjdbc.test.asset.model.ABean;
+import com.github.mjdbc.test.asset.model.MultipleMappersBean1;
 import com.github.mjdbc.test.asset.model.User;
 import com.github.mjdbc.test.asset.model.UserId;
+import com.github.mjdbc.test.asset.sql.*;
 import com.github.mjdbc.test.util.DbUtils;
 import com.zaxxer.hikari.HikariDataSource;
 import org.junit.After;
@@ -99,5 +97,40 @@ public class DbAttachSqlTest extends Assert {
     @Test(expected = IllegalArgumentException.class)
     public void checkUnboundBeanParameterSqlThrowsIllegalArgumentException() {
         db.attachSql(UnboundBeanParameterSql.class);
+    }
+
+    /**
+     * Check that @Mapper annotation is supported
+     */
+    @Test
+    public void checkMapperAnnotation() {
+        ABean bean = db.attachSql(ValidBeansSql.class).selectABean();
+        assertEquals(1, bean.value);
+    }
+
+    /**
+     * Check that multiple mapper variants triggers error
+     */
+    @Test(expected = IllegalArgumentException.class)
+    public void checkMultipleMappersTriggerError1() {
+        db.attachSql(MultipleMappersBean1Sql.class);
+    }
+
+    /**
+     * Check that multiple mapper variants triggers error
+     */
+    @Test(expected = IllegalArgumentException.class)
+    public void checkMultipleMappersTriggerError2() {
+        db.attachSql(MultipleMappersBean2Sql.class);
+    }
+
+    /**
+     * Check that manual mapper registration does not trigger error for a bean with multiple mappers
+     */
+    @Test
+    public void checkMultipleMappersTriggerError() {
+        db.registerMapper(MultipleMappersBean1.class, MultipleMappersBean1.SOME_MAPPER1);
+        MultipleMappersBean1 bean = db.attachSql(MultipleMappersBean1Sql.class).selectABean();
+        assertEquals(1, bean.value);
     }
 }
