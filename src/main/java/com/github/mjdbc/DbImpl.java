@@ -4,9 +4,21 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.sql.DataSource;
-import java.lang.reflect.*;
+import java.lang.reflect.AnnotatedParameterizedType;
+import java.lang.reflect.AnnotatedType;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Proxy;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static java.lang.reflect.Modifier.*;
@@ -192,7 +204,7 @@ public class DbImpl implements Db {
             if (bindAnnotation == null) {
                 BindBean bindBeanAnnotation = (BindBean) Arrays.stream(m.getParameterAnnotations()[i]).filter(a -> a instanceof BindBean).findFirst().orElse(null);
                 if (bindBeanAnnotation == null) {
-                    throw new IllegalArgumentException("Unbound parameter: " + i + ", method: " + m);
+                    throw new IllegalArgumentException("Unbound parameter: " + i + ", method: " + m + ". Forgot @BindBean or @Bind annotation?");
                 }
                 if (m.getParameterCount() != 1) {
                     throw new IllegalArgumentException("@BindBean must be the only parameter! Method: " + m);
