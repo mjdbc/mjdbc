@@ -270,7 +270,7 @@ public class DbImpl implements Db {
         for (Method m : type.getMethods()) {
             int modifiers = m.getModifiers();
             String methodName = m.getName();
-            if (!isPublic(modifiers) || isStatic(modifiers) || !methodName.startsWith("get") || !methodName.startsWith("is")) {
+            if (!isPublic(modifiers) || isStatic(modifiers) || !(methodName.startsWith("get") || methodName.startsWith("is"))) {
                 continue; //ignore
             }
             String suffix = methodName.startsWith("is") ? methodName.substring(2) : methodName.substring(3);
@@ -279,10 +279,9 @@ public class DbImpl implements Db {
                 continue;
             }
             DbBinder binder = findBinderByType(m.getReturnType());
-            if (binder == null) {
-                throw new IllegalArgumentException("No bean binder for method: " + m + ", bean: " + type);
+            if (binder != null) {
+                bindings.add(new BindInfo(propertyName, binder, 0, null, m));
             }
-            bindings.add(new BindInfo(propertyName, binder, 0, null, m));
         }
         beanInfoByClass.put(type, bindings);
         return bindings;
