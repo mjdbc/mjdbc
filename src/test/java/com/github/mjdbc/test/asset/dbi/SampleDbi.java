@@ -1,6 +1,5 @@
 package com.github.mjdbc.test.asset.dbi;
 
-import com.github.mjdbc.Tx;
 import com.github.mjdbc.test.asset.model.User;
 import com.github.mjdbc.test.asset.model.UserId;
 import org.jetbrains.annotations.NotNull;
@@ -24,7 +23,6 @@ public interface SampleDbi {
      * @param id - user id to search. If null -> NullPointerException is thrown.
      * @return user or null if not found.
      */
-    @Tx
     @Nullable
     User getUserById(@NotNull UserId id);
 
@@ -34,21 +32,22 @@ public interface SampleDbi {
      * @param login - user login to search. If null -> NullPointerException is thrown.
      * @return user or null if not found.
      */
-    @Tx
     @Nullable
     User getUserByLogin(@NotNull String login);
 
     /**
      * Updates user's score, returns old value.
      */
-    @Tx
     long updateScore(@NotNull String login, int newScore);
-
 
     /**
      * Updates user's score in database first. Throws RuntimeException at the end of the method to trigger rollback.
      */
-    @Tx
     int updateScoreAndRollback(@NotNull String login, int newScore);
+
+    /**
+     * Special method to demonstrate that if cache is used no connection is queried from DataSource at all
+     */
+    int getValueUseCacheIfPossible(boolean useCache);
 
 }

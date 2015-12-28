@@ -10,6 +10,7 @@ import com.github.mjdbc.test.asset.sql.UserSql;
 import com.github.mjdbc.test.util.DbUtils;
 import com.zaxxer.hikari.HikariDataSource;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -20,9 +21,9 @@ import java.sql.Timestamp;
 import java.util.List;
 
 /**
- *
+ * Set of examples to demonstrate basic MJDBC functionality.
  */
-public class SamplesTest extends org.junit.Assert {
+public class SamplesTest extends Assert {
     /**
      * Low level connection pool.
      */
@@ -66,7 +67,7 @@ public class SamplesTest extends org.junit.Assert {
     @Test
     public void checkDatabaseNotEmpty() {
         db.executeV(c -> {
-            try (Statement statement = c.sqlConnection.createStatement()) {
+            try (Statement statement = c.getConnection().createStatement()) {
                 try (ResultSet rs = statement.executeQuery("SELECT * FROM users")) {
                     assertTrue(rs.next());
                 }
@@ -191,7 +192,7 @@ public class SamplesTest extends org.junit.Assert {
 
 
     /**
-     * Check that statistics is collected for @Tx methods.
+     * Check that statistics is collected for Dbi methods.
      *
      * @throws NoSuchMethodException
      */

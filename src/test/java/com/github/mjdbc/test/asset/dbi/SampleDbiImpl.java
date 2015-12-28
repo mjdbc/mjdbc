@@ -1,18 +1,17 @@
 package com.github.mjdbc.test.asset.dbi;
 
-import com.github.mjdbc.DbStatement;
-import com.github.mjdbc.Tx;
-import com.github.mjdbc.test.asset.model.User;
 import com.github.mjdbc.Db;
-import com.github.mjdbc.test.asset.sql.UserSql;
+import com.github.mjdbc.DbStatement;
+import com.github.mjdbc.test.asset.model.User;
 import com.github.mjdbc.test.asset.model.UserId;
+import com.github.mjdbc.test.asset.sql.UserSql;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 
 /**
- * SampleDbi implementation. All methods annotated with @Tx will be wrapped with transaction context.
+ * SampleDbi implementation. All Dbi methods annotated will be wrapped with transaction context.
  */
 public class SampleDbiImpl implements SampleDbi {
 
@@ -44,7 +43,6 @@ public class SampleDbiImpl implements SampleDbi {
     /**
      * {@inheritDoc}
      */
-    @Tx
     @Override
     public void createUser(@NotNull User user) {
         Objects.requireNonNull(user);
@@ -55,7 +53,6 @@ public class SampleDbiImpl implements SampleDbi {
     /**
      * {@inheritDoc}
      */
-    @Tx
     @Nullable
     @Override
     public User getUserByLogin(@NotNull String login) {
@@ -66,7 +63,6 @@ public class SampleDbiImpl implements SampleDbi {
     /**
      * {@inheritDoc}
      */
-    @Tx
     public User getUserById(@NotNull UserId id) {
         Objects.requireNonNull(id);
         return userSql.getUserById(id);
@@ -76,7 +72,6 @@ public class SampleDbiImpl implements SampleDbi {
     /**
      * {@inheritDoc}
      */
-    @Tx
     @Override
     public long updateScore(@NotNull String login, int newScore) {
         // use sql interface to perform sql query.
@@ -92,11 +87,9 @@ public class SampleDbiImpl implements SampleDbi {
         return oldScore;
     }
 
-
     /**
      * {@inheritDoc}
      */
-    @Tx
     @Override
     public int updateScoreAndRollback(@NotNull String login, int newScore) {
         User user = userSql.getUserByLogin(login);
@@ -107,5 +100,13 @@ public class SampleDbiImpl implements SampleDbi {
 
         // trigger rollback and undo score update.
         throw new RuntimeException("Rollback!");
+    }
+
+    @Override
+    public int getValueUseCacheIfPossible(boolean useCache) {
+        if (useCache) {
+            return 100;
+        }
+        return userSql.countUsers();
     }
 }

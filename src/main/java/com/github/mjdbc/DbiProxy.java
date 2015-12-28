@@ -14,9 +14,6 @@ class DbiProxy<T> implements InvocationHandler {
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        if (method.getAnnotation(Tx.class) == null) {
-            return method.invoke(impl, args);
-        }
         long t0 = System.nanoTime();
         try {
             //noinspection unchecked

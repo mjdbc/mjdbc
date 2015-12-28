@@ -105,7 +105,7 @@ public class DbImpl implements Db {
         try {
             try {
                 if (c == null) {
-                    c = new DbConnection(dataSource.getConnection());
+                    c = new DbConnection(dataSource);
                     activeConnections.set(c);
                     topLevel = true;
                 }

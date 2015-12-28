@@ -8,8 +8,19 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.math.BigDecimal;
-import java.sql.*;
-import java.util.*;
+import java.sql.Connection;
+import java.sql.JDBCType;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.SQLType;
+import java.sql.Statement;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * Statement with named parameters support and safe operations to fetch results by hiding result set manipulation.
@@ -23,29 +34,29 @@ public class DbStatement<T> implements AutoCloseable {
 
     private final Map<String, List<Integer>> parametersMapping;
 
-    public DbStatement(@NotNull DbConnection c, @NotNull String sql) throws SQLException {
+    public DbStatement(@NotNull DbConnection dbc, @NotNull String sql) throws SQLException {
         //noinspection unchecked
-        this(c, sql, (DbMapper<T>) Mappers.VoidMapper, false);
+        this(dbc, sql, (DbMapper<T>) Mappers.VoidMapper, false);
     }
 
-    public DbStatement(@NotNull DbConnection c, @NotNull String sql, @NotNull DbMapper<T> resultMapper) throws SQLException {
-        this(c, sql, resultMapper, false);
+    public DbStatement(@NotNull DbConnection dbc, @NotNull String sql, @NotNull DbMapper<T> resultMapper) throws SQLException {
+        this(dbc, sql, resultMapper, false);
     }
 
-    public DbStatement(@NotNull DbConnection c, @NotNull String sql, @NotNull DbMapper<T> resultMapper, boolean useGeneratedKeys) throws SQLException {
+    public DbStatement(@NotNull DbConnection dbc, @NotNull String sql, @NotNull DbMapper<T> resultMapper, boolean useGeneratedKeys) throws SQLException {
         this.resultMapper = resultMapper;
         this.parametersMapping = new HashMap<>();
         String parsedSql = parse(sql, this.parametersMapping);
-        statement = prepareStatement(c.sqlConnection, parsedSql, useGeneratedKeys);
-        c.statementsToClose.add(this);
+        statement = prepareStatement(dbc.getConnection(), parsedSql, useGeneratedKeys);
+        dbc.statementsToClose.add(this);
     }
 
-    public DbStatement(@NotNull DbConnection c, @NotNull String parsedSql, @NotNull DbMapper<T> resultMapper,
+    public DbStatement(@NotNull DbConnection dbc, @NotNull String parsedSql, @NotNull DbMapper<T> resultMapper,
                        Map<String, List<Integer>> parametersMapping, boolean useGeneratedKeys) throws SQLException {
         this.resultMapper = resultMapper;
         this.parametersMapping = parametersMapping;
-        statement = prepareStatement(c.sqlConnection, parsedSql, useGeneratedKeys);
-        c.statementsToClose.add(this);
+        statement = prepareStatement(dbc.getConnection(), parsedSql, useGeneratedKeys);
+        dbc.statementsToClose.add(this);
     }
 
     private PreparedStatement prepareStatement(@NotNull Connection c, @NotNull String parsedSql, boolean useGeneratedKeys) throws SQLException {
@@ -156,7 +167,6 @@ public class DbStatement<T> implements AutoCloseable {
     public ResultSet executeQuery() throws SQLException {
         return statement.executeQuery();
     }
-
 
     @Nullable
     public T query() throws SQLException {

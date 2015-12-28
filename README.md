@@ -60,7 +60,8 @@ public interface MySqlQueries {
 An example of simple and fast pooled data source is [HikariCP](https://github.com/brettwooldridge/HikariCP). 
 
 ##### Transactions
-To run multiple SQL queries within a single transaction create a dedicated dbi (db-interface) interface with methods that have @Tx annotation.
+To run multiple SQL queries within a single transaction create a dedicated dbi (db-interface) interface and attach it to database.
+It will return a proxy class that will wrap all interface methods into transactions.
 ```java
     java.sql.DataSource ds = ...;
     Db db = new Db(ds);
@@ -70,12 +71,10 @@ To run multiple SQL queries within a single transaction create a dedicated dbi (
 where MyDbi:
 ```java
 public interface MyDbi {
-    @Tx // @Tx means that this method will be wrapped with connection.begin/commit/rollback(on Exception)
     User getUserByLoginCreateIfNotFound(String login);
 }
 
 public class MyDbiImpl implements MyDbi {
-    @Tx
     public User getUserByLoginCreateIfNotFound(String login) {
         User user = myQueries.getUserByLogin(login);
         if (user == null) {
@@ -88,9 +87,11 @@ public class MyDbiImpl implements MyDbi {
 }
 ```
 Notes:
- * If @Tx method is called from within another @Tx method no new transaction is started. Child method shares transaction context with a parent method.
- Transaction is committed/rolled back when top-level method is finished.
- * All @Sql (raw SQL) methods are processed as @Tx methods when no dbi interface is used.
+ * If Impl method is called directly with no use of proxy interface no new transaction is started. The method will share transaction context with an upper-stack method.
+ Transaction is committed/rolled back when upper-stack method is finished.
+ * All @Sql (raw SQL) methods are processed as independent transactions when no dbi interface is used.
+ * No connection is allocated when Dbi method is called. The actual connection is requested from datasource only when first SQL statement is used. 
+ So if DBI method uses cache and do not create any statements at all -> no network activity will be performed at all.
 
 
 
@@ -134,7 +135,7 @@ Example:
 ```java
 Db db = new Db(ds);
 db.execute(c -> { // wraps method into transaction
-    try (java.sql.Statement statement = c.sqlConnection.createStatement()) {
+    try (java.sql.Statement statement = c.getConnection().createStatement()) {
         ...
     }
 });
@@ -163,7 +164,7 @@ It will be closed automatically when connection is closed (returned to pool). In
 
 
 ##### Timers
-For all methods annotated with @Sql or @Tx mjdbc automatically collects statistics:
+For all methods annotated with @Sql or Dbi interface methods mjdbc automatically collects statistics:
 * method invocation count
 * total time spent in the method in nanoseconds.
 

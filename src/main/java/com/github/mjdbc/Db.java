@@ -31,7 +31,11 @@ public interface Db {
 
     /**
      * Attaches Dbi (Database Interface) implementation to the database.
-     * All methods marked with @Tx annotation will be wrapped to create transaction on entry and close it on exit.
+     * All methods will be wrapped to transaction. Transaction will be started when the first SQL statement
+     * is used inside of the method and closed on exit from the method. Transaction is committed
+     * on normal exit and rolled back if Exception is thrown.
+     * <p>
+     * If Dbi method is called from another Dbi method no new transaction will be started -> the upper-stack transaction will be used.
      *
      * @param impl         - database interface implementation.
      * @param dbiInterface - database interface to wrap with transactions support.
@@ -81,7 +85,7 @@ public interface Db {
 
     /**
      * Returns per-method timers.
-     * Statistics is collected for all @Tx methods of attached Dbi interfaces
+     * Statistics is collected for all methods of attached Dbi interfaces
      * and for all @Sql methods of attached query interfaces.
      *
      * @return per-method statistics. Note: This is direct access to the timers map. Timers are updated concurrently.
