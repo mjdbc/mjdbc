@@ -1,6 +1,7 @@
 package com.github.mjdbc.test;
 
 import com.github.mjdbc.test.asset.model.GetterBean;
+import com.github.mjdbc.test.asset.sql.FakeGettersBeanSql;
 import com.github.mjdbc.test.asset.sql.GetterBeanSql;
 import com.github.mjdbc.type.impl.DbIntValue;
 import org.jetbrains.annotations.NotNull;
@@ -57,6 +58,11 @@ public class GetterBeanTests extends BaseSqlTest<GetterBeanSql> {
         assertEquals(original.getIntField(), fromDb.getIntField());
         assertEquals(original.getStringField(), fromDb.getStringField());
         assertEquals(original.getIntValueField(), fromDb.getIntValueField());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void fakeGettersWontAttach() {
+        db.attachSql(FakeGettersBeanSql.class);
     }
 
 }

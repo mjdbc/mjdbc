@@ -21,7 +21,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static java.lang.reflect.Modifier.*;
+import static java.lang.reflect.Modifier.isFinal;
+import static java.lang.reflect.Modifier.isPublic;
+import static java.lang.reflect.Modifier.isStatic;
+import static java.lang.reflect.Modifier.isTransient;
 import static java.util.Objects.requireNonNull;
 
 /**
@@ -270,7 +273,7 @@ public class DbImpl implements Db {
         for (Method m : type.getMethods()) {
             int modifiers = m.getModifiers();
             String methodName = m.getName();
-            if (!isPublic(modifiers) || isStatic(modifiers) || !(methodName.startsWith("get") || methodName.startsWith("is"))) {
+            if (!isPublic(modifiers) || isStatic(modifiers) || m.getParameterCount() != 0 || !(methodName.startsWith("get") || methodName.startsWith("is"))) {
                 continue; //ignore
             }
             String suffix = methodName.startsWith("is") ? methodName.substring(2) : methodName.substring(3);

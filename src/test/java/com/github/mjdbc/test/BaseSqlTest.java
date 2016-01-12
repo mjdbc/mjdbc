@@ -1,5 +1,6 @@
 package com.github.mjdbc.test;
 
+import com.github.mjdbc.Db;
 import com.github.mjdbc.DbImpl;
 import com.github.mjdbc.test.util.DbUtils;
 import com.zaxxer.hikari.HikariDataSource;
@@ -14,6 +15,7 @@ public abstract class BaseSqlTest<S> extends Assert {
      */
     protected HikariDataSource ds;
 
+    protected Db db;
 
     /**
      * Set of raw SQL queries.
@@ -32,7 +34,7 @@ public abstract class BaseSqlTest<S> extends Assert {
     @Before
     public void setUp() {
         ds = DbUtils.prepareDataSource(schemaFileName);
-        DbImpl db = new DbImpl(ds);
+        db = new DbImpl(ds);
         sql = db.attachSql(type);
     }
 

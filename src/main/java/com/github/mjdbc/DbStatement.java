@@ -257,8 +257,7 @@ public class DbStatement<T> implements AutoCloseable {
                     if (c == '"') {
                         inDoubleQuote = true;
                     } else {
-                        if (c == ':' && i + 1 < length &&
-                                Character.isJavaIdentifierStart(sql.charAt(i + 1))) {
+                        if (c == ':' && i + 1 < length && Character.isJavaIdentifierStart(sql.charAt(i + 1))) {
                             int j = i + 2;
                             while (j < length && Character.isJavaIdentifierPart(sql.charAt(j))) {
                                 j++;
