@@ -5,7 +5,15 @@ import com.github.mjdbc.test.asset.model.ABean;
 import com.github.mjdbc.test.asset.model.MultipleMappersBean1;
 import com.github.mjdbc.test.asset.model.User;
 import com.github.mjdbc.test.asset.model.UserId;
-import com.github.mjdbc.test.asset.sql.*;
+import com.github.mjdbc.test.asset.sql.EmptyQuerySql;
+import com.github.mjdbc.test.asset.sql.EmptySql;
+import com.github.mjdbc.test.asset.sql.FakeGettersBeanSql;
+import com.github.mjdbc.test.asset.sql.MissedParameterSql;
+import com.github.mjdbc.test.asset.sql.MultipleMappersBean1Sql;
+import com.github.mjdbc.test.asset.sql.MultipleMappersBean2Sql;
+import com.github.mjdbc.test.asset.sql.UnboundBeanParameterSql;
+import com.github.mjdbc.test.asset.sql.UnboundParameterSql;
+import com.github.mjdbc.test.asset.sql.ValidBeansSql;
 import com.github.mjdbc.test.util.DbUtils;
 import com.zaxxer.hikari.HikariDataSource;
 import org.junit.After;
@@ -132,5 +140,10 @@ public class DbAttachSqlTest extends Assert {
         db.registerMapper(MultipleMappersBean1.class, MultipleMappersBean1.SOME_MAPPER1);
         MultipleMappersBean1 bean = db.attachSql(MultipleMappersBean1Sql.class).selectABean();
         assertEquals(1, bean.value);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void fakeGettersWontAttach() {
+        db.attachSql(FakeGettersBeanSql.class);
     }
 }

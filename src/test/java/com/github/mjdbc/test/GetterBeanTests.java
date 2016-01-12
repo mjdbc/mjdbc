@@ -59,10 +59,4 @@ public class GetterBeanTests extends BaseSqlTest<GetterBeanSql> {
         assertEquals(original.getStringField(), fromDb.getStringField());
         assertEquals(original.getIntValueField(), fromDb.getIntValueField());
     }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void fakeGettersWontAttach() {
-        db.attachSql(FakeGettersBeanSql.class);
-    }
-
 }
