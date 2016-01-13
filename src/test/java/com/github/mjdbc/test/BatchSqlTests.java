@@ -3,6 +3,7 @@ package com.github.mjdbc.test;
 import com.github.mjdbc.test.asset.model.User;
 import com.github.mjdbc.test.asset.sql.BatchSql;
 import org.jetbrains.annotations.NotNull;
+import org.junit.Test;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -17,7 +18,7 @@ public class BatchSqlTests extends BaseSqlTest<BatchSql> {
         super(BatchSql.class, "sample");
     }
 
-    //    @Test
+    @Test
     public void checkBatchModeTestCollection() {
         List<User> origList = getAndCheckOrigList();
 
@@ -26,7 +27,7 @@ public class BatchSqlTests extends BaseSqlTest<BatchSql> {
         checkUpdated();
     }
 
-    //    @Test
+    @Test
     public void checkBatchModeTestIterator() {
         List<User> origList = getAndCheckOrigList();
 
@@ -40,7 +41,7 @@ public class BatchSqlTests extends BaseSqlTest<BatchSql> {
         List<User> origList = getAndCheckOrigList();
 
         int[] ids = origList.stream().mapToInt(u -> u.id.getDbValue()).toArray();
-        sql.batchUpdateWithPrimitiveArray(ids);
+//        sql.batchUpdateWithPrimitiveArray(ids);
         checkUpdated();
     }
 
@@ -49,7 +50,7 @@ public class BatchSqlTests extends BaseSqlTest<BatchSql> {
         List<User> origList = getAndCheckOrigList();
 
         Integer[] ids = origList.stream().map(u -> u.id.getDbValue()).toArray(Integer[]::new);
-        sql.batchUpdateWithObjectArray(ids);
+//        sql.batchUpdateWithObjectArray(ids);
         checkUpdated();
     }
 

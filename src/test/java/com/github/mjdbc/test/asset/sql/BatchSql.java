@@ -14,24 +14,24 @@ import java.util.List;
  */
 public interface BatchSql {
 
-    @Sql("SELECT * FROM user")
+    @Sql("SELECT * FROM users")
     List<User> selectAllUsers();
 
 
     @Batch(10)
-    @Sql("UPDATE user SET score = 100 WHERE id=:id")
+    @Sql("UPDATE users SET score = 100 WHERE id=:id")
     void batchUpdateWithCollection(@Bind("id") List<Integer> ids);
 
     @Batch(10)
-    @Sql("UPDATE user SET score = 100 WHERE id=:id")
+    @Sql("UPDATE users SET score = 100 WHERE id=:id")
     void batchUpdateWithIterator(@Bind("id") Iterator<Integer> ids);
 
-    @Batch(10)
-    @Sql("UPDATE user SET score = 100 WHERE id=:id")
-    void batchUpdateWithPrimitiveArray(@Bind("id") int[] ids);
+//    @Batch(10)
+//    @Sql("UPDATE users SET score = 100 WHERE id=:id")
+//    void batchUpdateWithPrimitiveArray(@Bind("id") int[] ids);
 
-    @Batch(10)
-    @Sql("UPDATE user SET score = 100 WHERE id=:id")
-    void batchUpdateWithObjectArray(@Bind("id") Integer[] ids);
+//    @Batch(10)
+//    @Sql("UPDATE users SET score = 100 WHERE id=:id")
+//    void batchUpdateWithObjectArray(@Bind("id") Integer[] ids);
 
 }

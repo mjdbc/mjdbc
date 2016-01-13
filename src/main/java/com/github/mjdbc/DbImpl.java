@@ -1,5 +1,6 @@
 package com.github.mjdbc;
 
+import com.github.mjdbc.batch.BatchHandlerFactory;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -12,19 +13,18 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Proxy;
+import java.lang.reflect.Type;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static java.lang.reflect.Modifier.isFinal;
-import static java.lang.reflect.Modifier.isPublic;
-import static java.lang.reflect.Modifier.isStatic;
-import static java.lang.reflect.Modifier.isTransient;
+import static java.lang.reflect.Modifier.*;
 import static java.util.Objects.requireNonNull;
 
 /**
@@ -201,8 +201,12 @@ public class DbImpl implements Db {
         // parameter bindings
         List<BindInfo> bindings = new ArrayList<>();
         Class<?>[] parameterTypes = m.getParameterTypes();
+        Type[] genericTypes = m.getGenericParameterTypes();
+        int batchParamIdx = -1;
+        BatchHandlerFactory batchHandlerFactory = null;
         for (int i = 0; i < m.getParameterCount(); i++) {
             Class<?> parameterType = parameterTypes[i];
+            Type genericType = genericTypes[i];
             Bind bindAnnotation = (Bind) Arrays.stream(m.getParameterAnnotations()[i]).filter(a -> a instanceof Bind).findFirst().orElse(null);
             if (bindAnnotation == null) {
                 BindBean bindBeanAnnotation = (BindBean) Arrays.stream(m.getParameterAnnotations()[i]).filter(a -> a instanceof BindBean).findFirst().orElse(null);
@@ -219,11 +223,23 @@ public class DbImpl implements Db {
             if (name.isEmpty()) {
                 throw new IllegalArgumentException("Parameter name is empty! Position" + i + ", method: " + m);
             }
-            DbBinder binder = findBinderByType(parameterType);
+            DbBinder binder = findBinderByType(parameterType, genericType);
             if (binder == null) {
                 throw new IllegalArgumentException("No parameter binder for: '" + parameterType + "', method: " + m + ", position: " + i + ", type: " + parameterType);
             }
-            bindings.add(new BindInfo(name, binder, i, null, null));
+            BatchHandlerFactory paramBatchHandlerFactory = getBatchHandlerFactory(parameterType, genericType);
+            if (paramBatchHandlerFactory != null) {
+                if (resultMapper != Mappers.VoidMapper) {
+                    //todo: support return of original JDBC executeBatch results as int[]
+                    throw new IllegalArgumentException("Batch method must return no result (be void), method: " + m + ", position: " + i + ", type: " + parameterType);
+                }
+                if (batchParamIdx != -1) {
+                    throw new IllegalArgumentException("Multiple batch mode parameters! , method: " + m + ", args positions " + batchParamIdx + " and " + i);
+                }
+                batchParamIdx = i;
+                batchHandlerFactory = paramBatchHandlerFactory;
+            }
+            bindings.add(new BindInfo(name, binder, i, null, null, paramBatchHandlerFactory != null));
         }
 
         // check that all parameters are bound
@@ -237,7 +253,8 @@ public class DbImpl implements Db {
         boolean useGeneratedKeys = returnType.getAnnotation(UseGeneratedKeys.class) != null || sql.toUpperCase().startsWith("INSERT ");
 
         // construct result mapping
-        opByMethod.put(m, new OpRef(parsedSql, resultMapper, useGeneratedKeys, parametersMapping, bindings.toArray(new BindInfo[bindings.size()])));
+        opByMethod.put(m, new OpRef(parsedSql, resultMapper, useGeneratedKeys, parametersMapping, bindings.toArray(new BindInfo[bindings.size()]),
+                batchHandlerFactory, batchParamIdx));
     }
 
     @NotNull
@@ -262,11 +279,11 @@ public class DbImpl implements Db {
             if (isFinal(modifiers) || !isPublic(modifiers) || isStatic(modifiers) || isTransient(modifiers)) {
                 continue; //ignore
             }
-            DbBinder binder = findBinderByType(f.getType());
+            DbBinder binder = findBinderByType(f.getType(), null);
             if (binder == null) {
                 throw new IllegalArgumentException("No bean binder for field: " + f + ", bean: " + type);
             }
-            bindings.add(new BindInfo(f.getName(), binder, 0, f, null));
+            bindings.add(new BindInfo(f.getName(), binder, 0, f, null, false));
         }
 
         // check all public get/is methods
@@ -281,9 +298,9 @@ public class DbImpl implements Db {
             if (bindings.stream().filter(b -> b.mappedName.equals(propertyName)).findAny().orElse(null) != null) { // field has higher priority.
                 continue;
             }
-            DbBinder binder = findBinderByType(m.getReturnType());
+            DbBinder binder = findBinderByType(m.getReturnType(), null);
             if (binder != null) {
-                bindings.add(new BindInfo(propertyName, binder, 0, null, m));
+                bindings.add(new BindInfo(propertyName, binder, 0, null, m, false));
             }
         }
         beanInfoByClass.put(type, bindings);
@@ -324,16 +341,43 @@ public class DbImpl implements Db {
     }
 
     @Nullable
-    private DbBinder findBinderByType(Class<?> parameterType) {
-        DbBinder binder = binderByClass.get(parameterType);
+    private DbBinder findBinderByType(@NotNull Class<?> parameterType, @Nullable Type genericType) {
+        Class<?> effectiveType = parameterType;
+        if (isBatchType(parameterType) && genericType instanceof ParameterizedType) {
+            ParameterizedType pt = (ParameterizedType) genericType;
+            Type[] args = pt.getActualTypeArguments();
+            if (args.length == 1 && args[0] instanceof Class) {
+                effectiveType = (Class) args[0];
+            }
+        }
+
+        DbBinder binder = binderByClass.get(effectiveType);
         if (binder == null) {
-            binder = findBinderByInterfaces(parameterType.getInterfaces());
+            binder = findBinderByInterfaces(effectiveType.getInterfaces());
             if (binder == null) {
-                Class superClass = parameterType.getSuperclass();
-                binder = superClass == null ? null : findBinderByType(superClass);
+                Class superClass = effectiveType.getSuperclass();
+                binder = superClass == null ? null : findBinderByType(superClass, null);
             }
         }
         return binder;
+    }
+
+    private static boolean isBatchType(@NotNull Class<?> type) {
+        return Iterable.class.isAssignableFrom(type) || Iterator.class.isAssignableFrom(type) || type.isArray();
+    }
+
+    @Nullable
+    private static BatchHandlerFactory getBatchHandlerFactory(@NotNull Class<?> parameterType, @Nullable Type genericType) {
+        if (!isBatchType(parameterType) || genericType == null) {
+            return null;
+        }
+        if (Iterable.class.isAssignableFrom(parameterType)) {
+            return BatchHandlerFactory.ITERABLE;
+        }
+        if (Iterator.class.isAssignableFrom(parameterType)) {
+            return BatchHandlerFactory.ITERATOR;
+        }
+        throw new IllegalStateException("Failed to find valid BatchHandlerFactor for " + parameterType + ", generic: " + genericType);
     }
 
     private DbBinder findBinderByInterfaces(Class<?>[] interfaces) {
@@ -364,14 +408,20 @@ public class DbImpl implements Db {
 
         final boolean useGeneratedKeys;
 
+        @Nullable
+        final BatchHandlerFactory batchHandlerFactory;
+        final int batchParameterIdx;
 
         private OpRef(@NotNull String parsedSql, @NotNull DbMapper resultMapper, boolean useGeneratedKeys,
-                      @NotNull Map<String, List<Integer>> parametersNamesMapping, @NotNull BindInfo[] bindings) {
+                      @NotNull Map<String, List<Integer>> parametersNamesMapping, @NotNull BindInfo[] bindings,
+                      @Nullable BatchHandlerFactory batchHandlerFactory, int batchParameterIdx) {
             this.parsedSql = parsedSql;
             this.useGeneratedKeys = useGeneratedKeys;
             this.resultMapper = resultMapper;
             this.parametersNamesMapping = parametersNamesMapping;
             this.bindings = bindings;
+            this.batchHandlerFactory = batchHandlerFactory;
+            this.batchParameterIdx = batchParameterIdx;
         }
     }
 
@@ -390,12 +440,16 @@ public class DbImpl implements Db {
         @Nullable
         final Method getter;
 
-        private BindInfo(@NotNull String mappedName, @NotNull DbBinder binder, int argumentIdx, @Nullable Field field, @Nullable Method getter) {
+        final boolean batchParameter;
+
+        private BindInfo(@NotNull String mappedName, @NotNull DbBinder binder, int argumentIdx, @Nullable Field field,
+                         @Nullable Method getter, boolean batchParameter) {
             this.mappedName = mappedName;
             this.binder = binder;
             this.argumentIdx = argumentIdx;
             this.field = field;
             this.getter = getter;
+            this.batchParameter = batchParameter;
         }
 
         @Override
