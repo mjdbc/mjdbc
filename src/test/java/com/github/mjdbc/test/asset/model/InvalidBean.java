@@ -1,6 +1,6 @@
 package com.github.mjdbc.test.asset.model;
 
-public class Bean1 {
+public class InvalidBean {
     @SuppressWarnings("unused")
     Class unmappedValue;
 }

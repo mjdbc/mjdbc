@@ -1,7 +1,7 @@
 package com.github.mjdbc.test;
 
 import com.github.mjdbc.DbImpl;
-import com.github.mjdbc.test.asset.model.ABean;
+import com.github.mjdbc.test.asset.model.ValidBean;
 import com.github.mjdbc.test.asset.model.MultipleMappersBean1;
 import com.github.mjdbc.test.asset.model.User;
 import com.github.mjdbc.test.asset.model.UserId;
@@ -112,7 +112,7 @@ public class DbAttachSqlTest extends Assert {
      */
     @Test
     public void checkMapperAnnotation() {
-        ABean bean = db.attachSql(ValidBeansSql.class).selectABean();
+        ValidBean bean = db.attachSql(ValidBeansSql.class).selectABean();
         assertEquals(1, bean.value);
     }
 
