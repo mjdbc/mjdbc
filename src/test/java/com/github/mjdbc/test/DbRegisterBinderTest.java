@@ -65,7 +65,7 @@ public class DbRegisterBinderTest extends Assert {
      */
     @Test(expected = NullPointerException.class)
     public void checkNullBinderTriggersNullPointerException() {
-        //noinspection ConstantConditions
+        //noinspection ConstantConditions,RedundantCast
         db.registerBinder((Class<Reader>) null, PreparedStatement::setCharacterStream);
     }
 

@@ -14,7 +14,7 @@ import java.util.logging.Logger;
  */
 public class ProfiledDataSource implements javax.sql.DataSource {
     @NotNull
-    private DataSource ds;
+    private final DataSource ds;
 
     public int nGetConnectionCalls;
 

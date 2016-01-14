@@ -24,7 +24,7 @@ public abstract class BaseSqlTest<S> extends Assert {
 
     @NotNull
     protected final Class<S> type;
-    private String schemaFileName;
+    private final String schemaFileName;
 
     public BaseSqlTest(@NotNull Class<S> type, String schemaFileName) {
         this.type = type;

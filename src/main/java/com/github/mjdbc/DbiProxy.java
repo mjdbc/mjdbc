@@ -4,7 +4,7 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 
 class DbiProxy<T> implements InvocationHandler {
-    private DbImpl db;
+    private final DbImpl db;
     private final T impl;
 
     DbiProxy(DbImpl db, T impl) {

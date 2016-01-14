@@ -8,6 +8,6 @@ import com.github.mjdbc.Sql;
  */
 public interface EmptyQuerySql {
 
-    @Sql("")
+    @Sql
     void updateFirstNameWithReader();
 }

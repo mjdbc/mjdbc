@@ -106,7 +106,10 @@ public class ScriptRunner {
                 }
                 runScript(connection, reader);
             } finally {
-                connection.setAutoCommit(originalAutoCommit);
+                try {
+                    connection.setAutoCommit(originalAutoCommit);
+                } catch (SQLException ignored) {
+                }
             }
         } catch (IOException | SQLException e) {
             throw e;
@@ -125,8 +128,7 @@ public class ScriptRunner {
      * @throws IOException  if there is an error reading from the Reader
      */
     @SuppressWarnings("StatementWithEmptyBody")
-    private void runScript(Connection conn, Reader reader) throws IOException,
-            SQLException {
+    private void runScript(Connection conn, Reader reader) throws IOException {
         StringBuffer command = null;
         try {
             LineNumberReader lineReader = new LineNumberReader(reader);
@@ -207,7 +209,10 @@ public class ScriptRunner {
         } catch (Exception e) {
             throw new IOException(String.format("Error executing '%s': %s", command, e.getMessage()), e);
         } finally {
-            conn.rollback();
+            try {
+                conn.rollback();
+            } catch (SQLException ignored) {
+            }
             flush();
         }
     }

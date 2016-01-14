@@ -1,7 +1,6 @@
 package com.github.mjdbc;
 
 import com.github.mjdbc.DbImpl.OpRef;
-import com.github.mjdbc.batch.BatchHandler;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.InvocationHandler;
@@ -9,6 +8,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
 class SqlProxy implements InvocationHandler {
@@ -16,7 +16,7 @@ class SqlProxy implements InvocationHandler {
     private final DbImpl db;
 
     @NotNull
-    private String interfaceSimpleName;
+    private final String interfaceSimpleName;
 
     SqlProxy(@NotNull DbImpl db, @NotNull String interfaceSimpleName) {
         this.db = db;
@@ -38,7 +38,7 @@ class SqlProxy implements InvocationHandler {
                 //noinspection unchecked
                 DbStatement s = new DbStatement(c, p.parsedSql, p.resultMapper, p.parametersNamesMapping, p.useGeneratedKeys);
                 if (args != null) {
-                    if (p.batchHandlerFactory != null) {
+                    if (p.batchIteratorFactory != null) {
                         return executeBatch(p, s, args);
                     }
                     bindSingleStatementArgs(p, s, args);
@@ -60,19 +60,17 @@ class SqlProxy implements InvocationHandler {
     }
 
     private static Object executeBatch(@NotNull OpRef p, @NotNull DbStatement s, @NotNull Object[] args) throws IllegalAccessException, InvocationTargetException, java.sql.SQLException {
-        assert p.batchHandlerFactory != null;
+        assert p.batchIteratorFactory != null;
         Object batchArg = args[p.batchArgIdx];
         //noinspection unchecked
-        BatchHandler bh = p.batchHandlerFactory.createHandler(batchArg);
         Object[] batchArgs = Arrays.copyOf(args, args.length);
-        boolean hasNext = bh.hasNext();
-        for (int i = 0; hasNext; i++) {
-            Object beanValue = bh.next();
+        Iterator it = p.batchIteratorFactory.createIterator(batchArg);
+        for (int i = 0; it.hasNext(); i++) {
+            Object beanValue = it.next();
             batchArgs[p.batchArgIdx] = beanValue;
             bindSingleStatementArgs(p, s, batchArgs);
             s.statement.addBatch();
-            hasNext = bh.hasNext();
-            if (i % p.batchSize == p.batchSize - 1 || !hasNext) {
+            if (i % p.batchSize == p.batchSize - 1 || !it.hasNext()) {
                 s.statement.executeBatch();
             }
         }

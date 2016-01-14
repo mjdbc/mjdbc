@@ -1,7 +1,6 @@
 package com.github.mjdbc.test;
 
 import com.github.mjdbc.test.asset.model.GetterBean;
-import com.github.mjdbc.test.asset.sql.FakeGettersBeanSql;
 import com.github.mjdbc.test.asset.sql.GetterBeanSql;
 import com.github.mjdbc.type.impl.DbIntValue;
 import org.jetbrains.annotations.NotNull;
