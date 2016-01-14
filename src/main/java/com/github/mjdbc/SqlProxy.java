@@ -1,13 +1,14 @@
 package com.github.mjdbc;
 
+import com.github.mjdbc.DbImpl.OpRef;
 import com.github.mjdbc.batch.BatchHandler;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 class SqlProxy implements InvocationHandler {
@@ -24,7 +25,7 @@ class SqlProxy implements InvocationHandler {
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        DbImpl.OpRef p = db.opByMethod.get(method);
+        OpRef p = db.opByMethod.get(method);
         if (p == null) { // java.lang.Object methods
             if (method.getName().equals("toString")) {
                 return interfaceSimpleName + "$Proxy";
@@ -40,7 +41,7 @@ class SqlProxy implements InvocationHandler {
                     if (p.batchHandlerFactory != null) {
                         return executeBatch(p, s, args);
                     }
-                    bindSingleStatementArgs(p, s, args, null);
+                    bindSingleStatementArgs(p, s, args);
                 }
                 if (p.resultMapper != Mappers.VoidMapper) {
                     if (p.useGeneratedKeys) {
@@ -58,43 +59,37 @@ class SqlProxy implements InvocationHandler {
         }
     }
 
-    private Object executeBatch(@NotNull DbImpl.OpRef p, @NotNull DbStatement s, @NotNull Object[] args) throws IllegalAccessException, InvocationTargetException, java.sql.SQLException {
-        int batchSize = 100;
+    private static Object executeBatch(@NotNull OpRef p, @NotNull DbStatement s, @NotNull Object[] args) throws IllegalAccessException, InvocationTargetException, java.sql.SQLException {
         assert p.batchHandlerFactory != null;
+        Object batchArg = args[p.batchArgIdx];
         //noinspection unchecked
-        BatchHandler bh = p.batchHandlerFactory.createHandler(args[p.batchParameterIdx]);
+        BatchHandler bh = p.batchHandlerFactory.createHandler(batchArg);
+        Object[] batchArgs = Arrays.copyOf(args, args.length);
         boolean hasNext = bh.hasNext();
         for (int i = 0; hasNext; i++) {
-            bindSingleStatementArgs(p, s, args, bh);
+            Object beanValue = bh.next();
+            batchArgs[p.batchArgIdx] = beanValue;
+            bindSingleStatementArgs(p, s, batchArgs);
             s.statement.addBatch();
             hasNext = bh.hasNext();
-            if (i % batchSize == batchSize - 1 || !hasNext) {
-                s.statement.executeBatch(); //todo: support executeLargeBatch
+            if (i % p.batchSize == p.batchSize - 1 || !hasNext) {
+                s.statement.executeBatch();
             }
         }
         return null; //todo: return valid batch results
     }
 
-    private void bindSingleStatementArgs(@NotNull DbImpl.OpRef p, @NotNull DbStatement s, @NotNull Object[] args, @Nullable BatchHandler batchHandler) throws IllegalAccessException, InvocationTargetException, java.sql.SQLException {
+    private static void bindSingleStatementArgs(@NotNull OpRef p, @NotNull DbStatement s, @NotNull Object[] args) throws IllegalAccessException, InvocationTargetException, java.sql.SQLException {
         for (DbImpl.BindInfo bi : p.bindings) {
             List<Integer> sqlIndexes = p.parametersNamesMapping.get(bi.mappedName);
             if (sqlIndexes == null) {
                 continue;
             }
-            if (bi.batchParameter) {
-                assert batchHandler != null;
-                Object value = batchHandler.next();
-                for (Integer idx : sqlIndexes) {
-                    //noinspection unchecked
-                    bi.binder.bind(s.statement, idx, value);
-                }
-            } else {
-                for (Integer idx : sqlIndexes) {
-                    Object arg = args[bi.argumentIdx];
-                    Object value = bi.field != null ? bi.field.get(arg) : bi.getter != null ? bi.getter.invoke(arg) : arg;
-                    //noinspection unchecked
-                    bi.binder.bind(s.statement, idx, value);
-                }
+            for (Integer idx : sqlIndexes) {
+                Object arg = args[bi.argumentIdx];
+                Object value = bi.field != null ? bi.field.get(arg) : bi.getter != null ? bi.getter.invoke(arg) : arg;
+                //noinspection unchecked
+                bi.binder.bind(s.statement, idx, value);
             }
         }
     }

@@ -13,4 +13,6 @@ import java.lang.annotation.Target;
 @Target({ElementType.METHOD})
 public @interface Sql {
     String value() default "";
+
+    int batchChunkSize() default Integer.MAX_VALUE;
 }

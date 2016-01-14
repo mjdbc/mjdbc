@@ -216,7 +216,15 @@ public class DbImpl implements Db {
                 if (m.getParameterCount() != 1) {
                     throw new IllegalArgumentException("@BindBean must be the only parameter! Method: " + m);
                 }
-                bindings.addAll(getBeanBinders(parameterType));
+                if (isBatchType(parameterType)) {
+                    batchHandlerFactory = getBatchHandlerFactory(parameterType);
+                    bindings.add(new BindInfo("", Binders.VoidBinder, -1, null, null, true));
+                    batchParamIdx = 0;
+                    Class<?> beanType = getEffectiveType(parameterType, genericType);
+                    bindings.addAll(getBeanBinders(beanType));
+                } else {
+                    bindings.addAll(getBeanBinders(parameterType));
+                }
                 break;
             }
             String name = bindAnnotation.value();
@@ -227,11 +235,11 @@ public class DbImpl implements Db {
             if (binder == null) {
                 throw new IllegalArgumentException("No parameter binder for: '" + parameterType + "', method: " + m + ", position: " + i + ", type: " + parameterType);
             }
-            BatchHandlerFactory paramBatchHandlerFactory = getBatchHandlerFactory(parameterType, genericType);
+            BatchHandlerFactory paramBatchHandlerFactory = getBatchHandlerFactory(parameterType);
             if (paramBatchHandlerFactory != null) {
                 if (resultMapper != Mappers.VoidMapper) {
                     //todo: support return of original JDBC executeBatch results as int[]
-                    throw new IllegalArgumentException("Batch method must return no result (be void), method: " + m + ", position: " + i + ", type: " + parameterType);
+                    throw new IllegalArgumentException("BatchChunkSize method must return no result (be void), method: " + m + ", position: " + i + ", type: " + parameterType);
                 }
                 if (batchParamIdx != -1) {
                     throw new IllegalArgumentException("Multiple batch mode parameters! , method: " + m + ", args positions " + batchParamIdx + " and " + i);
@@ -252,9 +260,14 @@ public class DbImpl implements Db {
 
         boolean useGeneratedKeys = returnType.getAnnotation(UseGeneratedKeys.class) != null || sql.toUpperCase().startsWith("INSERT ");
 
+        int batchSize = sqlAnnotation.batchChunkSize();
+        if (batchSize <= 0) {
+            throw new IllegalArgumentException("Illegal batch size : " + m + " batch size:" + sqlAnnotation.batchChunkSize());
+        }
         // construct result mapping
-        opByMethod.put(m, new OpRef(parsedSql, resultMapper, useGeneratedKeys, parametersMapping, bindings.toArray(new BindInfo[bindings.size()]),
-                batchHandlerFactory, batchParamIdx));
+        BindInfo[] bindingsArray = bindings.toArray(new BindInfo[bindings.size()]);
+        OpRef op = new OpRef(parsedSql, resultMapper, useGeneratedKeys, parametersMapping, bindingsArray, batchHandlerFactory, batchParamIdx, batchSize);
+        opByMethod.put(m, op);
     }
 
     @NotNull
@@ -342,15 +355,7 @@ public class DbImpl implements Db {
 
     @Nullable
     private DbBinder findBinderByType(@NotNull Class<?> parameterType, @Nullable Type genericType) {
-        Class<?> effectiveType = parameterType;
-        if (isBatchType(parameterType) && genericType instanceof ParameterizedType) {
-            ParameterizedType pt = (ParameterizedType) genericType;
-            Type[] args = pt.getActualTypeArguments();
-            if (args.length == 1 && args[0] instanceof Class) {
-                effectiveType = (Class) args[0];
-            }
-        }
-
+        Class<?> effectiveType = getEffectiveType(parameterType, genericType);
         DbBinder binder = binderByClass.get(effectiveType);
         if (binder == null) {
             binder = findBinderByInterfaces(effectiveType.getInterfaces());
@@ -362,13 +367,29 @@ public class DbImpl implements Db {
         return binder;
     }
 
+    private static Class<?> getEffectiveType(@NotNull Class<?> parameterType, @Nullable Type genericType) {
+        Class<?> effectiveType = parameterType;
+        if (isBatchType(parameterType)) {
+            if (genericType instanceof ParameterizedType) {
+                ParameterizedType pt = (ParameterizedType) genericType;
+                Type[] args = pt.getActualTypeArguments();
+                if (args.length == 1 && args[0] instanceof Class) {
+                    effectiveType = (Class) args[0];
+                }
+            } else if (genericType instanceof Class && ((Class) genericType).isArray()) {
+                effectiveType = ((Class) genericType).getComponentType();
+            }
+        }
+        return effectiveType;
+    }
+
     private static boolean isBatchType(@NotNull Class<?> type) {
         return Iterable.class.isAssignableFrom(type) || Iterator.class.isAssignableFrom(type) || type.isArray();
     }
 
     @Nullable
-    private static BatchHandlerFactory getBatchHandlerFactory(@NotNull Class<?> parameterType, @Nullable Type genericType) {
-        if (!isBatchType(parameterType) || genericType == null) {
+    private static BatchHandlerFactory getBatchHandlerFactory(@NotNull Class<?> parameterType) {
+        if (!isBatchType(parameterType)) {
             return null;
         }
         if (Iterable.class.isAssignableFrom(parameterType)) {
@@ -377,7 +398,10 @@ public class DbImpl implements Db {
         if (Iterator.class.isAssignableFrom(parameterType)) {
             return BatchHandlerFactory.ITERATOR;
         }
-        throw new IllegalStateException("Failed to find valid BatchHandlerFactor for " + parameterType + ", generic: " + genericType);
+        if (parameterType.isArray()) {
+            return BatchHandlerFactory.ARRAY;
+        }
+        throw new IllegalStateException("No BatchHandlerFactory found for " + parameterType);
     }
 
     private DbBinder findBinderByInterfaces(Class<?>[] interfaces) {
@@ -410,18 +434,20 @@ public class DbImpl implements Db {
 
         @Nullable
         final BatchHandlerFactory batchHandlerFactory;
-        final int batchParameterIdx;
+        final int batchArgIdx;
+        final int batchSize;
 
         private OpRef(@NotNull String parsedSql, @NotNull DbMapper resultMapper, boolean useGeneratedKeys,
                       @NotNull Map<String, List<Integer>> parametersNamesMapping, @NotNull BindInfo[] bindings,
-                      @Nullable BatchHandlerFactory batchHandlerFactory, int batchParameterIdx) {
+                      @Nullable BatchHandlerFactory batchHandlerFactory, int batchArgIdx, int batchSize) {
             this.parsedSql = parsedSql;
             this.useGeneratedKeys = useGeneratedKeys;
             this.resultMapper = resultMapper;
             this.parametersNamesMapping = parametersNamesMapping;
             this.bindings = bindings;
             this.batchHandlerFactory = batchHandlerFactory;
-            this.batchParameterIdx = batchParameterIdx;
+            this.batchArgIdx = batchArgIdx;
+            this.batchSize = batchSize;
         }
     }
 

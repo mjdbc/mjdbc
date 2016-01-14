@@ -77,6 +77,7 @@ public final class Binders {
             statement.setShort(idx, value);
         }
     };
+
     public static final DbBinder<java.sql.Date> SqlDateBinder = PreparedStatement::setDate;
     public static final DbBinder<java.sql.Time> SqlTimeBinder = PreparedStatement::setTime;
     public static final DbBinder<String> StringBinder = PreparedStatement::setString;
@@ -87,6 +88,10 @@ public final class Binders {
     public static final DbBinder<DbLong> DbLongBinder = (statement, idx, value) -> LongBinder.bind(statement, idx, value == null ? null : value.getDbValue());
     public static final DbBinder<DbString> DbStringBinder = (statement, idx, value) -> StringBinder.bind(statement, idx, value == null ? null : value.getDbValue());
     public static final DbBinder<DbTimestamp> DbTimestampBinder = (statement, idx, value) -> TimestampBinder.bind(statement, idx, value == null ? null : value.getDbValue());
+
+    protected static final DbBinder<Void> VoidBinder = (statement, idx, value) -> {
+        throw new UnsupportedOperationException();
+    };
 
     public static final Map<Class, DbBinder> BUILT_IN_BINDERS = Collections.unmodifiableMap(new HashMap<Class, DbBinder>() {{
 
