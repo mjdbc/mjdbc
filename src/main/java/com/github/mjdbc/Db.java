@@ -7,7 +7,8 @@ import java.lang.reflect.Method;
 import java.util.Map;
 
 /**
- * Database access interface. Allows to register result set mappers, statement parameter binders and execute queries and updates over database.
+ * Database access interface.
+ * Allows to register result set mappers, statement parameter binders and execute queries and updates over database.
  */
 public interface Db {
 

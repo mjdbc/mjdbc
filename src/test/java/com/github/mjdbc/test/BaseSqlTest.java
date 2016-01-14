@@ -3,6 +3,7 @@ package com.github.mjdbc.test;
 import com.github.mjdbc.Db;
 import com.github.mjdbc.DbImpl;
 import com.github.mjdbc.test.util.DbUtils;
+import com.github.mjdbc.test.util.ProfiledDataSource;
 import com.zaxxer.hikari.HikariDataSource;
 import org.jetbrains.annotations.NotNull;
 import org.junit.After;
@@ -14,7 +15,7 @@ public abstract class BaseSqlTest<S> extends Assert {
      * Low level connection pool.
      */
     protected HikariDataSource ds;
-
+    protected ProfiledDataSource profiledDs;
     protected Db db;
 
     /**
@@ -34,7 +35,8 @@ public abstract class BaseSqlTest<S> extends Assert {
     @Before
     public void setUp() {
         ds = DbUtils.prepareDataSource(schemaFileName);
-        db = new DbImpl(ds);
+        profiledDs = new ProfiledDataSource(ds);
+        db = new DbImpl(profiledDs);
         sql = db.attachSql(type);
     }
 

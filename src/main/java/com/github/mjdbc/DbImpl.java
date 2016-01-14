@@ -228,7 +228,7 @@ public class DbImpl implements Db {
             }
             String name = bindAnnotation.value();
             if (name.isEmpty()) {
-                throw new IllegalArgumentException("Parameter name is empty! Position" + i + ", method: " + m);
+                throw new IllegalArgumentException("Parameter name is empty at position: " + i + ", method: " + m);
             }
             DbBinder binder = findBinderByType(parameterType, genericType);
             if (binder == null) {
@@ -238,7 +238,7 @@ public class DbImpl implements Db {
             if (paramBatchIteratorFactory != null) {
                 if (resultMapper != Mappers.VoidMapper) {
                     //todo: support return of original JDBC executeBatch results as int[]
-                    throw new IllegalArgumentException("BatchChunkSize method must return no result (be void), method: " + m + ", position: " + i + ", type: " + parameterType);
+                    throw new IllegalArgumentException("Batch method must return no result (be void), method: " + m + ", position: " + i + ", type: " + parameterType);
                 }
                 if (batchParamIdx != -1) {
                     throw new IllegalArgumentException("Multiple batch mode parameters! , method: " + m + ", args positions " + batchParamIdx + " and " + i);

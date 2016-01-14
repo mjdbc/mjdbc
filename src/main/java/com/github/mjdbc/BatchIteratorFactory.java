@@ -6,6 +6,9 @@ import java.lang.reflect.Array;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
+/**
+ * BatchIteratorFactory - the factory that provides handlers for batch ops: Iterable, Iterator and Array handlers.
+ */
 public interface BatchIteratorFactory {
     BatchIteratorFactory ITERATOR_HANDLER = iterator -> new Iterator() {
         final Iterator it = (Iterator) iterator;

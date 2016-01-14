@@ -14,7 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Map of all 'mjdbc' binders in a single place.
+ * Map of all internal 'mjdbc' binders in a single place.
  */
 public final class Binders {
 

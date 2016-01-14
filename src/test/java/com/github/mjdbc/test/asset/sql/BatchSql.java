@@ -38,4 +38,8 @@ public interface BatchSql {
 
     @Sql("UPDATE users SET score = :score WHERE id=:id")
     void batchUpdateBeanWithArray(@BindBean User[] users);
+
+    @Sql(value = "INSERT INTO users(login, first_name, last_name, gender, score, reg_date) VALUES (:login, :firstName, :lastName, :gender, :score, :registrationDate)",
+            batchChunkSize = 2)
+    void batchInsert(@BindBean List<User> users);
 }

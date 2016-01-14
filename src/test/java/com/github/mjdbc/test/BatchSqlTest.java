@@ -1,14 +1,18 @@
 package com.github.mjdbc.test;
 
+import com.github.mjdbc.test.asset.model.Gender;
 import com.github.mjdbc.test.asset.model.User;
 import com.github.mjdbc.test.asset.sql.BatchSql;
 import com.github.mjdbc.test.asset.sql.BatchSqlErr1;
 import com.github.mjdbc.test.asset.sql.BatchSqlErr2;
 import com.github.mjdbc.test.asset.sql.BatchSqlErr3;
 import com.github.mjdbc.test.asset.sql.BatchSqlErr4;
+import com.github.mjdbc.test.util.ProfiledPreparedStatement;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
+import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -83,6 +87,41 @@ public class BatchSqlTest extends BaseSqlTest<BatchSql> {
         sql.batchUpdateBeanWithArray(origList.toArray(new User[origList.size()]));
         checkUpdated(700);
     }
+
+    @Test
+    public void checkBatchInsert() {
+        List<User> newUsers = new ArrayList<>();
+        ProfiledPreparedStatement.executeBatchCalls = 0;
+        ProfiledPreparedStatement.addBatchCalls = 0;
+        newUsers.add(createUser("test1"));
+        newUsers.add(createUser("test2"));
+        newUsers.add(createUser("test3"));
+        newUsers.add(createUser("test4"));
+        newUsers.add(createUser("test5"));
+        newUsers.add(createUser("test6"));
+        newUsers.add(createUser("test7"));
+        newUsers.add(createUser("test8"));
+
+        sql.batchInsert(newUsers);
+
+        assertEquals(8, ProfiledPreparedStatement.addBatchCalls);
+        assertEquals(4, ProfiledPreparedStatement.executeBatchCalls);
+
+        List<User> usersInDb = sql.selectAllUsers();
+        assertEquals(10, usersInDb.size());
+        assertEquals(1, usersInDb.stream().filter(u -> u.login.equals("test5")).count());
+    }
+
+    private User createUser(String login) {
+        User u = new User();
+        u.login = login;
+        u.firstName = "FirstName";
+        u.lastName = "LastName";
+        u.gender = Gender.FEMALE;
+        u.registrationDate = new Timestamp(System.currentTimeMillis());
+        return u;
+    }
+
 
     @Test(expected = IllegalArgumentException.class)
     public void checkBatchSqlErr1() {
