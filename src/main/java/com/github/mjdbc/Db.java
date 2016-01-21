@@ -8,7 +8,7 @@ import java.util.Map;
 
 /**
  * Database access interface.
- * Allows to register result set mappers, statement parameter binders and execute queries and updates over database.
+ * Allows to register result set mappers (@Mapper), statement parameter binders (@Binder), execute SQL queries and updates.
  */
 public interface Db {
 
@@ -92,6 +92,7 @@ public interface Db {
      * @return per-method statistics. Note: This is direct access to the timers map. Timers are updated concurrently.
      * if timer is removed from the map -> it will be restarted.
      */
+    @NotNull
     Map<Method, DbTimer> getTimers();
 
 }

@@ -23,7 +23,7 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * Statement with named parameters support and safe operations to fetch results by hiding result set manipulation.
+ * PreparedStatement with named parameters and {@link DbMapper}  support.
  */
 public class DbStatement<T> implements AutoCloseable {
     @NotNull

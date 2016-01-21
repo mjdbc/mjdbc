@@ -33,7 +33,7 @@ public class DbImpl implements Db {
 
     private final ThreadLocal<DbConnection> activeConnections = new ThreadLocal<>();
 
-    final Map<Method, OpRef> opByMethod = new ConcurrentHashMap<>();
+    final Map<Method, SqlOp> opByMethod = new ConcurrentHashMap<>();
 
     private final Map<Class, DbMapper> mapperByClass = new ConcurrentHashMap<>(Mappers.BUILT_IN_MAPPERS);
 
@@ -94,6 +94,7 @@ public class DbImpl implements Db {
         executeImpl(op);
     }
 
+    @NotNull
     @Override
     public Map<Method, DbTimer> getTimers() {
         return timersByMethod;
@@ -207,7 +208,7 @@ public class DbImpl implements Db {
             Class<?> parameterType = parameterTypes[i];
             Type genericType = genericTypes[i];
             Bind bindAnnotation = (Bind) Arrays.stream(m.getParameterAnnotations()[i]).filter(a -> a instanceof Bind).findFirst().orElse(null);
-            if (bindAnnotation == null) {
+            if (bindAnnotation == null) { // if there are no @Bind -> search for @BindBean
                 BindBean bindBeanAnnotation = (BindBean) Arrays.stream(m.getParameterAnnotations()[i]).filter(a -> a instanceof BindBean).findFirst().orElse(null);
                 if (bindBeanAnnotation == null) {
                     throw new IllegalArgumentException("Unbound parameter: " + i + ", method: " + m + ". Forgot @BindBean or @Bind annotation?");
@@ -265,7 +266,7 @@ public class DbImpl implements Db {
         }
         // construct result mapping
         BindInfo[] bindingsArray = bindings.toArray(new BindInfo[bindings.size()]);
-        OpRef op = new OpRef(parsedSql, resultMapper, useGeneratedKeys, parametersMapping, bindingsArray, batchIteratorFactory, batchParamIdx, batchSize);
+        SqlOp op = new SqlOp(parsedSql, resultMapper, useGeneratedKeys, parametersMapping, bindingsArray, batchIteratorFactory, batchParamIdx, batchSize);
         opByMethod.put(m, op);
     }
 
@@ -278,7 +279,7 @@ public class DbImpl implements Db {
     /**
      * For all public fields and getters assign binders by type
      */
-    private List<BindInfo> getBeanBinders(Class<?> type) {
+    private List<BindInfo> getBeanBinders(@NotNull Class<?> type) {
         List<BindInfo> bindings = beanInfoByClass.get(type);
         if (bindings != null) {
             return bindings;
@@ -319,7 +320,7 @@ public class DbImpl implements Db {
     }
 
     @Nullable
-    private DbMapper findMapperByType(Class<?> type) {
+    private DbMapper findMapperByType(@NotNull Class<?> type) {
         DbMapper mapper = mapperByClass.get(type);
         if (mapper == null) {
             // search for a field marked as mapper with valid parameter type
@@ -402,7 +403,7 @@ public class DbImpl implements Db {
         throw new IllegalStateException("No BatchIteratorFactory found for " + parameterType);
     }
 
-    private DbBinder findBinderByInterfaces(Class<?>[] interfaces) {
+    private DbBinder findBinderByInterfaces(@NotNull Class<?>[] interfaces) {
         for (Class interfaceClass : interfaces) {
             DbBinder binder = binderByClass.get(interfaceClass);
             if (binder == null) {
@@ -415,7 +416,10 @@ public class DbImpl implements Db {
         return null;
     }
 
-    static class OpRef {
+    /**
+     * Operational data for @Sql method: holds all required info to bind parameters and execute SQL.
+     */
+    static class SqlOp {
         @NotNull
         final String parsedSql;
 
@@ -435,7 +439,7 @@ public class DbImpl implements Db {
         final int batchArgIdx;
         final int batchSize;
 
-        private OpRef(@NotNull String parsedSql, @NotNull DbMapper resultMapper, boolean useGeneratedKeys,
+        private SqlOp(@NotNull String parsedSql, @NotNull DbMapper resultMapper, boolean useGeneratedKeys,
                       @NotNull Map<String, List<Integer>> parametersNamesMapping, @NotNull BindInfo[] bindings,
                       @Nullable BatchIteratorFactory batchIteratorFactory, int batchArgIdx, int batchSize) {
             this.parsedSql = parsedSql;
@@ -449,6 +453,9 @@ public class DbImpl implements Db {
         }
     }
 
+    /**
+     * Binding info for 1 parameter.
+     */
     static class BindInfo {
         @NotNull
         final String mappedName;
@@ -478,7 +485,7 @@ public class DbImpl implements Db {
         }
     }
 
-    void updateTimer(Method method, long t0) {
+    void updateTimer(@NotNull Method method, long t0) {
         DbTimer timer = timersByMethod.get(method);
         if (timer == null) {
             synchronized (timersByMethod) {

@@ -6,8 +6,9 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Marker for raw sql method with parameters mapped by name.
+ * Marks that the annotated interface method is a SQL query.
  * Raw sql query is provided as value for the annotation.
+ * Parameters are mapped by names in @{link DbStatement} way.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.METHOD})

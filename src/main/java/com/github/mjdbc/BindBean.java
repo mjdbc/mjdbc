@@ -8,7 +8,7 @@ import java.lang.annotation.Target;
 /**
  * Annotation to mark parameter as bean in @Sql methods.
  * All properties accessible directly or via get/is methods will be mapped to query values by names.
- * There can be only 1 @BindBean annotation per methods.
+ * There can be only one @BindBean annotation per methods.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.PARAMETER})

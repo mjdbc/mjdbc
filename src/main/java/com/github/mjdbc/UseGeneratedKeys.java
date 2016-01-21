@@ -6,8 +6,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Markup for raw sql queries to indicate that result must be returned by statement.getGeneratedKeys() method.
- * The markup is optional for queries started with 'INSERT ' text.
+ * Markup for {@link Sql} queries that indicates that result must be returned by statement.getGeneratedKeys() method.
+ * The markup is optional for queries started with 'INSERT ' keyword.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.METHOD})

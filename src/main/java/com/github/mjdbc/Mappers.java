@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Map of all 'mjdbc' mappers in single place.
+ * Set of all 'mJDBC' mappers.
  */
 public final class Mappers {
 

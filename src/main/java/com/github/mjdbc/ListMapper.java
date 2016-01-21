@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- *
+ * Maps list of result set arguments.
  */
 final class ListMapper implements DbMapper<List> {
 

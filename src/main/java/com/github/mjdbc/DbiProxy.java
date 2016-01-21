@@ -3,6 +3,9 @@ package com.github.mjdbc;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 
+/**
+ * Proxy for Dbi methods. Wraps them with transactional context by utilizing db.execute(DbOp) method.
+ */
 class DbiProxy<T> implements InvocationHandler {
     private final DbImpl db;
     private final T impl;

@@ -1,6 +1,6 @@
 package com.github.mjdbc;
 
-import com.github.mjdbc.DbImpl.OpRef;
+import com.github.mjdbc.DbImpl.SqlOp;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.InvocationHandler;
@@ -11,6 +11,9 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
+/**
+ * Proxy for {@link Sql} method. Manages execution of SQL query.
+ */
 class SqlProxy implements InvocationHandler {
     @NotNull
     private final DbImpl db;
@@ -25,7 +28,7 @@ class SqlProxy implements InvocationHandler {
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        OpRef p = db.opByMethod.get(method);
+        SqlOp p = db.opByMethod.get(method);
         if (p == null) { // java.lang.Object methods
             if (method.getName().equals("toString")) {
                 return interfaceSimpleName + "$Proxy";
@@ -59,7 +62,7 @@ class SqlProxy implements InvocationHandler {
         }
     }
 
-    private static Object executeBatch(@NotNull OpRef p, @NotNull DbStatement s, @NotNull Object[] args) throws IllegalAccessException, InvocationTargetException, java.sql.SQLException {
+    private static Object executeBatch(@NotNull SqlOp p, @NotNull DbStatement s, @NotNull Object[] args) throws IllegalAccessException, InvocationTargetException, java.sql.SQLException {
         assert p.batchIteratorFactory != null;
         Object batchArg = args[p.batchArgIdx];
         //noinspection unchecked
@@ -77,7 +80,7 @@ class SqlProxy implements InvocationHandler {
         return null; //todo: return valid batch results
     }
 
-    private static void bindSingleStatementArgs(@NotNull OpRef p, @NotNull DbStatement s, @NotNull Object[] args) throws IllegalAccessException, InvocationTargetException, java.sql.SQLException {
+    private static void bindSingleStatementArgs(@NotNull SqlOp p, @NotNull DbStatement s, @NotNull Object[] args) throws IllegalAccessException, InvocationTargetException, java.sql.SQLException {
         for (DbImpl.BindInfo bi : p.bindings) {
             List<Integer> sqlIndexes = p.parametersNamesMapping.get(bi.mappedName);
             if (sqlIndexes == null) {
