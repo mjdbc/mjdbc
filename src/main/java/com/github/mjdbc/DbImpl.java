@@ -292,10 +292,9 @@ public class DbImpl implements Db {
                 continue; //ignore
             }
             DbBinder binder = findBinderByType(f.getType(), null);
-            if (binder == null) {
-                throw new IllegalArgumentException("No bean binder for field: " + f + ", bean: " + type);
+            if (binder != null) {
+                bindings.add(new BindInfo(f.getName(), binder, 0, f, null));
             }
-            bindings.add(new BindInfo(f.getName(), binder, 0, f, null));
         }
 
         // check all public get/is methods

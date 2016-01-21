@@ -10,6 +10,8 @@ public class ValidBean {
 
     public final int value;
 
+    public Object someTransientFieldWithNoBinder = new Object();
+
     public ValidBean(int value) {
         this.value = value;
     }
