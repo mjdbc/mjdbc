@@ -1,4 +1,4 @@
-__mjdbc__  - Small and efficient JDBC wrapper.
+__mJDBC__  - Small and efficient JDBC wrapper.
 
 ***mJDBC is:***
 * *Small:* no external dependencies. Distribution size is  less than 50kb.
@@ -30,7 +30,7 @@ Add snapshots repository to your pom.xml file. The project now is in alpha stage
         <url>https://oss.sonatype.org/content/repositories/snapshots</url>
     </repository>
 </repositories>
-```
+
 
 Add project dependency:
 ```xml
