@@ -1,6 +1,5 @@
 __mJDBC__  - Small and efficient JDBC wrapper.
 
-***mJDBC is:***
 * *Small:* no external dependencies. Jar size is  less than 50kb.
 * *Simple:* no special configuration required. Start using it after 1 line of initialization code.
 * *Reliable:* all SQL statements are parsed and validated on application startup.
