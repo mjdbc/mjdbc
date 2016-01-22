@@ -1,6 +1,6 @@
 __mjdbc__  - Small and efficient JDBC wrapper.
 
-***mjdbc is:***
+***mJDBC is:***
 * *Small:* no external dependencies. Distribution size is  less than 50kb.
 * *Simple:* no special configuration is needed. Start using it after 1 line of initialization code.
 * *Reliable:* all SQL statements are parsed and validated during application startup.
@@ -118,7 +118,7 @@ Optional: register this mapper in Db interface during initialization;
 Now use User type in all queries attached to Db instance.
 Mappers for native Java types are supported by default [(source)](https://github.com/mjdbc/mjdbc/blob/master/src/main/java/com/github/mjdbc/util/Mappers.java) and can be overridden if needed..
 
-Note: If mapper is not registered manually mjdbc will try to derive it from .MAPPER static field of the mapped object.
+Note: If mapper is not registered manually mJDBC will try to derive it from .MAPPER static field of the mapped object.
 
 ##### Parameter binders
 Parameters in @Sql interfaces can be bound with @Bind or @BindBean annotations.
@@ -130,7 +130,7 @@ Binders for native Java types are supported by default [(source)](https://github
 In most cases you do not need to create your own binder. All you need is to make your class to implement one of these interfaces: DbInt, DbLong or DbString [(example)](https://github.com/mjdbc/mjdbc/blob/master/src/test/java/com/github/mjdbc/test/asset/model/UserId.java).
 
 ##### Low level API
-Usage of java.sql.* API is transparent in mjdbc. You can always get statements, connections, result sets and have a full power of native JDBC driver.
+Usage of java.sql.* API is transparent in mJDBC. You can always get statements, connections, result sets and have a full power of native JDBC driver.
 Example:
 ```java
 Db db = new Db(ds);
