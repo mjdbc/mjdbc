@@ -111,7 +111,7 @@ public static final DbMapper<User> MAPPER = (r) -> {
 
 Optional: register this mapper in Db interface during initialization;
 ```java
-    Db db = new Db(ds);
+    Db db = new DbImpl(ds);
     db.registerMapper(User.class, User.MAPPER)
 ```
 Now use User type in all queries attached to Db instance.
