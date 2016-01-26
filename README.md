@@ -109,7 +109,7 @@ public static final DbMapper<User> MAPPER = (r) -> {
 };
 ```
 
-Optional: register this mapper in MJDBC interface during initialization;
+Optional: register this mapper during initialization;
 ```java
     Db db = Db.newInstance(ds);
     db.registerMapper(User.class, User.MAPPER)
