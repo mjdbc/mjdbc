@@ -1,7 +1,7 @@
 package com.github.mjdbc.test;
 
+import com.github.mjdbc.Db;
 import com.github.mjdbc.DbConnection;
-import com.github.mjdbc.DbImpl;
 import com.github.mjdbc.test.asset.dbi.SampleDbi;
 import com.github.mjdbc.test.asset.dbi.SampleDbiImpl;
 import com.github.mjdbc.test.asset.sql.UserSql;
@@ -20,7 +20,7 @@ import org.junit.Test;
 public class LazyTxTest extends Assert {
     private ProfiledDataSource profiledDs;
     private HikariDataSource origDs;
-    private DbImpl db;
+    private Db db;
     private SampleDbi dbi;
     private UserSql sampleQueries;
 
@@ -28,7 +28,7 @@ public class LazyTxTest extends Assert {
     public void setUp() {
         origDs = DbUtils.prepareDataSource("sample");
         profiledDs = new ProfiledDataSource(origDs);
-        db = new DbImpl(profiledDs);
+        db = Db.newInstance(profiledDs);
         dbi = db.attachDbi(new SampleDbiImpl(db), SampleDbi.class);
         sampleQueries = db.attachSql(UserSql.class);
     }

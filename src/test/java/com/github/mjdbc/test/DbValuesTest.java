@@ -1,7 +1,6 @@
 package com.github.mjdbc.test;
 
 import com.github.mjdbc.Db;
-import com.github.mjdbc.DbImpl;
 import com.github.mjdbc.DbStatement;
 import com.github.mjdbc.Mappers;
 import com.github.mjdbc.test.util.DbUtils;
@@ -33,7 +32,7 @@ public class DbValuesTest extends Assert {
     @Before
     public void setUp() {
         ds = DbUtils.prepareDataSource("sample");
-        db = new DbImpl(ds);
+        db = Db.newInstance(ds);
     }
 
     @After

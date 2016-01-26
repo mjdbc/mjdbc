@@ -1,6 +1,6 @@
 package com.github.mjdbc.test;
 
-import com.github.mjdbc.DbImpl;
+import com.github.mjdbc.Db;
 import com.github.mjdbc.test.asset.model.ValidBean;
 import com.github.mjdbc.test.asset.model.MultipleMappersBean1;
 import com.github.mjdbc.test.asset.model.User;
@@ -33,13 +33,13 @@ public class DbAttachSqlTest extends Assert {
     /**
      * Database instance.
      */
-    private DbImpl db;
+    private Db db;
 
 
     @Before
     public void setUp() {
         ds = DbUtils.prepareDataSource("sample");
-        db = new DbImpl(ds);
+        db = Db.newInstance(ds);
         db.registerMapper(UserId.class, UserId.MAPPER);
         db.registerMapper(User.class, User.MAPPER);
     }

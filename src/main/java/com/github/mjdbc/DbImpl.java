@@ -29,7 +29,7 @@ import static java.util.Objects.requireNonNull;
 /**
  * Main class of the library: implementation for Db interface.
  */
-public class DbImpl implements Db {
+class DbImpl implements Db {
 
     private final ThreadLocal<DbConnection> activeConnections = new ThreadLocal<>();
 
@@ -46,7 +46,7 @@ public class DbImpl implements Db {
     @NotNull
     private final DataSource dataSource;
 
-    public DbImpl(@NotNull DataSource dataSource) {
+    DbImpl(@NotNull DataSource dataSource) {
         this.dataSource = dataSource;
     }
 

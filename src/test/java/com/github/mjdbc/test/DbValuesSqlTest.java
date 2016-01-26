@@ -1,7 +1,6 @@
 package com.github.mjdbc.test;
 
 import com.github.mjdbc.Db;
-import com.github.mjdbc.DbImpl;
 import com.github.mjdbc.test.asset.sql.DbValueSql;
 import com.github.mjdbc.test.util.DbUtils;
 import com.github.mjdbc.type.impl.DbIntValue;
@@ -28,7 +27,7 @@ public class DbValuesSqlTest extends Assert {
     @Before
     public void setUp() {
         ds = DbUtils.prepareDataSource("types");
-        Db db = new DbImpl(ds);
+        Db db = Db.newInstance(ds);
         sql = db.attachSql(DbValueSql.class);
     }
 

@@ -45,7 +45,7 @@ Add project dependency:
 ##### Raw SQL queries
 ```java
     java.sql.DataSource ds = ...; // have a DataSource first. 
-    Db db = new DbImpl(ds);  // wrap DataSource with Db class instance.
+    Db db = Db.newInstance(ds);  // wrap DataSource with mJDBC wrapper.
     MySqlQueries q = db.attachSql(MySqlQueries.class) // attach query interface. All queries are parsed and validated at this moment.
     User user = q.getUserByLogin('login'); // run any query method
 ```
@@ -63,7 +63,7 @@ To run multiple SQL queries within a single transaction create a dedicated dbi (
 It will return a proxy class that will wrap all interface methods into transactions.
 ```java
     java.sql.DataSource ds = ...;
-    Db db = new Db(ds);
+    Db db = Db.newInstance(ds);
     MyDbi dbi = db.attachDbi(MyDbiImpl(), MyDbi.class); // all MyDbi method calls will be proxied to MyDbiImpl wrapped with transactions.
     User user = dbi.getUserByLoginCreateIfNotFound('login');
 ```
@@ -109,12 +109,12 @@ public static final DbMapper<User> MAPPER = (r) -> {
 };
 ```
 
-Optional: register this mapper in Db interface during initialization;
+Optional: register this mapper in MJDBC interface during initialization;
 ```java
-    Db db = new DbImpl(ds);
+    Db db = Db.newInstance(ds);
     db.registerMapper(User.class, User.MAPPER)
 ```
-Now use User type in all queries attached to Db instance.
+Now use User type in all queries attached to MJDBC database instance.
 Mappers for native Java types are supported by default [(source)](https://github.com/mjdbc/mjdbc/blob/master/src/main/java/com/github/mjdbc/util/Mappers.java) and can be overridden if needed..
 
 Note: If mapper is not registered manually mJDBC will try to derive it from .MAPPER static field of the mapped object.
@@ -132,7 +132,7 @@ In most cases you do not need to create your own binder. All you need is to make
 Usage of java.sql.* API is transparent in mJDBC. You can always get statements, connections, result sets and have a full power of native JDBC driver.
 Example:
 ```java
-Db db = new Db(ds);
+Db db = Db.newInstance(ds);
 db.execute(c -> { // wraps method into transaction
     try (java.sql.Statement statement = c.getConnection().createStatement()) {
         ...
@@ -141,7 +141,7 @@ db.execute(c -> { // wraps method into transaction
 ```
 If named parameters or object/collections mappers support is needed:
 ```java
-Db db = new Db(ds);
+Db db = Db.newInstance(ds);
 User user = db.execute(c -> { // wraps method into transaction
     DbStatement s = new DbStatement(c, "SELECT * FROM users WHERE login = :login", User.MAPPER)
     s.setString("login", login);

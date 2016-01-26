@@ -1,6 +1,6 @@
 package com.github.mjdbc.test;
 
-import com.github.mjdbc.DbImpl;
+import com.github.mjdbc.Db;
 import com.github.mjdbc.DbTimer;
 import com.github.mjdbc.test.asset.dbi.SampleDbi;
 import com.github.mjdbc.test.asset.dbi.SampleDbiImpl;
@@ -21,7 +21,7 @@ import java.sql.Timestamp;
 import java.util.List;
 
 /**
- * Set of examples to demonstrate basic MJDBC functionality.
+ * Set of examples to demonstrate basic Db functionality.
  */
 public class SamplesTest extends Assert {
     /**
@@ -32,7 +32,7 @@ public class SamplesTest extends Assert {
     /**
      * Database instance.
      */
-    private DbImpl db;
+    private Db db;
 
     /**
      * Data access interface. Set of complex SQL ops & business logic joined into transactions.
@@ -47,7 +47,7 @@ public class SamplesTest extends Assert {
     @Before
     public void setUp() {
         ds = DbUtils.prepareDataSource("sample");
-        db = new DbImpl(ds);
+        db = Db.newInstance(ds);
         dbi = db.attachDbi(new SampleDbiImpl(db), SampleDbi.class);
 
         // Usually DB must be accessed by calling Dbi interface method.
