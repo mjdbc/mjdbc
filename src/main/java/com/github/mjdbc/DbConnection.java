@@ -12,7 +12,7 @@ import java.util.Objects;
 
 /**
  * Lightweight java.sql.Connection wrapper.
- * Used in pair with DbStatement and DbOpX classes for automatic statements cleanup when connection is closed.
+ * Used in pair with DbPreparedStatement and DbOpX classes for automatic statements cleanup when connection is closed.
  */
 public class DbConnection {
     /**
@@ -31,7 +31,7 @@ public class DbConnection {
      * List of statements to close when connection is closed.
      */
     @NotNull
-    protected final List<DbStatement> statementsToClose = new ArrayList<>();
+    protected final List<DbPreparedStatement> statementsToClose = new ArrayList<>();
 
     public DbConnection(@NotNull DataSource dataSource) {
         this.dataSource = Objects.requireNonNull(dataSource);
@@ -75,7 +75,7 @@ public class DbConnection {
     }
 
     public void close() throws SQLException {
-        for (DbStatement s : statementsToClose) {
+        for (DbPreparedStatement s : statementsToClose) {
             try {
                 s.close();
             } catch (SQLException ignored) {

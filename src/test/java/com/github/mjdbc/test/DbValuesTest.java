@@ -1,7 +1,7 @@
 package com.github.mjdbc.test;
 
 import com.github.mjdbc.Db;
-import com.github.mjdbc.DbStatement;
+import com.github.mjdbc.DbPreparedStatement;
 import com.github.mjdbc.Mappers;
 import com.github.mjdbc.test.util.DbUtils;
 import com.github.mjdbc.type.DbInt;
@@ -42,7 +42,7 @@ public class DbValuesTest extends Assert {
 
     @Test
     public void checkDbInt() {
-        String login = db.execute(c -> new DbStatement<>(c, "SELECT login FROM users WHERE id = :id", Mappers.StringMapper)
+        String login = db.execute(c -> new DbPreparedStatement<>(c, "SELECT login FROM users WHERE id = :id", Mappers.StringMapper)
                 .set("id", () -> 1)
                 .query());
         assertEquals("u1", login);
@@ -50,7 +50,7 @@ public class DbValuesTest extends Assert {
 
     @Test
     public void checkDbIntNull() {
-        String login = db.execute(c -> new DbStatement<>(c, "SELECT login FROM users WHERE id = :id", Mappers.StringMapper)
+        String login = db.execute(c -> new DbPreparedStatement<>(c, "SELECT login FROM users WHERE id = :id", Mappers.StringMapper)
                 .set("id", (DbInt) null)
                 .query());
         assertNull(login);
@@ -58,8 +58,8 @@ public class DbValuesTest extends Assert {
 
     @Test
     public void checkDbLong() {
-        db.executeV(c -> new DbStatement<>(c, "UPDATE users SET score = 10").update());
-        int res = db.executeNN(c -> new DbStatement<>(c, "SELECT COUNT(*) FROM users WHERE score > :min_score", Mappers.IntegerMapper)
+        db.executeV(c -> new DbPreparedStatement<>(c, "UPDATE users SET score = 10").update());
+        int res = db.executeNN(c -> new DbPreparedStatement<>(c, "SELECT COUNT(*) FROM users WHERE score > :min_score", Mappers.IntegerMapper)
                 .set("min_score", () -> 1L)
                 .queryNN());
         assertEquals(2, res);
@@ -67,7 +67,7 @@ public class DbValuesTest extends Assert {
 
     @Test
     public void checkDbLongNull() {
-        String login = db.execute(c -> new DbStatement<>(c, "SELECT login FROM users WHERE score > :min_score", Mappers.StringMapper)
+        String login = db.execute(c -> new DbPreparedStatement<>(c, "SELECT login FROM users WHERE score > :min_score", Mappers.StringMapper)
                 .set("min_score", (DbLong) null)
                 .query());
         assertNull(login);
@@ -75,7 +75,7 @@ public class DbValuesTest extends Assert {
 
     @Test
     public void checkDbString() {
-        int n = db.executeNN(c -> new DbStatement<>(c, "SELECT COUNT(*) FROM users WHERE login = :login", Mappers.IntegerMapper)
+        int n = db.executeNN(c -> new DbPreparedStatement<>(c, "SELECT COUNT(*) FROM users WHERE login = :login", Mappers.IntegerMapper)
                 .set("login", () -> "u1")
                 .queryNN());
         assertEquals(1, n);
@@ -83,7 +83,7 @@ public class DbValuesTest extends Assert {
 
     @Test
     public void checkDbStringNull() {
-        int n = db.executeNN(c -> new DbStatement<>(c, "SELECT COUNT(*) FROM users WHERE login = :login", Mappers.IntegerMapper)
+        int n = db.executeNN(c -> new DbPreparedStatement<>(c, "SELECT COUNT(*) FROM users WHERE login = :login", Mappers.IntegerMapper)
                 .set("login", (DbString) null)
                 .queryNN());
         assertEquals(0, n);
@@ -91,7 +91,7 @@ public class DbValuesTest extends Assert {
 
     @Test
     public void checkDbTimestamp() {
-        int n = db.executeNN(c -> new DbStatement<>(c, "SELECT COUNT(*) FROM users WHERE reg_date > :reg_date", Mappers.IntegerMapper)
+        int n = db.executeNN(c -> new DbPreparedStatement<>(c, "SELECT COUNT(*) FROM users WHERE reg_date > :reg_date", Mappers.IntegerMapper)
                 .set("reg_date", () -> new Timestamp(0))
                 .queryNN());
         assertEquals(2, n);

@@ -196,7 +196,7 @@ class DbImpl implements Db {
             throw new IllegalArgumentException("Illegal SQL: '" + sql + "' in method: " + m);
         }
         Map<String, List<Integer>> parametersMapping = new HashMap<>();
-        String parsedSql = DbStatement.parse(sql, parametersMapping);
+        String parsedSql = DbPreparedStatement.parse(sql, parametersMapping);
 
         // parameter bindings
         List<BindInfo> bindings = new ArrayList<>();

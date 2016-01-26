@@ -1,7 +1,7 @@
 package com.github.mjdbc.test.asset.dbi;
 
 import com.github.mjdbc.Db;
-import com.github.mjdbc.DbStatement;
+import com.github.mjdbc.DbPreparedStatement;
 import com.github.mjdbc.test.asset.model.User;
 import com.github.mjdbc.test.asset.model.UserId;
 import com.github.mjdbc.test.asset.sql.UserSql;
@@ -57,7 +57,7 @@ public class SampleDbiImpl implements SampleDbi {
     @Override
     public User getUserByLogin(@NotNull String login) {
         Objects.requireNonNull(login);
-        return db.execute(c -> new DbStatement<>(c, "SELECT * FROM users WHERE login = :login", User.MAPPER).set("login", login).query());
+        return db.execute(c -> new DbPreparedStatement<>(c, "SELECT * FROM users WHERE login = :login", User.MAPPER).set("login", login).query());
     }
 
     /**

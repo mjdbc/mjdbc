@@ -143,7 +143,7 @@ If named parameters or object/collections mappers support is needed:
 ```java
 Db db = Db.newInstance(ds);
 User user = db.execute(c -> { // wraps method into transaction
-    DbStatement s = new DbStatement(c, "SELECT * FROM users WHERE login = :login", User.MAPPER)
+    DbPreparedStatement s = new DbPreparedStatement(c, "SELECT * FROM users WHERE login = :login", User.MAPPER)
     s.setString("login", login);
 
     // Direct access to JDBC starts here
@@ -153,12 +153,12 @@ User user = db.execute(c -> { // wraps method into transaction
     java.sql.PreparedStatement ps = s.statement;
     ... // write some low-level code with java.sql.PreparedStatement: bind data streams, execute and check result set...
 
-    // or simply return the result using mapper class provided in DbStatement constructor.
+    // or simply return the result using mapper class provided in DbPreparedStatement constructor.
     return s.query();
 });
 ```
 
-Note: that when you use [DbStatement](https://github.com/mjdbc/mjdbc/blob/master/src/main/java/com/github/mjdbc/DbStatement.java) class it is not necessary to close it manually.
+Note: that when you use [DbPreparedStatement](https://github.com/mjdbc/mjdbc/blob/master/src/main/java/com/github/mjdbc/DbPreparedStatement.java) class it is not necessary to close it manually.
 It will be closed automatically when connection is closed (returned to pool). In this example  connection is closed when *db.execute()* method is finished.
 
 

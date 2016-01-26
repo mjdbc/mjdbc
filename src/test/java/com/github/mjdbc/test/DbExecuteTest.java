@@ -1,7 +1,7 @@
 package com.github.mjdbc.test;
 
 import com.github.mjdbc.Db;
-import com.github.mjdbc.DbStatement;
+import com.github.mjdbc.DbPreparedStatement;
 import com.github.mjdbc.Mappers;
 import com.github.mjdbc.test.util.DbUtils;
 import com.zaxxer.hikari.HikariDataSource;
@@ -38,7 +38,7 @@ public class DbExecuteTest extends Assert {
 
     @Test
     public void checkExecute() {
-        Integer n = db.execute(c -> new DbStatement<>(c, "SELECT COUNT(*) FROM users", Mappers.IntegerMapper).query());
+        Integer n = db.execute(c -> new DbPreparedStatement<>(c, "SELECT COUNT(*) FROM users", Mappers.IntegerMapper).query());
         assertEquals(new Integer(2), n);
     }
 }

@@ -39,7 +39,7 @@ class SqlProxy implements InvocationHandler {
         try {
             return db.execute(c -> {
                 //noinspection unchecked
-                DbStatement s = new DbStatement(c, p.parsedSql, p.resultMapper, p.parametersNamesMapping, p.useGeneratedKeys);
+                DbPreparedStatement s = new DbPreparedStatement(c, p.parsedSql, p.resultMapper, p.parametersNamesMapping, p.useGeneratedKeys);
                 if (args != null) {
                     if (p.batchIteratorFactory != null) {
                         return executeBatch(p, s, args);
@@ -62,7 +62,7 @@ class SqlProxy implements InvocationHandler {
         }
     }
 
-    private static Object executeBatch(@NotNull SqlOp p, @NotNull DbStatement s, @NotNull Object[] args) throws IllegalAccessException, InvocationTargetException, java.sql.SQLException {
+    private static Object executeBatch(@NotNull SqlOp p, @NotNull DbPreparedStatement s, @NotNull Object[] args) throws IllegalAccessException, InvocationTargetException, java.sql.SQLException {
         assert p.batchIteratorFactory != null;
         Object batchArg = args[p.batchArgIdx];
         //noinspection unchecked
@@ -80,7 +80,7 @@ class SqlProxy implements InvocationHandler {
         return null; //todo: return valid batch results
     }
 
-    private static void bindSingleStatementArgs(@NotNull SqlOp p, @NotNull DbStatement s, @NotNull Object[] args) throws IllegalAccessException, InvocationTargetException, java.sql.SQLException {
+    private static void bindSingleStatementArgs(@NotNull SqlOp p, @NotNull DbPreparedStatement s, @NotNull Object[] args) throws IllegalAccessException, InvocationTargetException, java.sql.SQLException {
         for (DbImpl.BindInfo bi : p.bindings) {
             List<Integer> sqlIndexes = p.parametersNamesMapping.get(bi.mappedName);
             if (sqlIndexes == null) {
