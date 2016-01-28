@@ -153,9 +153,9 @@
 
         <!-- Compile-time dependencies -->
         <dependency>
-            <groupId>com.intellij</groupId>
+            <groupId>org.jetbrains</groupId>
             <artifactId>annotations</artifactId>
-            <version>12.0</version>
+            <version>13.0</version>
             <scope>provided</scope>
         </dependency>
 
