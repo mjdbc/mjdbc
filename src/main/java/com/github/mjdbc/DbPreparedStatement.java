@@ -43,24 +43,24 @@ public class DbPreparedStatement<T> implements AutoCloseable {
         this(dbc, sql, resultMapper, false);
     }
 
-    public DbPreparedStatement(@NotNull DbConnection dbc, @NotNull String sql, @NotNull DbMapper<T> resultMapper, boolean useGeneratedKeys) throws SQLException {
+    public DbPreparedStatement(@NotNull DbConnection dbc, @NotNull String sql, @NotNull DbMapper<T> resultMapper, boolean returnGeneratedKeys) throws SQLException {
         this.resultMapper = resultMapper;
         this.parametersMapping = new HashMap<>();
         String parsedSql = parse(sql, this.parametersMapping);
-        statement = prepareStatement(dbc.getConnection(), parsedSql, useGeneratedKeys);
+        statement = prepareStatement(dbc.getConnection(), parsedSql, returnGeneratedKeys);
         dbc.statementsToClose.add(this);
     }
 
     public DbPreparedStatement(@NotNull DbConnection dbc, @NotNull String parsedSql, @NotNull DbMapper<T> resultMapper,
-                               Map<String, List<Integer>> parametersMapping, boolean useGeneratedKeys) throws SQLException {
+                               Map<String, List<Integer>> parametersMapping, boolean returnGeneratedKeys) throws SQLException {
         this.resultMapper = resultMapper;
         this.parametersMapping = parametersMapping;
-        statement = prepareStatement(dbc.getConnection(), parsedSql, useGeneratedKeys);
+        statement = prepareStatement(dbc.getConnection(), parsedSql, returnGeneratedKeys);
         dbc.statementsToClose.add(this);
     }
 
-    private PreparedStatement prepareStatement(@NotNull Connection c, @NotNull String parsedSql, boolean useGeneratedKeys) throws SQLException {
-        return useGeneratedKeys ? c.prepareStatement(parsedSql, Statement.RETURN_GENERATED_KEYS) : c.prepareStatement(parsedSql);
+    private PreparedStatement prepareStatement(@NotNull Connection c, @NotNull String parsedSql, boolean returnGeneratedKeys) throws SQLException {
+        return returnGeneratedKeys ? c.prepareStatement(parsedSql, Statement.RETURN_GENERATED_KEYS) : c.prepareStatement(parsedSql);
     }
 
 

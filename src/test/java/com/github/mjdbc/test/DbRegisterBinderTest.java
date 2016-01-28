@@ -1,10 +1,13 @@
 package com.github.mjdbc.test;
 
 import com.github.mjdbc.Db;
-import com.github.mjdbc.test.asset.sql.ReaderSql;
-import com.github.mjdbc.test.asset.sql.UserSql;
+import com.github.mjdbc.test.asset.model.DbType1;
+import com.github.mjdbc.test.asset.model.DbType2;
 import com.github.mjdbc.test.asset.model.User;
 import com.github.mjdbc.test.asset.model.UserId;
+import com.github.mjdbc.test.asset.sql.AmbiguousTypeSql;
+import com.github.mjdbc.test.asset.sql.ReaderSql;
+import com.github.mjdbc.test.asset.sql.UserSql;
 import com.github.mjdbc.test.util.DbUtils;
 import com.zaxxer.hikari.HikariDataSource;
 import org.junit.After;
@@ -73,6 +76,15 @@ public class DbRegisterBinderTest extends Assert {
     public void checkNullBinderFunctionTriggersNullPointerException() {
         //noinspection ConstantConditions
         db.registerBinder(Reader.class, null);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void multipleBindersForSameObjectThrowException() {
+        db.registerBinder(DbType1.class, (statement, idx, value) -> {
+        });
+        db.registerBinder(DbType2.class, (statement, idx, value) -> {
+        });
+        db.attachSql(AmbiguousTypeSql.class);
     }
 
 }

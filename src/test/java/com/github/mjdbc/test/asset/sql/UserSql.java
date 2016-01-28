@@ -4,7 +4,7 @@ package com.github.mjdbc.test.asset.sql;
 import com.github.mjdbc.Bind;
 import com.github.mjdbc.BindBean;
 import com.github.mjdbc.Sql;
-import com.github.mjdbc.UseGeneratedKeys;
+import com.github.mjdbc.GetGeneratedKeys;
 import com.github.mjdbc.test.asset.model.User;
 import com.github.mjdbc.test.asset.model.UserId;
 import org.jetbrains.annotations.NotNull;
@@ -47,7 +47,7 @@ public interface UserSql {
     void updateScore(@BindBean User user);
 
     @NotNull
-    @UseGeneratedKeys
+    @GetGeneratedKeys
     @Sql("INSERT INTO users(login, first_name, last_name, gender, score, reg_date) VALUES (:login, :firstName, :lastName, :gender, :score, :registrationDate)")
     UserId insertUser(@BindBean User user);
 }

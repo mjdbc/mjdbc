@@ -39,7 +39,7 @@ class SqlProxy implements InvocationHandler {
         try {
             return db.execute(c -> {
                 //noinspection unchecked
-                DbPreparedStatement s = new DbPreparedStatement(c, p.parsedSql, p.resultMapper, p.parametersNamesMapping, p.useGeneratedKeys);
+                DbPreparedStatement s = new DbPreparedStatement(c, p.parsedSql, p.resultMapper, p.parametersNamesMapping, p.returnGeneratedKeys);
                 if (args != null) {
                     if (p.batchIteratorFactory != null) {
                         return executeBatch(p, s, args);
@@ -47,7 +47,7 @@ class SqlProxy implements InvocationHandler {
                     bindSingleStatementArgs(p, s, args);
                 }
                 if (p.resultMapper != Mappers.VoidMapper) {
-                    if (p.useGeneratedKeys) {
+                    if (p.returnGeneratedKeys) {
                         return s.updateAndGetGeneratedKeys();
                     } else {
                         Object res = s.query();

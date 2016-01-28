@@ -22,6 +22,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 import static java.lang.reflect.Modifier.*;
 import static java.util.Objects.requireNonNull;
@@ -258,7 +259,7 @@ class DbImpl implements Db {
             }
         }
 
-        boolean useGeneratedKeys = returnType.getAnnotation(UseGeneratedKeys.class) != null || sql.toUpperCase().startsWith("INSERT ");
+        boolean returnGeneratedKeys = returnType.getAnnotation(GetGeneratedKeys.class) != null || sql.toUpperCase().startsWith("INSERT ");
 
         int batchSize = sqlAnnotation.batchChunkSize();
         if (batchSize <= 0) {
@@ -266,7 +267,7 @@ class DbImpl implements Db {
         }
         // construct result mapping
         BindInfo[] bindingsArray = bindings.toArray(new BindInfo[bindings.size()]);
-        SqlOp op = new SqlOp(parsedSql, resultMapper, useGeneratedKeys, parametersMapping, bindingsArray, batchIteratorFactory, batchParamIdx, batchSize);
+        SqlOp op = new SqlOp(parsedSql, resultMapper, returnGeneratedKeys, parametersMapping, bindingsArray, batchIteratorFactory, batchParamIdx, batchSize);
         opByMethod.put(m, op);
     }
 
@@ -356,14 +357,23 @@ class DbImpl implements Db {
     private DbBinder findBinderByType(@NotNull Class<?> parameterType, @Nullable Type genericType) {
         Class<?> effectiveType = getEffectiveType(parameterType, genericType);
         DbBinder binder = binderByClass.get(effectiveType);
-        if (binder == null) {
-            binder = findBinderByInterfaces(effectiveType.getInterfaces());
-            if (binder == null) {
-                Class superClass = effectiveType.getSuperclass();
-                binder = superClass == null ? null : findBinderByType(superClass, null);
-            }
+        if (binder != null) {
+            return binder;
         }
-        return binder;
+        Class superClass = effectiveType.getSuperclass();
+        binder = superClass == null ? null : findBinderByType(superClass, null);
+        if (binder != null) {
+            return binder;
+        }
+        List<DbBinder> interfaceBinders = findBindersByInterfaces(effectiveType.getInterfaces());
+        if (interfaceBinders.isEmpty()) {
+            return null;
+        }
+        if (interfaceBinders.size() > 1) {
+            throw new IllegalArgumentException("Multiple binders for type: " + effectiveType
+                    + ", binders: " + interfaceBinders.stream().map(b -> b.getClass().getName()).collect(Collectors.joining(", ")));
+        }
+        return interfaceBinders.get(0);
     }
 
     private static Class<?> getEffectiveType(@NotNull Class<?> parameterType, @Nullable Type genericType) {
@@ -403,17 +413,15 @@ class DbImpl implements Db {
         throw new IllegalStateException("No BatchIteratorFactory found for " + parameterType);
     }
 
-    private DbBinder findBinderByInterfaces(@NotNull Class<?>[] interfaces) {
+    private List<DbBinder> findBindersByInterfaces(@NotNull Class<?>[] interfaces) {
+        List<DbBinder> binders = new ArrayList<>();
         for (Class interfaceClass : interfaces) {
             DbBinder binder = binderByClass.get(interfaceClass);
-            if (binder == null) {
-                binder = findBinderByInterfaces(interfaceClass.getInterfaces());
-            }
-            if (binder != null) {
-                return binder;
+            if (binder != null && !binders.contains(binder)) {
+                binders.add(binder);
             }
         }
-        return null;
+        return binders;
     }
 
     /**
@@ -432,18 +440,18 @@ class DbImpl implements Db {
         @NotNull
         final BindInfo[] bindings;
 
-        final boolean useGeneratedKeys;
+        final boolean returnGeneratedKeys;
 
         @Nullable
         final BatchIteratorFactory batchIteratorFactory;
         final int batchArgIdx;
         final int batchSize;
 
-        private SqlOp(@NotNull String parsedSql, @NotNull DbMapper resultMapper, boolean useGeneratedKeys,
+        private SqlOp(@NotNull String parsedSql, @NotNull DbMapper resultMapper, boolean returnGeneratedKeys,
                       @NotNull Map<String, List<Integer>> parametersNamesMapping, @NotNull BindInfo[] bindings,
                       @Nullable BatchIteratorFactory batchIteratorFactory, int batchArgIdx, int batchSize) {
             this.parsedSql = parsedSql;
-            this.useGeneratedKeys = useGeneratedKeys;
+            this.returnGeneratedKeys = returnGeneratedKeys;
             this.resultMapper = resultMapper;
             this.parametersNamesMapping = parametersNamesMapping;
             this.bindings = bindings;
