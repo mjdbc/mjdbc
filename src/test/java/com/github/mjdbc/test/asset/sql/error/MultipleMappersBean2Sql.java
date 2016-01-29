@@ -1,8 +1,8 @@
-package com.github.mjdbc.test.asset.sql;
+package com.github.mjdbc.test.asset.sql.error;
 
 
 import com.github.mjdbc.Sql;
-import com.github.mjdbc.test.asset.model.MultipleMappersBean2;
+import com.github.mjdbc.test.asset.model.error.MultipleMappersBean2;
 
 /**
  * Broken Sql interface used for testing.

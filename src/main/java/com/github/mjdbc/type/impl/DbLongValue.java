@@ -3,9 +3,6 @@ package com.github.mjdbc.type.impl;
 public class DbLongValue extends AbstractDbLong {
     protected long value;
 
-    public DbLongValue() {
-    }
-
     public DbLongValue(int value) {
         this.value = value;
     }

@@ -123,6 +123,7 @@ public class ProfiledPreparedStatement implements PreparedStatement {
     @Override
     @Deprecated
     public void setUnicodeStream(int parameterIndex, InputStream x, int length) throws SQLException {
+        //noinspection deprecation
         ps.setUnicodeStream(parameterIndex, x, length);
     }
 

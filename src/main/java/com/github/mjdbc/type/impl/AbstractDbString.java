@@ -12,7 +12,7 @@ public abstract class AbstractDbString implements DbString {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         return this == o || (o != null && o instanceof DbString && equals(getDbValue(), ((DbString) o).getDbValue()));
     }
 

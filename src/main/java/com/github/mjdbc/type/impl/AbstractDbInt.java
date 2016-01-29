@@ -1,6 +1,7 @@
 package com.github.mjdbc.type.impl;
 
 import com.github.mjdbc.type.DbInt;
+import org.jetbrains.annotations.Nullable;
 
 public abstract class AbstractDbInt implements DbInt {
 
@@ -10,7 +11,7 @@ public abstract class AbstractDbInt implements DbInt {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         return this == o || (o != null && o instanceof DbInt && getDbValue() == ((DbInt) o).getDbValue());
     }
 }

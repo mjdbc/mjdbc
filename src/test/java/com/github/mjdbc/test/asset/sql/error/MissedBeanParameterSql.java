@@ -1,4 +1,4 @@
-package com.github.mjdbc.test.asset.sql;
+package com.github.mjdbc.test.asset.sql.error;
 
 
 import com.github.mjdbc.BindBean;

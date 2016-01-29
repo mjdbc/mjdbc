@@ -232,6 +232,9 @@ class DbImpl implements Db {
             if (name.isEmpty()) {
                 throw new IllegalArgumentException("Parameter name is empty at position: " + i + ", method: " + m);
             }
+            if (!isValidParameterName(name)) {
+                throw new IllegalArgumentException("Illegal @Bind parameter name: " + name + " , method: " + m + ". Use valid Java-style names.");
+            }
             DbBinder binder = findBinderByType(parameterType, genericType);
             if (binder == null) {
                 throw new IllegalArgumentException("No parameter binder for: '" + parameterType + "', method: " + m + ", position: " + i + ", type: " + parameterType);
@@ -247,6 +250,9 @@ class DbImpl implements Db {
                 }
                 batchParamIdx = i;
                 batchIteratorFactory = paramBatchIteratorFactory;
+            }
+            if (bindings.stream().filter(f -> f.mappedName.equals(name)).findAny().isPresent()) {
+                throw new IllegalArgumentException("Duplicate parameter name:" + name + " method: ");
             }
             bindings.add(new BindInfo(name, binder, i, null, null));
         }
@@ -269,6 +275,18 @@ class DbImpl implements Db {
         BindInfo[] bindingsArray = bindings.toArray(new BindInfo[bindings.size()]);
         SqlOp op = new SqlOp(parsedSql, resultMapper, returnGeneratedKeys, parametersMapping, bindingsArray, batchIteratorFactory, batchParamIdx, batchSize);
         opByMethod.put(m, op);
+    }
+
+    private static boolean isValidParameterName(@NotNull String name) {
+        if (name.isEmpty() || !Character.isJavaIdentifierStart(name.charAt(0))) {
+            return false;
+        }
+        for (char c : name.toCharArray()) {
+            if (!Character.isJavaIdentifierPart(c)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     @NotNull

@@ -124,7 +124,6 @@ public class ScriptRunner {
      *
      * @param conn   - the connection to use for the script
      * @param reader - the source of the script
-     * @throws SQLException if any SQL errors occur
      * @throws IOException  if there is an error reading from the Reader
      */
     @SuppressWarnings("StatementWithEmptyBody")
@@ -138,7 +137,7 @@ public class ScriptRunner {
                     command = new StringBuffer();
                 }
                 String trimmedLine = line.trim();
-                final Matcher delimMatch = delimP.matcher(trimmedLine);
+                Matcher delimMatch = delimP.matcher(trimmedLine);
                 if (trimmedLine.length() < 1 || trimmedLine.startsWith("//")) {
                     // Do nothing
                 } else if (delimMatch.matches()) {

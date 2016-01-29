@@ -3,9 +3,6 @@ package com.github.mjdbc.type.impl;
 public class DbIntValue extends AbstractDbInt {
     protected int value;
 
-    public DbIntValue() {
-    }
-
     public DbIntValue(int value) {
         this.value = value;
     }

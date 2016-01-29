@@ -25,6 +25,7 @@ public interface Db {
     /**
      * Registers prepared statement parameter binder.
      * A binder for parameter is looked up by matching class first, any superclass second or any interface third.
+     * The old binder for this type is removed.
      *
      * @param binderClass parameter class to be processed by this binder.
      * @param binder      binder implementation.

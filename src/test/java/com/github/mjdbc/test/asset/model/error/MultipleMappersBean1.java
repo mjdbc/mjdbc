@@ -1,4 +1,4 @@
-package com.github.mjdbc.test.asset.model;
+package com.github.mjdbc.test.asset.model.error;
 
 import com.github.mjdbc.DbMapper;
 import com.github.mjdbc.Mapper;

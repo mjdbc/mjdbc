@@ -1,4 +1,4 @@
-package com.github.mjdbc.test.asset.model;
+package com.github.mjdbc.test.asset.model.error;
 
 public class InvalidBean {
     @SuppressWarnings("unused")

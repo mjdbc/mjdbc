@@ -1,10 +1,10 @@
-package com.github.mjdbc.test.asset.sql;
+package com.github.mjdbc.test.asset.sql.error;
 
 import com.github.mjdbc.Bind;
 import com.github.mjdbc.BindBean;
 import com.github.mjdbc.Sql;
 import com.github.mjdbc.GetGeneratedKeys;
-import com.github.mjdbc.test.asset.model.FakeGettersBean;
+import com.github.mjdbc.test.asset.model.error.FakeGettersBean;
 
 public interface FakeGettersBeanSql {
 

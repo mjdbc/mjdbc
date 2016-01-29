@@ -5,7 +5,7 @@ import com.github.mjdbc.test.asset.model.DbType1;
 import com.github.mjdbc.test.asset.model.DbType2;
 import com.github.mjdbc.test.asset.model.User;
 import com.github.mjdbc.test.asset.model.UserId;
-import com.github.mjdbc.test.asset.sql.AmbiguousTypeSql;
+import com.github.mjdbc.test.asset.sql.error.AmbiguousTypeSql;
 import com.github.mjdbc.test.asset.sql.ReaderSql;
 import com.github.mjdbc.test.asset.sql.UserSql;
 import com.github.mjdbc.test.util.DbUtils;
@@ -52,7 +52,7 @@ public class DbRegisterBinderTest extends Assert {
      * Check that new binder class can be registered and used.
      */
     @Test
-    public void checkBinderRegistration() {
+    public void binderForUserClassIsRegisteredSuccessfully() {
         db.registerBinder(Reader.class, PreparedStatement::setCharacterStream);
         ReaderSql q1 = db.attachSql(ReaderSql.class);
         q1.updateFirstNameWithReader("u1", new StringReader("x"));
@@ -67,13 +67,13 @@ public class DbRegisterBinderTest extends Assert {
      * Check that registration of null binder triggers IllegalArgumentException
      */
     @Test(expected = NullPointerException.class)
-    public void checkNullBinderTriggersNullPointerException() {
+    public void nullBinderTypeTriggersNullPointerException() {
         //noinspection ConstantConditions,RedundantCast
         db.registerBinder((Class<Reader>) null, PreparedStatement::setCharacterStream);
     }
 
     @Test(expected = NullPointerException.class)
-    public void checkNullBinderFunctionTriggersNullPointerException() {
+    public void nullBinderFunctionTriggersNullPointerException() {
         //noinspection ConstantConditions
         db.registerBinder(Reader.class, null);
     }

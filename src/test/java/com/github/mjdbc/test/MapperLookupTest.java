@@ -3,7 +3,7 @@ package com.github.mjdbc.test;
 import com.github.mjdbc.Db;
 import com.github.mjdbc.test.asset.model.User;
 import com.github.mjdbc.test.asset.model.UserId;
-import com.github.mjdbc.test.asset.sql.InvalidMapperSql;
+import com.github.mjdbc.test.asset.sql.error.InvalidMapperSql;
 import com.github.mjdbc.test.asset.sql.UserSql;
 import com.github.mjdbc.test.util.DbUtils;
 import com.zaxxer.hikari.HikariDataSource;
