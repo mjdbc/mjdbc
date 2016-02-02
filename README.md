@@ -100,6 +100,7 @@ Extend [DbMapper](https://github.com/mjdbc/mjdbc/blob/master/src/main/java/com/g
 It may be convenient to put the implementation into the Java class it maps [(example)](https://github.com/mjdbc/mjdbc/blob/master/src/test/java/com/github/mjdbc/test/asset/model/User.java).
 
 ```java
+@Mapper
 public static final DbMapper<User> MAPPER = (r) -> {
     User user = new User();
     user.id = new UserId(r.getInt("id"));
@@ -117,7 +118,7 @@ Optional: register this mapper during initialization;
 Now use User type in all queries attached to MJDBC database instance.
 Mappers for native Java types are supported by default [(source)](https://github.com/mjdbc/mjdbc/blob/master/src/main/java/com/github/mjdbc/util/Mappers.java) and can be overridden if needed..
 
-Note: If mapper is not registered manually mJDBC will try to derive it from .MAPPER static field of the mapped object.
+Note: If mapper is not registered manually mJDBC will try to derive it searching for public static and final field of the mapped object annotated as @Mapper.
 
 ##### Parameter binders
 Parameters in @Sql interfaces can be bound with @Bind or @BindBean annotations.

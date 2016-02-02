@@ -1,6 +1,7 @@
 package com.github.mjdbc.test.asset.model;
 
 import com.github.mjdbc.DbMapper;
+import com.github.mjdbc.Mapper;
 import com.github.mjdbc.type.impl.DbIntValue;
 
 /**
@@ -11,5 +12,6 @@ public final class UserId extends DbIntValue {
         super(val);
     }
 
+    @Mapper
     public static final DbMapper<UserId> MAPPER = (r) -> new UserId(r.getInt(1));
 }

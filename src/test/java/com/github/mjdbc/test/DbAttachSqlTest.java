@@ -1,13 +1,17 @@
 package com.github.mjdbc.test;
 
 import com.github.mjdbc.Db;
+import com.github.mjdbc.DbImpl;
+import com.github.mjdbc.test.asset.model.BeanWithStaticFieldMapper;
 import com.github.mjdbc.test.asset.model.User;
 import com.github.mjdbc.test.asset.model.UserId;
 import com.github.mjdbc.test.asset.model.ValidBean;
-import com.github.mjdbc.test.asset.model.error.MultipleMappersBean1;
+import com.github.mjdbc.test.asset.model.error.MultipleMappersBean;
+import com.github.mjdbc.test.asset.sql.BeanWithStaticFieldMapperSql;
 import com.github.mjdbc.test.asset.sql.EmptyQuerySql;
 import com.github.mjdbc.test.asset.sql.EmptySql;
 import com.github.mjdbc.test.asset.sql.ValidBeansSql;
+import com.github.mjdbc.test.asset.sql.error.BeanWithNullMapperSql;
 import com.github.mjdbc.test.asset.sql.error.DuplicateParametersSql;
 import com.github.mjdbc.test.asset.sql.error.FakeGettersBeanSql;
 import com.github.mjdbc.test.asset.sql.error.IllegalParametersSql1;
@@ -15,7 +19,9 @@ import com.github.mjdbc.test.asset.sql.error.IllegalParametersSql2;
 import com.github.mjdbc.test.asset.sql.error.IllegalParametersSql3;
 import com.github.mjdbc.test.asset.sql.error.MissedParameterSql;
 import com.github.mjdbc.test.asset.sql.error.MultipleMappersBean1Sql;
-import com.github.mjdbc.test.asset.sql.error.MultipleMappersBean2Sql;
+import com.github.mjdbc.test.asset.sql.error.NonFinalMapperBeanSql;
+import com.github.mjdbc.test.asset.sql.error.NonPublicMapperBeanSql;
+import com.github.mjdbc.test.asset.sql.error.NonStaticMapperBeanSql;
 import com.github.mjdbc.test.asset.sql.error.UnboundBeanParameterSql;
 import com.github.mjdbc.test.asset.sql.error.UnboundParameterSql;
 import com.github.mjdbc.test.util.DbUtils;
@@ -37,13 +43,13 @@ public class DbAttachSqlTest extends Assert {
     /**
      * Database instance.
      */
-    private Db db;
+    private DbImpl db;
 
 
     @Before
     public void setUp() {
         ds = DbUtils.prepareDataSource("sample");
-        db = Db.newInstance(ds);
+        db = (DbImpl) Db.newInstance(ds);
         db.registerMapper(UserId.class, UserId.MAPPER);
         db.registerMapper(User.class, User.MAPPER);
     }
@@ -158,21 +164,14 @@ public class DbAttachSqlTest extends Assert {
         db.attachSql(MultipleMappersBean1Sql.class);
     }
 
-    /**
-     * Check that multiple mapper variants triggers error
-     */
-    @Test(expected = IllegalArgumentException.class)
-    public void multipleMappersThrowsException2() {
-        db.attachSql(MultipleMappersBean2Sql.class);
-    }
 
     /**
      * Check that manual mapper registration does not trigger error for a bean with multiple mappers
      */
     @Test
     public void multipleMappersThrowsException3() {
-        db.registerMapper(MultipleMappersBean1.class, MultipleMappersBean1.SOME_MAPPER1);
-        MultipleMappersBean1 bean = db.attachSql(MultipleMappersBean1Sql.class).selectABean();
+        db.registerMapper(MultipleMappersBean.class, MultipleMappersBean.SOME_MAPPER1);
+        MultipleMappersBean bean = db.attachSql(MultipleMappersBean1Sql.class).selectABean();
         assertEquals(1, bean.value);
     }
 
@@ -180,4 +179,33 @@ public class DbAttachSqlTest extends Assert {
     public void fakeGettersThrowException() {
         db.attachSql(FakeGettersBeanSql.class);
     }
+
+
+    @Test
+    public void checkBeanWithStaticFieldMapperByAnnotation() {
+        assertNull(db.getRegisteredMapperByType(BeanWithStaticFieldMapper.class));
+        db.attachSql(BeanWithStaticFieldMapperSql.class);
+        assertNotNull(db.getRegisteredMapperByType(BeanWithStaticFieldMapper.class));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void checkBeanNonPublicMapper() {
+        db.attachSql(NonPublicMapperBeanSql.class);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void checkBeanNonStaticMapper() {
+        db.attachSql(NonStaticMapperBeanSql.class);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void checkBeanNonFinalMapper() {
+        db.attachSql(NonFinalMapperBeanSql.class);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void checkBeanNullMapper() {
+        db.attachSql(BeanWithNullMapperSql.class);
+    }
+
 }

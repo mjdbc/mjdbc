@@ -21,7 +21,7 @@ final class ListMapper implements DbMapper<List> {
 
     @NotNull
     @Override
-    public List map(ResultSet r) throws SQLException {
+    public List map(@NotNull ResultSet r) throws SQLException {
         ArrayList res = new ArrayList();
         do {
             //noinspection unchecked

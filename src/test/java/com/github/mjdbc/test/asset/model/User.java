@@ -1,6 +1,7 @@
 package com.github.mjdbc.test.asset.model;
 
 import com.github.mjdbc.DbMapper;
+import com.github.mjdbc.Mapper;
 
 import java.sql.Timestamp;
 
@@ -25,6 +26,7 @@ public final class User {
     /**
      * Class to create User object from result set.
      */
+    @Mapper
     public static final DbMapper<User> MAPPER = (r) -> {
         User user = new User();
         user.id = new UserId(r.getInt("id"));

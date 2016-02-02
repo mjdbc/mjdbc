@@ -1,6 +1,8 @@
 package com.github.mjdbc;
 
 
+import org.jetbrains.annotations.NotNull;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
@@ -19,5 +21,5 @@ public interface DbMapper<T> {
      * @return Java object.
      * @throws SQLException
      */
-    T map(ResultSet r) throws SQLException;
+    T map(@NotNull  ResultSet r) throws SQLException;
 }

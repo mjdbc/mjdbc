@@ -30,7 +30,7 @@ import static java.util.Objects.requireNonNull;
 /**
  * Main class of the library: implementation for Db interface.
  */
-class DbImpl implements Db {
+public class DbImpl implements Db {
 
     private final ThreadLocal<DbConnection> activeConnections = new ThreadLocal<>();
 
@@ -174,14 +174,14 @@ class DbImpl implements Db {
         if (returnType == List.class) {
             ParameterizedType genericReturnType = (ParameterizedType) m.getGenericReturnType();
             Class<?> elementType = (Class<?>) genericReturnType.getActualTypeArguments()[0];
-            DbMapper elementMapper = findMapperByType(elementType);
+            DbMapper elementMapper = findOrResolveMapperByType(elementType);
             if (elementMapper != null) {
                 resultMapper = new ListMapper(elementMapper);
             } else {
                 throw new IllegalArgumentException(getNoMapperMessage(elementType));
             }
         } else {
-            resultMapper = findMapperByType(returnType);
+            resultMapper = findOrResolveMapperByType(returnType);
         }
         if (resultMapper == null) {
             throw new IllegalArgumentException(getNoMapperMessage(returnType));
@@ -292,7 +292,7 @@ class DbImpl implements Db {
     @NotNull
     private static String getNoMapperMessage(@NotNull Class<?> elementType) {
         return "Not supported query result type: " + elementType + "." +
-                " Add MAPPER field or register custom DbMapper for the type.";
+                " Add @Mapper field or manually register DbMapper instance for the type.";
     }
 
     /**
@@ -339,22 +339,30 @@ class DbImpl implements Db {
     }
 
     @Nullable
-    private DbMapper findMapperByType(@NotNull Class<?> type) {
+    public <T> DbMapper getRegisteredMapperByType(Class<T> type) {
+        return mapperByClass.get(type);
+    }
+
+    @Nullable
+    private DbMapper findOrResolveMapperByType(@NotNull Class<?> type) {
         DbMapper mapper = mapperByClass.get(type);
         if (mapper == null) {
             // search for a field marked as mapper with valid parameter type
             for (Field f : type.getDeclaredFields()) {
                 int mods = f.getModifiers();
-                if (Modifier.isStatic(mods) && Modifier.isPublic(mods) && f.getType().isAssignableFrom(DbMapper.class)) {
+                if (Modifier.isStatic(mods) && Modifier.isPublic(mods) && Modifier.isFinal(mods) && f.getType().isAssignableFrom(DbMapper.class)) {
                     AnnotatedType at = f.getAnnotatedType();
                     if (at instanceof AnnotatedParameterizedType) {
                         AnnotatedParameterizedType apt = (AnnotatedParameterizedType) at;
                         AnnotatedType[] args = apt.getAnnotatedActualTypeArguments();
                         if (args.length == 1 && args[0].getType() == type) {
                             Mapper a = f.getAnnotation(Mapper.class);
-                            if (a != null || f.getName().equals("MAPPER")) {
+                            if (a != null) {
                                 try {
                                     mapper = (DbMapper) f.get(type);
+                                    if (mapper == null) {
+                                        throw new IllegalArgumentException("Mapper must not be null: " + f);
+                                    }
                                 } catch (IllegalAccessException ignored) { // already checked for 'isPublic' before
                                 }
                                 if (mapperByClass.containsKey(type)) {
@@ -363,6 +371,10 @@ class DbImpl implements Db {
                                 mapperByClass.put(type, mapper);
                             }
                         }
+                    }
+                } else {
+                    if (f.getAnnotation(Mapper.class) != null) {
+                        throw new IllegalArgumentException("@Mapper field must be public, static final and have valid parametrized type: " + f);
                     }
                 }
             }
