@@ -3,10 +3,10 @@ package com.github.mjdbc.test;
 import com.github.mjdbc.test.asset.model.Gender;
 import com.github.mjdbc.test.asset.model.User;
 import com.github.mjdbc.test.asset.sql.BatchSql;
-import com.github.mjdbc.test.asset.sql.error.BatchSqlErr1;
-import com.github.mjdbc.test.asset.sql.error.BatchSqlErr2;
-import com.github.mjdbc.test.asset.sql.error.BatchSqlErr3;
-import com.github.mjdbc.test.asset.sql.error.BatchSqlErr4;
+import com.github.mjdbc.test.asset.sql.error.IllegalBatchArgumentTypeSql;
+import com.github.mjdbc.test.asset.sql.error.MultipleBatchParams1Sql;
+import com.github.mjdbc.test.asset.sql.error.MultipleBatchParams2Sql;
+import com.github.mjdbc.test.asset.sql.error.NonVoidBatchMethodSql;
 import com.github.mjdbc.test.util.ProfiledPreparedStatement;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
@@ -124,23 +124,23 @@ public class BatchSqlTest extends BaseSqlTest<BatchSql> {
 
 
     @Test(expected = IllegalArgumentException.class)
-    public void checkBatchSqlErr1() {
-        db.attachSql(BatchSqlErr1.class);
+    public void checkNonVoidBatchMethodThrowsException() {
+        db.attachSql(NonVoidBatchMethodSql.class);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void checkBatchSqlErr2() {
-        db.attachSql(BatchSqlErr2.class);
+    public void checkMultipleBatchParams1ThrowsException() {
+        db.attachSql(MultipleBatchParams1Sql.class);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void checkBatchSqlErr3() {
-        db.attachSql(BatchSqlErr3.class);
+    public void checkMultipleBatchParams2ThrowsException() {
+        db.attachSql(MultipleBatchParams2Sql.class);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void checkBatchSqlErr4() {
-        db.attachSql(BatchSqlErr4.class);
+    public void checkIllegalBatchArgumentTypeThrowsException() {
+        db.attachSql(IllegalBatchArgumentTypeSql.class);
     }
 
     private void checkUpdated(int expectedScore) {

@@ -6,11 +6,8 @@ import com.github.mjdbc.Sql;
 
 import java.util.List;
 
-/**
- * Sql interface to test batch methods error handling
- */
-public interface BatchSqlErr4 {
+public interface IllegalBatchArgumentTypeSql {
 
     @Sql("UPDATE users SET score = :score WHERE id=:id")
-    void batchUpdateWithCollection(@Bind("id") List<Class> ids, @Bind("score") int scores);
+    void batchUpdateWithCollection(@Bind("id") List<Class> ids, @Bind("score") int score);
 }
