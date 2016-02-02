@@ -366,7 +366,7 @@ public class DbImpl implements Db {
                                 } catch (IllegalAccessException ignored) { // already checked for 'isPublic' before
                                 }
                                 if (mapperByClass.containsKey(type)) {
-                                    throw new IllegalArgumentException("Found multiple mappers per type: " + type);
+                                    throw new IllegalArgumentException("Found multiple mappers per type: m1: " + mapper + ", m2: " + mapperByClass.get(type));
                                 }
                                 mapperByClass.put(type, mapper);
                             }
@@ -374,7 +374,7 @@ public class DbImpl implements Db {
                     }
                 } else {
                     if (f.getAnnotation(Mapper.class) != null) {
-                        throw new IllegalArgumentException("@Mapper field must be public, static final and have valid parametrized type: " + f);
+                        throw new IllegalArgumentException("@Mapper field must be public, static final and have valid parameterized type type: " + f);
                     }
                 }
             }
