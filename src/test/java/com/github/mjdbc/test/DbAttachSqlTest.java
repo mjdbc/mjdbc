@@ -24,6 +24,7 @@ import com.github.mjdbc.test.asset.sql.error.NonPublicMapperBeanSql;
 import com.github.mjdbc.test.asset.sql.error.NonStaticMapperBeanSql;
 import com.github.mjdbc.test.asset.sql.error.UnboundBeanParameterSql;
 import com.github.mjdbc.test.asset.sql.error.UnboundParameterSql;
+import com.github.mjdbc.test.asset.sql.error.WildcardParametrizedReturnTypeSql;
 import com.github.mjdbc.test.util.DbUtils;
 import com.zaxxer.hikari.HikariDataSource;
 import org.junit.After;
@@ -207,5 +208,11 @@ public class DbAttachSqlTest extends Assert {
     public void checkBeanNullMapper() {
         db.attachSql(BeanWithNullMapperSql.class);
     }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void checkWildcardParameterizedReturnTypeThrowsException() {
+        db.attachSql(WildcardParametrizedReturnTypeSql.class);
+    }
+
 
 }

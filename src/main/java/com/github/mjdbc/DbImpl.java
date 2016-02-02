@@ -173,7 +173,11 @@ public class DbImpl implements Db {
         Class<?> returnType = m.getReturnType();
         if (returnType == List.class) {
             ParameterizedType genericReturnType = (ParameterizedType) m.getGenericReturnType();
-            Class<?> elementType = (Class<?>) genericReturnType.getActualTypeArguments()[0];
+            Type type = genericReturnType.getActualTypeArguments()[0];
+            if (!(type instanceof Class)) {
+                throw new IllegalArgumentException("Wildcard generics return types are not supported: " + m);
+            }
+            Class<?> elementType = (Class<?>) type;
             DbMapper elementMapper = findOrResolveMapperByType(elementType);
             if (elementMapper != null) {
                 resultMapper = new ListMapper(elementMapper);
@@ -412,8 +416,12 @@ public class DbImpl implements Db {
             if (genericType instanceof ParameterizedType) {
                 ParameterizedType pt = (ParameterizedType) genericType;
                 Type[] args = pt.getActualTypeArguments();
-                if (args.length == 1 && args[0] instanceof Class) {
-                    effectiveType = (Class) args[0];
+                if (args.length == 1) {
+                    Type arg0 = args[0];
+                    if (!(arg0 instanceof Class)) {
+                        throw new IllegalArgumentException("Wildcard arguments are not supported for batch methods: " + genericType);
+                    }
+                    effectiveType = (Class) arg0;
                 }
             } else if (genericType instanceof Class && ((Class) genericType).isArray()) {
                 effectiveType = ((Class) genericType).getComponentType();

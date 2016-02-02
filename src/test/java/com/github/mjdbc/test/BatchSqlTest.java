@@ -7,6 +7,7 @@ import com.github.mjdbc.test.asset.sql.error.IllegalBatchArgumentTypeSql;
 import com.github.mjdbc.test.asset.sql.error.MultipleBatchParams1Sql;
 import com.github.mjdbc.test.asset.sql.error.MultipleBatchParams2Sql;
 import com.github.mjdbc.test.asset.sql.error.NonVoidBatchMethodSql;
+import com.github.mjdbc.test.asset.sql.error.WildcardBatchParamSql;
 import com.github.mjdbc.test.util.ProfiledPreparedStatement;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
@@ -141,6 +142,11 @@ public class BatchSqlTest extends BaseSqlTest<BatchSql> {
     @Test(expected = IllegalArgumentException.class)
     public void checkIllegalBatchArgumentTypeThrowsException() {
         db.attachSql(IllegalBatchArgumentTypeSql.class);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void checkWildcardBatchParamThrowException() {
+        db.attachSql(WildcardBatchParamSql.class);
     }
 
     private void checkUpdated(int expectedScore) {
