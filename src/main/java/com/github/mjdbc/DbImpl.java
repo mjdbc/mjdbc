@@ -178,14 +178,14 @@ public class DbImpl implements Db {
                 throw new IllegalArgumentException("Wildcard generics return types are not supported: " + m);
             }
             Class<?> elementType = (Class<?>) type;
-            DbMapper elementMapper = findOrResolveMapperByType(elementType);
+            DbMapper elementMapper = findOrResolveMapperByType(elementType, mapperByClass);
             if (elementMapper != null) {
                 resultMapper = new ListMapper(elementMapper);
             } else {
                 throw new IllegalArgumentException(getNoMapperMessage(elementType));
             }
         } else {
-            resultMapper = findOrResolveMapperByType(returnType);
+            resultMapper = findOrResolveMapperByType(returnType, mapperByClass);
         }
         if (resultMapper == null) {
             throw new IllegalArgumentException(getNoMapperMessage(returnType));
@@ -347,9 +347,12 @@ public class DbImpl implements Db {
         return mapperByClass.get(type);
     }
 
+    /**
+     * Finds and return mapper by type. Uses registered mappers map if not null to search for candidates and register results in this map.
+     */
     @Nullable
-    private DbMapper findOrResolveMapperByType(@NotNull Class<?> type) {
-        DbMapper mapper = mapperByClass.get(type);
+    public static <T> DbMapper<T> findOrResolveMapperByType(@NotNull Class<T> type, @Nullable Map<Class, DbMapper> registeredMappers) {
+        DbMapper<T> mapper = registeredMappers == null ? null : registeredMappers.get(type);
         if (mapper == null) {
             // search for a field marked as mapper with valid parameter type
             for (Field f : type.getDeclaredFields()) {
@@ -363,16 +366,19 @@ public class DbImpl implements Db {
                             Mapper a = f.getAnnotation(Mapper.class);
                             if (a != null) {
                                 try {
-                                    mapper = (DbMapper) f.get(type);
+                                    //noinspection unchecked
+                                    mapper = (DbMapper<T>) f.get(type);
                                     if (mapper == null) {
                                         throw new IllegalArgumentException("Mapper must not be null: " + f);
                                     }
                                 } catch (IllegalAccessException ignored) { // already checked for 'isPublic' before
                                 }
-                                if (mapperByClass.containsKey(type)) {
-                                    throw new IllegalArgumentException("Found multiple mappers per type: m1: " + mapper + ", m2: " + mapperByClass.get(type));
+                                if (registeredMappers != null) {
+                                    if (registeredMappers.containsKey(type)) {
+                                        throw new IllegalArgumentException("Found multiple mappers per type: m1: " + mapper + ", m2: " + registeredMappers.get(type));
+                                    }
+                                    registeredMappers.put(type, mapper);
                                 }
-                                mapperByClass.put(type, mapper);
                             }
                         }
                     }
@@ -382,7 +388,6 @@ public class DbImpl implements Db {
                     }
                 }
             }
-
         }
         return mapper;
     }

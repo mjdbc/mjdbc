@@ -23,7 +23,7 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * PreparedStatement with named parameters and {@link DbMapper}  support.
+ * PreparedStatement with named parameters and {@link DbMapper} support.
  */
 public class DbPreparedStatement<T> implements AutoCloseable {
     @NotNull
@@ -37,6 +37,10 @@ public class DbPreparedStatement<T> implements AutoCloseable {
     public DbPreparedStatement(@NotNull DbConnection dbc, @NotNull String sql) throws SQLException {
         //noinspection unchecked
         this(dbc, sql, (DbMapper<T>) Mappers.VoidMapper, false);
+    }
+
+    public DbPreparedStatement(@NotNull DbConnection dbc, @NotNull String sql, @NotNull Class<T> resultClass) throws SQLException {
+        this(dbc, sql, Objects.requireNonNull(DbImpl.findOrResolveMapperByType(resultClass, null)), false);
     }
 
     public DbPreparedStatement(@NotNull DbConnection dbc, @NotNull String sql, @NotNull DbMapper<T> resultMapper) throws SQLException {

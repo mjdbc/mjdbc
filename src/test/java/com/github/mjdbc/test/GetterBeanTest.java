@@ -6,9 +6,9 @@ import com.github.mjdbc.type.impl.DbIntValue;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
-public class GetterBeanTests extends BaseSqlTest<GetterBeanSql> {
+public class GetterBeanTest extends BaseSqlTest<GetterBeanSql> {
 
-    public GetterBeanTests() {
+    public GetterBeanTest() {
         super(GetterBeanSql.class, "beans");
     }
 
