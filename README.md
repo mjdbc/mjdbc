@@ -9,35 +9,23 @@ __mJDBC__  - Small and efficient JDBC wrapper.
 * *Extensible:* add support for new data types or override the way built-in types are handled.
 * *Measurable:* profile timings for all SQL queries and transactions.
 * *Open source:* fork and change it.
-* *Bug free*... not yet... still in beta, but number of tests is growing.
 
 [![Build Status](https://travis-ci.org/mjdbc/mjdbc.svg?branch=master)]	(https://travis-ci.org/mjdbc/mjdbc)
+
+## Maven
+
+```xml
+<dependency>
+    <groupId>com.github.mjdbc</groupId>
+    <artifactId>mjdbc</artifactId>
+    <version>1.0.0</version>
+</dependency
+```
 
 ## Building
 
 ```bash
 mvn -DskipTests=true clean package install
-```
-
-## Maven
-
-Add snapshots repository to your pom.xml file. The project now is in alpha stage and has no public releases to Central Repository yet.
-```xml
-<repositories>
-    <repository>
-        <id>ossrh</id>
-        <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-    </repository>
-</repositories>
-```
-
-Add project dependency:
-```xml
-<dependency>
-    <groupId>com.github.mjdbc</groupId>
-    <artifactId>mjdbc</artifactId>
-    <version>1.0-SNAPSHOT</version>
-</dependency
 ```
 
 ## Brief API overview
