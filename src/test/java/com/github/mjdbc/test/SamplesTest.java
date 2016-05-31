@@ -190,6 +190,24 @@ public class SamplesTest extends Assert {
         assertEquals(u.id, checkUser2.id);
     }
 
+    /**
+     * Test that update returns number of records updated
+     */
+    @Test
+    public void checkUpdateResults() {
+        List<User> originalUsers = sampleQueries.selectAllUsers();
+        assertTrue(originalUsers.size() > 0);
+
+        int score = 100;
+        int n = sampleQueries.updateAllScores(score);
+        assertEquals(originalUsers.size(), n);
+
+        List<User> updatedUsers = sampleQueries.selectAllUsers();
+        for (User u : updatedUsers) {
+            assertEquals("Score not matched for user: " + u.login, score, u.score);
+        }
+    }
+
 
     /**
      * Check that statistics is collected for Dbi methods.

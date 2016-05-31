@@ -49,6 +49,8 @@ class SqlProxy implements InvocationHandler {
                 if (p.resultMapper != Mappers.VoidMapper) {
                     if (p.returnGeneratedKeys) {
                         return s.updateAndGetGeneratedKeys();
+                    } else if (p.useUpdateCall) {
+                        return s.update();
                     } else {
                         Object res = s.query();
                         return res == null && p.resultMapper.getClass() == ListMapper.class ? new ArrayList<>() : res;

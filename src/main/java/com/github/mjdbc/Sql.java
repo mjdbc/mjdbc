@@ -16,4 +16,6 @@ public @interface Sql {
     String value() default "";
 
     int batchChunkSize() default Integer.MAX_VALUE;
+
+    boolean forceUseUpdate() default false;
 }

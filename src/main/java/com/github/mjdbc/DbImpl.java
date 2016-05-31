@@ -24,7 +24,10 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
-import static java.lang.reflect.Modifier.*;
+import static java.lang.reflect.Modifier.isFinal;
+import static java.lang.reflect.Modifier.isPublic;
+import static java.lang.reflect.Modifier.isStatic;
+import static java.lang.reflect.Modifier.isTransient;
 import static java.util.Objects.requireNonNull;
 
 /**
@@ -269,7 +272,10 @@ public class DbImpl implements Db {
             }
         }
 
-        boolean returnGeneratedKeys = returnType.getAnnotation(GetGeneratedKeys.class) != null || sql.toUpperCase().startsWith("INSERT ");
+        String sqlUp = sql.toUpperCase();
+
+        boolean useUpdateOp = sqlAnnotation.forceUseUpdate() || sqlUp.startsWith("UPDATE ");
+        boolean returnGeneratedKeys = returnType.getAnnotation(GetGeneratedKeys.class) != null || sqlUp.startsWith("INSERT ");
 
         int batchSize = sqlAnnotation.batchChunkSize();
         if (batchSize <= 0) {
@@ -277,7 +283,7 @@ public class DbImpl implements Db {
         }
         // construct result mapping
         BindInfo[] bindingsArray = bindings.toArray(new BindInfo[bindings.size()]);
-        SqlOp op = new SqlOp(parsedSql, resultMapper, returnGeneratedKeys, parametersMapping, bindingsArray, batchIteratorFactory, batchParamIdx, batchSize);
+        SqlOp op = new SqlOp(parsedSql, resultMapper, returnGeneratedKeys, parametersMapping, bindingsArray, batchIteratorFactory, batchParamIdx, batchSize, useUpdateOp);
         opByMethod.put(m, op);
     }
 
@@ -490,9 +496,11 @@ public class DbImpl implements Db {
         final int batchArgIdx;
         final int batchSize;
 
+        final boolean useUpdateCall;
+
         private SqlOp(@NotNull String parsedSql, @NotNull DbMapper resultMapper, boolean returnGeneratedKeys,
                       @NotNull Map<String, List<Integer>> parametersNamesMapping, @NotNull BindInfo[] bindings,
-                      @Nullable BatchIteratorFactory batchIteratorFactory, int batchArgIdx, int batchSize) {
+                      @Nullable BatchIteratorFactory batchIteratorFactory, int batchArgIdx, int batchSize, boolean useUpdateCall) {
             this.parsedSql = parsedSql;
             this.returnGeneratedKeys = returnGeneratedKeys;
             this.resultMapper = resultMapper;
@@ -501,6 +509,7 @@ public class DbImpl implements Db {
             this.batchIteratorFactory = batchIteratorFactory;
             this.batchArgIdx = batchArgIdx;
             this.batchSize = batchSize;
+            this.useUpdateCall = useUpdateCall;
         }
     }
 

@@ -4,7 +4,7 @@
 
     <groupId>com.github.mjdbc</groupId>
     <artifactId>mjdbc</artifactId>
-    <version>1.0.1-SNAPSHOT</version>
+    <version>1.1.0</version>
     <packaging>jar</packaging>
     <name>mjdbc</name>
     <description>Small and efficient JDBC wrapper.</description>
@@ -53,7 +53,7 @@
             <!-- Java compiler -->
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.3</version>
+                <version>3.5.1</version>
                 <configuration>
                     <source>1.8</source>
                     <target>1.8</target>
