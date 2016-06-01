@@ -274,7 +274,7 @@ public class DbImpl implements Db {
 
         String sqlUp = sql.toUpperCase();
 
-        boolean useUpdateOp = sqlAnnotation.forceUseUpdate() || sqlUp.startsWith("UPDATE ");
+        boolean useUpdateOp = sqlAnnotation.forceUseUpdate() || sqlUp.startsWith("UPDATE ") || sqlUp.startsWith("DELETE ");
         boolean returnGeneratedKeys = returnType.getAnnotation(GetGeneratedKeys.class) != null || sqlUp.startsWith("INSERT ");
 
         int batchSize = sqlAnnotation.batchChunkSize();

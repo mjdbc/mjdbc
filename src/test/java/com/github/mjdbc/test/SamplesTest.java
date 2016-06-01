@@ -210,6 +210,22 @@ public class SamplesTest extends Assert {
 
 
     /**
+     * Test that delete returns number of records updated
+     */
+    @Test
+    public void checkDeleteResults() {
+        List<User> originalUsers = sampleQueries.selectAllUsers();
+        assertTrue(originalUsers.size() > 0);
+
+        int n = sampleQueries.deleteAll();
+        assertEquals(originalUsers.size(), n);
+
+        List<User> newUsers = sampleQueries.selectAllUsers();
+        assertTrue(newUsers.isEmpty());
+    }
+
+
+    /**
      * Check that statistics is collected for Dbi methods.
      *
      * @throws NoSuchMethodException
