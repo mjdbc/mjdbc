@@ -19,7 +19,7 @@ __mJDBC__  - Small and efficient JDBC wrapper.
     <groupId>com.github.mjdbc</groupId>
     <artifactId>mjdbc</artifactId>
     <version>1.0.0</version>
-</dependency
+</dependency>
 ```
 
 ## Building
