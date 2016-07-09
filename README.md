@@ -14,13 +14,11 @@ __mJDBC__  - Small and efficient JDBC wrapper.
 
 ## Maven
 
-```xml
-<dependency>
-    <groupId>com.github.mjdbc</groupId>
-    <artifactId>mjdbc</artifactId>
-    <version>1.0.0</version>
-</dependency>
-```
+    <dependency>
+        <groupId>com.github.mjdbc</groupId>
+        <artifactId>mjdbc</artifactId>
+        <version>1.0.0</version>
+    </dependency>
 
 ## Building
 
@@ -172,5 +170,10 @@ Java8+
 
 
 ### License
+Apache License 2.0
 
-This project available under Apache License 2.0.
+### Related projects
+* [cs4j](https://github.com/cs4j/cs4j) - minimal Cron style task scheduler for Java compatible with Spring API
+* [μotto](https://github.com/uotto/uotto) - plain Java version of [Otto Event Bus](https://github.com/square/otto) with no dependencies
+
+
