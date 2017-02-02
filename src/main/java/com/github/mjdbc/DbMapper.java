@@ -19,7 +19,7 @@ public interface DbMapper<T> {
      *
      * @param r - open result set.
      * @return Java object.
-     * @throws SQLException
+     * @throws SQLException if SQLException occurs during the mapping process
      */
-    T map(@NotNull  ResultSet r) throws SQLException;
+    T map(@NotNull ResultSet r) throws SQLException;
 }

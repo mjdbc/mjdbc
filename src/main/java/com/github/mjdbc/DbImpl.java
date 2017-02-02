@@ -24,7 +24,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
-import static java.lang.reflect.Modifier.isFinal;
 import static java.lang.reflect.Modifier.isPublic;
 import static java.lang.reflect.Modifier.isStatic;
 import static java.lang.reflect.Modifier.isTransient;
@@ -258,7 +257,7 @@ public class DbImpl implements Db {
                 batchParamIdx = i;
                 batchIteratorFactory = paramBatchIteratorFactory;
             }
-            if (bindings.stream().filter(f -> f.mappedName.equals(name)).findAny().isPresent()) {
+            if (bindings.stream().anyMatch(f -> f.mappedName.equals(name))) {
                 throw new IllegalArgumentException("Duplicate parameter name:" + name + " method: ");
             }
             bindings.add(new BindInfo(name, binder, i, null, null));
@@ -318,7 +317,7 @@ public class DbImpl implements Db {
         // check all public fields
         for (Field f : type.getFields()) {
             int modifiers = f.getModifiers();
-            if (isFinal(modifiers) || !isPublic(modifiers) || isStatic(modifiers) || isTransient(modifiers)) {
+            if (!isPublic(modifiers) || isStatic(modifiers) || isTransient(modifiers)) {
                 continue; //ignore
             }
             DbBinder binder = findBinderByType(f.getType(), null);
@@ -549,11 +548,7 @@ public class DbImpl implements Db {
         DbTimer timer = timersByMethod.get(method);
         if (timer == null) {
             synchronized (timersByMethod) {
-                timer = timersByMethod.get(method);
-                if (timer == null) {
-                    timer = new DbTimer(method);
-                    timersByMethod.put(method, timer);
-                }
+                timer = timersByMethod.computeIfAbsent(method, k -> new DbTimer(method));
             }
         }
         timer.onInvoke(System.nanoTime() - t0);
