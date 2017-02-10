@@ -4,7 +4,7 @@
 
     <groupId>com.github.mjdbc</groupId>
     <artifactId>mjdbc</artifactId>
-    <version>1.1.3-SNAPSHOT</version>
+    <version>1.1.3</version>
     <packaging>jar</packaging>
     <name>mjdbc</name>
     <description>Small and efficient JDBC wrapper.</description>
@@ -129,7 +129,7 @@
                             </execution>
                         </executions>
                     </plugin>
-                    <!-- Sign release build o-->
+                    <!-- Sign release build -->
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-gpg-plugin</artifactId>
