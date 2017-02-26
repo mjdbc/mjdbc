@@ -46,7 +46,6 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <surefireArgLine></surefireArgLine>
     </properties>
 
     <build>
@@ -73,7 +72,7 @@
                             <goal>prepare-agent</goal>
                         </goals>
                         <configuration>
-                            <propertyName>surefireArgLine</propertyName>
+                            <propertyName>jacocoArgs</propertyName>
                         </configuration>
                     </execution>
                     <!-- Generate report after tests are run -->
@@ -92,7 +91,8 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>2.19.1</version>
                 <configuration>
-                    <argLine>-Duser.timezone=UTC ${surefireArgLine}</argLine>
+                    <!--suppress MavenModelInspection -->
+                    <argLine>-Duser.timezone=UTC ${jacocoArgs}</argLine>
                     <systemProperties>
                         <property>
                             <name>derby.stream.error.file</name>

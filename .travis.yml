@@ -3,6 +3,6 @@ jdk:
   - oraclejdk8
 script: mvn test
 after_success:
-  - mvn clean test jacoco:report coveralls:report
+  - mvn jacoco:report coveralls:report
 jdk:
   - oraclejdk8
