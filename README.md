@@ -11,6 +11,8 @@ __mJDBC__  - Small and efficient JDBC wrapper.
 * *Open source:* fork and change it.
 
 [![Build Status](https://travis-ci.org/mjdbc/mjdbc.svg?branch=master)]	(https://travis-ci.org/mjdbc/mjdbc)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.mjdbc/mjdbc/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.mjdbc/mjdbc)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 ## Maven
 
