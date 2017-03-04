@@ -107,7 +107,7 @@ Optional: register this mapper during initialization;
     Db db = Db.newInstance(ds);
     db.registerMapper(User.class, User.MAPPER)
 ```
-Now use User type in all queries attached to MJDBC database instance.
+Now use User type in all queries attached to mJDBC database instance.
 Mappers for native Java types are supported by default [(source)](https://github.com/mjdbc/mjdbc/blob/master/src/main/java/com/github/mjdbc/util/Mappers.java) and can be overridden if needed..
 
 Note: If mapper is not registered manually mJDBC will try to derive it searching for public static and final field of the mapped object annotated as @Mapper.
