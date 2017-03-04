@@ -22,6 +22,7 @@ __mJDBC__  - Small and efficient JDBC wrapper.
         <artifactId>mjdbc</artifactId>
         <version>1.1.3</version>
     </dependency>
+```
 
 ## Building
 
@@ -178,5 +179,8 @@ Apache License 2.0
 ### Related projects
 * [cs4j](https://github.com/cs4j/cs4j) - minimal Cron style task scheduler for Java compatible with Spring API
 * [μotto](https://github.com/uotto/uotto) - plain Java version of [Otto Event Bus](https://github.com/square/otto) with no dependencies
+* [openjson](https://github.com/openjson/openjson) - fast and minimal JSON library for Java  [OpenJSON](https://github.com/openjson/openjson) under Apache 2 license.
 
-
+### Projects that use mJDBC
+* [zametki](https://github.com/zametki/zametki) - simple alternative to Evernote. See  [sql](https://github.com/zametki/zametki/tree/master/src/main/java/com/github/zametki/db/sql) package for details.
+* [pesennik](https://github.com/pesennik/pesennik) - songbook. See  [sql](https://github.com/pesennik/pesennik/tree/master/src/main/java/com/github/pesennik/db/sql) package for details.
