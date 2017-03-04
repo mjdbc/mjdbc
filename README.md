@@ -10,7 +10,9 @@ __mJDBC__  - Small and efficient JDBC wrapper.
 * *Measurable:* profile timings for all SQL queries and transactions.
 * *Open source:* fork and change it.
 
-[![Build Status](https://travis-ci.org/mjdbc/mjdbc.svg?branch=master)]	(https://travis-ci.org/mjdbc/mjdbc)
+[View detailed documentation](https://mjdbc.github.io)
+
+[![Build Status](https://travis-ci.org/mjdbc/mjdbc.svg?branch=master)](https://travis-ci.org/mjdbc/mjdbc)
 [![Coverage Status](https://coveralls.io/repos/github/mjdbc/mjdbc/badge.svg?branch=master)](https://coveralls.io/github/mjdbc/mjdbc?branch=master)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.mjdbc/mjdbc/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.mjdbc/mjdbc)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
