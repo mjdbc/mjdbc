@@ -2,7 +2,7 @@ package com.github.mjdbc.test;
 
 import com.github.mjdbc.test.asset.model.GetterBean;
 import com.github.mjdbc.test.asset.sql.GetterBeanSql;
-import com.github.mjdbc.type.impl.DbIntValue;
+import com.github.mjdbc.test.asset.types.DbIntValue;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 

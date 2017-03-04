@@ -2,7 +2,7 @@ package com.github.mjdbc.test.asset.model.error;
 
 import com.github.mjdbc.DbMapper;
 import com.github.mjdbc.Mapper;
-import com.github.mjdbc.type.impl.DbIntValue;
+import com.github.mjdbc.test.asset.types.DbIntValue;
 
 /**
  * Bean with fake getters -> getters with parameters are not normal getters

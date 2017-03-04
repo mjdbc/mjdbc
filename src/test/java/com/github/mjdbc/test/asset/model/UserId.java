@@ -2,7 +2,7 @@ package com.github.mjdbc.test.asset.model;
 
 import com.github.mjdbc.DbMapper;
 import com.github.mjdbc.Mapper;
-import com.github.mjdbc.type.impl.DbIntValue;
+import com.github.mjdbc.test.asset.types.DbIntValue;
 
 /**
  * Type safe id for User objects.

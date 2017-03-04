@@ -1,4 +1,4 @@
-package com.github.mjdbc.type.impl;
+package com.github.mjdbc.test.asset.types;
 
 public class DbLongValue extends AbstractDbLong {
     protected long value;

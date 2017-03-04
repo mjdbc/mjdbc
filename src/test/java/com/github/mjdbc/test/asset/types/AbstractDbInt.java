@@ -1,4 +1,4 @@
-package com.github.mjdbc.type.impl;
+package com.github.mjdbc.test.asset.types;
 
 import com.github.mjdbc.type.DbInt;
 import org.jetbrains.annotations.Nullable;

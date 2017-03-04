@@ -61,7 +61,7 @@ public interface Db {
     /**
      * Executes database query that produces Nullable result.
      *
-     * @param op  query impl.
+     * @param op  query types.
      * @param <T> result type.
      * @return query result.
      */
@@ -71,7 +71,7 @@ public interface Db {
     /**
      * Executes database query that produces NotNull result.
      *
-     * @param op  query impl.
+     * @param op  query types.
      * @param <T> result type.
      * @return query result.
      */
@@ -81,7 +81,7 @@ public interface Db {
     /**
      * Executes database operation that  produces no result.
      *
-     * @param op operation impl.
+     * @param op operation types.
      */
     void executeV(@NotNull DbOpV op);
 

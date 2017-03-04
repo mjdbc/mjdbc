@@ -1,6 +1,6 @@
 package com.github.mjdbc.test.asset.model;
 
-import com.github.mjdbc.type.impl.DbIntValue;
+import com.github.mjdbc.test.asset.types.DbIntValue;
 
 /**
  * Bean with getters and setters methods and private fields.

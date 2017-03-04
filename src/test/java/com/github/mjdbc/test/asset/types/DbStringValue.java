@@ -1,4 +1,4 @@
-package com.github.mjdbc.type.impl;
+package com.github.mjdbc.test.asset.types;
 
 public class DbStringValue extends AbstractDbString {
     protected String value;
