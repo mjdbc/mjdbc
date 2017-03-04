@@ -16,7 +16,7 @@ __mJDBC__  - Small and efficient JDBC wrapper.
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 ## Maven
-
+```xml
     <dependency>
         <groupId>com.github.mjdbc</groupId>
         <artifactId>mjdbc</artifactId>
