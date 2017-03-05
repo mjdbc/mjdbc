@@ -307,7 +307,7 @@ public class DbImpl implements Db {
     /**
      * For all public fields and getters assign binders by type
      */
-    private List<BindInfo> getBeanBinders(@NotNull Class<?> type) {
+    protected List<BindInfo> getBeanBinders(@NotNull Class<?> type) {
         List<BindInfo> bindings = beanInfoByClass.get(type);
         if (bindings != null) {
             return bindings;
@@ -389,7 +389,7 @@ public class DbImpl implements Db {
                     }
                 } else {
                     if (f.getAnnotation(Mapper.class) != null) {
-                        throw new IllegalArgumentException("@Mapper field must be public, static final and have valid parameterized type type: " + f);
+                        throw new IllegalArgumentException("@Mapper field must be public, static final and have valid parametrized type type: " + f);
                     }
                 }
             }
@@ -461,6 +461,7 @@ public class DbImpl implements Db {
         throw new IllegalStateException("No BatchIteratorFactory found for " + parameterType);
     }
 
+    @NotNull
     private List<DbBinder> findBindersByInterfaces(@NotNull Class<?>[] interfaces) {
         List<DbBinder> binders = new ArrayList<>();
         for (Class interfaceClass : interfaces) {

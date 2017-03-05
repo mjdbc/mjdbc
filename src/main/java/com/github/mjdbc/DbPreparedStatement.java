@@ -1,5 +1,6 @@
 package com.github.mjdbc;
 
+import com.github.mjdbc.DbImpl.BindInfo;
 import com.github.mjdbc.type.DbInt;
 import com.github.mjdbc.type.DbLong;
 import com.github.mjdbc.type.DbString;
@@ -7,6 +8,7 @@ import com.github.mjdbc.type.DbTimestamp;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.JDBCType;
@@ -167,6 +169,56 @@ public class DbPreparedStatement<T> implements AutoCloseable {
         return set(name, value == null ? null : value.getDbValue());
     }
 
+    /**
+     * Sets all bean properties to named parameters.
+     *
+     * @param db   database to use. This method call relies on binders registered in this database instance.
+     * @param bean bean to map to named SQL parameters.
+     * @return this.
+     * @throws SQLException if anything bad happens during SQL operations or bean field accessors calls.
+     */
+    public DbPreparedStatement<T> bindBean(@NotNull Db db, @NotNull Object bean) throws SQLException {
+        return bindBean(db, bean, true);
+    }
+
+    /**
+     * Sets all bean properties to named parameters.
+     *
+     * @param db                database to use. This method call relies on binders registered in this database instance.
+     * @param bean              bean to map to named SQL parameters.
+     * @param allowCustomFields if false and SQL contains keys not resolved with this bean -> SQLException will be thrown.
+     * @return this.
+     * @throws SQLException if anything bad happens during SQL operations or bean field accessors calls.
+     */
+    @NotNull
+    public DbPreparedStatement<T> bindBean(@NotNull Db db, @NotNull Object bean, boolean allowCustomFields) throws SQLException {
+        List<BindInfo> binders = ((DbImpl) db).getBeanBinders(bean.getClass());
+        for (String key : parametersMapping.keySet()) {
+            BindInfo info = binders.stream().filter(i -> i.mappedName.equals(key)).findFirst().orElse(null);
+            if (info == null) {
+                if (allowCustomFields) {
+                    continue;
+                }
+                throw new SQLException("No mapping found for field: " + key);
+            }
+            try {
+                bindArg(this, info, getIndexes(key), bean);
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                throw new SQLException("Error applying bean properties: " + bean, e);
+            }
+        }
+        return this;
+    }
+
+    protected static void bindArg(@NotNull DbPreparedStatement s, @NotNull DbImpl.BindInfo bi, @NotNull List<Integer> indexes, @NotNull Object bean) throws IllegalAccessException, InvocationTargetException, SQLException {
+        for (Integer idx : indexes) {
+            Object value = bi.field != null ? bi.field.get(bean) : bi.getter != null ? bi.getter.invoke(bean) : bean;
+            //noinspection unchecked
+            bi.binder.bind(s.statement, idx, value);
+        }
+    }
+
+
     @NotNull
     public ResultSet executeQuery() throws SQLException {
         return statement.executeQuery();
@@ -174,7 +226,7 @@ public class DbPreparedStatement<T> implements AutoCloseable {
 
     @Nullable
     public T query() throws SQLException {
-        try (ResultSet r = statement.executeQuery()) {
+        try (ResultSet r = executeQuery()) {
             if (r.next()) {
                 return resultMapper.map(r);
             }
@@ -270,11 +322,7 @@ public class DbPreparedStatement<T> implements AutoCloseable {
                             c = '?'; // replace the parameter with a question mark
                             i += name.length(); // skip past the end if the parameter
 
-                            List<Integer> indexList = paramMap.get(name);
-                            if (indexList == null) {
-                                indexList = new ArrayList<>();
-                                paramMap.put(name, indexList);
-                            }
+                            List<Integer> indexList = paramMap.computeIfAbsent(name, k -> new ArrayList<>());
                             indexList.add(index);
 
                             index++;

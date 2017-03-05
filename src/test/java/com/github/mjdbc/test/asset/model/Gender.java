@@ -1,6 +1,7 @@
 package com.github.mjdbc.test.asset.model;
 
 import com.github.mjdbc.type.DbInt;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public enum Gender implements DbInt {
@@ -21,5 +22,10 @@ public enum Gender implements DbInt {
     @Nullable
     public static Gender fromDbValue(int dbValue) {
         return dbValue == 0 ? MALE : dbValue == 1 ? FEMALE : null;
+    }
+
+    @NotNull
+    public Gender opposite() {
+        return this == MALE ? FEMALE : MALE;
     }
 }

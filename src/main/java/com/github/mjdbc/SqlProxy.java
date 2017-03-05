@@ -88,12 +88,7 @@ class SqlProxy implements InvocationHandler {
             if (sqlIndexes == null) {
                 continue;
             }
-            for (Integer idx : sqlIndexes) {
-                Object arg = args[bi.argumentIdx];
-                Object value = bi.field != null ? bi.field.get(arg) : bi.getter != null ? bi.getter.invoke(arg) : arg;
-                //noinspection unchecked
-                bi.binder.bind(s.statement, idx, value);
-            }
+            DbPreparedStatement.bindArg(s, bi, sqlIndexes, args[bi.argumentIdx]);
         }
     }
 }

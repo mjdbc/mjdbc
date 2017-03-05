@@ -4,6 +4,7 @@ import com.github.mjdbc.DbMapper;
 import com.github.mjdbc.Mapper;
 
 import java.sql.Timestamp;
+import java.util.Objects;
 
 
 /**
@@ -35,6 +36,26 @@ public final class User {
         user.lastName = r.getString("last_name");
         user.gender = Gender.fromDbValue(r.getInt("gender"));
         user.score = r.getLong("score");
+        user.registrationDate = r.getTimestamp("reg_date");
         return user;
     };
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return score == user.score &&
+                Objects.equals(id, user.id) &&
+                Objects.equals(login, user.login) &&
+                Objects.equals(firstName, user.firstName) &&
+                Objects.equals(lastName, user.lastName) &&
+                gender == user.gender &&
+                Objects.equals(registrationDate, user.registrationDate);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, login, firstName, lastName, gender, score, registrationDate);
+    }
 }
