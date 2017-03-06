@@ -3,6 +3,7 @@ package com.github.mjdbc.test;
 import com.github.mjdbc.Db;
 import com.github.mjdbc.DbConnection;
 import com.github.mjdbc.DbPreparedStatement;
+import com.github.mjdbc.test.asset.model.GetterBean;
 import com.github.mjdbc.test.asset.model.User;
 import com.github.mjdbc.test.util.DbUtils;
 import com.zaxxer.hikari.HikariDataSource;
@@ -12,6 +13,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.lang.reflect.InvocationTargetException;
+import java.sql.SQLException;
 import java.sql.Timestamp;
 
 /**
@@ -106,6 +109,24 @@ public class DbPreparedStatementTest extends Assert {
         });
     }
 
+    @Test
+    public void checkBindBeanExceptionOnFieldAccess() {
+        String exceptionMessage = "*it happens";
+        db.executeV(c -> {
+            try {
+                DbPreparedStatement stmt = new DbPreparedStatement<>(c, "SELECT * FROM users  WHERE id = :id ", User.MAPPER);
+                stmt.bindBean(db, new BadGetterBean(exceptionMessage));
+                fail("Expected SQLException!");
+            } catch (SQLException e) {
+                Assert.assertNotNull(e.getCause());
+                Assert.assertEquals(InvocationTargetException.class, e.getCause().getClass());
+                Assert.assertNotNull(e.getCause().getCause());
+                Assert.assertEquals(RuntimeException.class, e.getCause().getCause().getClass());
+                Assert.assertEquals(exceptionMessage, e.getCause().getCause().getMessage());
+            }
+        });
+    }
+
     @NotNull
     private static User shuffleAllFields(@NotNull User user) {
         User res = new User();
@@ -123,4 +144,17 @@ public class DbPreparedStatementTest extends Assert {
         return new DbPreparedStatement<>(c, "SELECT * FROM users WHERE id = 1", User.MAPPER).query();
     }
 
+    public static class BadGetterBean extends GetterBean {
+        @NotNull
+        private final String exceptionMessage;
+
+        public BadGetterBean(@NotNull String exceptionMessage) {
+            this.exceptionMessage = exceptionMessage;
+        }
+
+        @Override
+        public long getId() {
+            throw new RuntimeException(exceptionMessage);
+        }
+    }
 }

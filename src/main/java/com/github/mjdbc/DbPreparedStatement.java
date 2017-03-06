@@ -25,15 +25,31 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * PreparedStatement with named parameters and {@link DbMapper} support.
+ * Wrapper over ${PreparedStatement} with named parameters, results mapping ({@link DbMapper})
+ * and bean binding ({@link @{@link BindBean}}) support.
+ * <p>
+ * Provides full access to underlying ${PreparedStatement} and ads useful utility methods.
+ * <p>
+ * DbPreparedStatement is automatically closed on transaction commit/rollback.
  */
 public class DbPreparedStatement<T> implements AutoCloseable {
+
+    /**
+     * Actual java.sql.PreparedStatement in use.
+     */
     @NotNull
     public final PreparedStatement statement;
 
+    /**
+     * Mapper for the result. Used by methods like ${link {@link #query()} or {@link #queryList()}}
+     */
     @NotNull
     public final DbMapper<T> resultMapper;
 
+    /**
+     * Mapping of parameter names to indexes.
+     */
+    @NotNull
     private final Map<String, List<Integer>> parametersMapping;
 
     public DbPreparedStatement(@NotNull DbConnection dbc, @NotNull String sql) throws SQLException {
@@ -57,19 +73,23 @@ public class DbPreparedStatement<T> implements AutoCloseable {
         dbc.statementsToClose.add(this);
     }
 
-    public DbPreparedStatement(@NotNull DbConnection dbc, @NotNull String parsedSql, @NotNull DbMapper<T> resultMapper,
-                               Map<String, List<Integer>> parametersMapping, boolean returnGeneratedKeys) throws SQLException {
+    protected DbPreparedStatement(@NotNull DbConnection dbc, @NotNull String parsedSql, @NotNull DbMapper<T> resultMapper,
+                                  @NotNull Map<String, List<Integer>> parametersMapping, boolean returnGeneratedKeys) throws SQLException {
         this.resultMapper = resultMapper;
         this.parametersMapping = parametersMapping;
         statement = prepareStatement(dbc.getConnection(), parsedSql, returnGeneratedKeys);
         dbc.statementsToClose.add(this);
     }
 
-    private PreparedStatement prepareStatement(@NotNull Connection c, @NotNull String parsedSql, boolean returnGeneratedKeys) throws SQLException {
+    @NotNull
+    private static PreparedStatement prepareStatement(@NotNull Connection c, @NotNull String parsedSql, boolean returnGeneratedKeys) throws SQLException {
         return returnGeneratedKeys ? c.prepareStatement(parsedSql, Statement.RETURN_GENERATED_KEYS) : c.prepareStatement(parsedSql);
     }
 
-
+    /**
+     * Sets null for all fields matched by name.
+     */
+    @NotNull
     public DbPreparedStatement<T> setNull(@NotNull String name, @NotNull SQLType type) throws SQLException {
         for (int i : getIndexes(name)) {
             statement.setNull(i, type.getVendorTypeNumber());
@@ -77,6 +97,9 @@ public class DbPreparedStatement<T> implements AutoCloseable {
         return this;
     }
 
+    /**
+     * Sets boolean value for all fields matched by name.
+     */
     @NotNull
     public DbPreparedStatement<T> set(@NotNull String name, boolean value) throws SQLException {
         for (int i : getIndexes(name)) {
@@ -85,6 +108,9 @@ public class DbPreparedStatement<T> implements AutoCloseable {
         return this;
     }
 
+    /**
+     * Sets int value for all fields matched by name.
+     */
     @NotNull
     public DbPreparedStatement<T> set(@NotNull String name, int value) throws SQLException {
         for (int i : getIndexes(name)) {
@@ -93,11 +119,17 @@ public class DbPreparedStatement<T> implements AutoCloseable {
         return this;
     }
 
+    /**
+     * Sets int value for all fields matched by name. If value is null calls setNull for all fields.
+     */
     @NotNull
     public DbPreparedStatement<T> set(@NotNull String name, @Nullable DbInt value) throws SQLException {
         return value == null ? setNull(name, JDBCType.INTEGER) : set(name, value.getDbValue());
     }
 
+    /**
+     * Sets long value for all fields matched by name.
+     */
     @NotNull
     public DbPreparedStatement<T> set(@NotNull String name, long value) throws SQLException {
         for (int i : getIndexes(name)) {
@@ -106,11 +138,17 @@ public class DbPreparedStatement<T> implements AutoCloseable {
         return this;
     }
 
+    /**
+     * Sets long value for all fields matched by name. If value is null calls setNull for all fields.
+     */
     @NotNull
     public DbPreparedStatement<T> set(@NotNull String name, @Nullable DbLong value) throws SQLException {
         return value == null ? setNull(name, JDBCType.BIGINT) : set(name, value.getDbValue());
     }
 
+    /**
+     * Sets float value for all fields matched by name.
+     */
     @NotNull
     public DbPreparedStatement<T> set(@NotNull String name, float value) throws SQLException {
         for (int i : getIndexes(name)) {
@@ -119,6 +157,9 @@ public class DbPreparedStatement<T> implements AutoCloseable {
         return this;
     }
 
+    /**
+     * Sets double value for all fields matched by name.
+     */
     @NotNull
     public DbPreparedStatement<T> set(@NotNull String name, double value) throws SQLException {
         for (int i : getIndexes(name)) {
@@ -127,6 +168,9 @@ public class DbPreparedStatement<T> implements AutoCloseable {
         return this;
     }
 
+    /**
+     * Sets BigDecimal value for all fields matched by name.
+     */
     @NotNull
     public DbPreparedStatement<T> set(@NotNull String name, @Nullable BigDecimal value) throws SQLException {
         for (int i : getIndexes(name)) {
@@ -135,6 +179,9 @@ public class DbPreparedStatement<T> implements AutoCloseable {
         return this;
     }
 
+    /**
+     * Sets string value for all fields matched by name.
+     */
     @NotNull
     public DbPreparedStatement<T> set(@NotNull String name, @Nullable String value) throws SQLException {
         for (int i : getIndexes(name)) {
@@ -143,11 +190,17 @@ public class DbPreparedStatement<T> implements AutoCloseable {
         return this;
     }
 
+    /**
+     * Sets string value for all fields matched by name. If value is null -> sets null.
+     */
     @NotNull
     public DbPreparedStatement<T> set(@NotNull String name, @Nullable DbString value) throws SQLException {
         return set(name, value == null ? null : value.getDbValue());
     }
 
+    /**
+     * Sets byte[] value for all fields matched by name.
+     */
     @NotNull
     public DbPreparedStatement<T> set(@NotNull String name, @Nullable byte[] value) throws SQLException {
         for (int i : getIndexes(name)) {
@@ -156,6 +209,9 @@ public class DbPreparedStatement<T> implements AutoCloseable {
         return this;
     }
 
+    /**
+     * Sets Timestamp value for all fields matched by name.
+     */
     @NotNull
     public DbPreparedStatement<T> set(@NotNull String name, @Nullable Timestamp value) throws SQLException {
         for (int i : getIndexes(name)) {
@@ -164,6 +220,9 @@ public class DbPreparedStatement<T> implements AutoCloseable {
         return this;
     }
 
+    /**
+     * Sets Timestamp value for all fields matched by name. If value is null -> sets null.
+     */
     @NotNull
     public DbPreparedStatement<T> set(@NotNull String name, @Nullable DbTimestamp value) throws SQLException {
         return set(name, value == null ? null : value.getDbValue());
@@ -219,11 +278,17 @@ public class DbPreparedStatement<T> implements AutoCloseable {
     }
 
 
+    /**
+     * Executes sql statement and returns java.sql.ResultSet.
+     */
     @NotNull
     public ResultSet executeQuery() throws SQLException {
         return statement.executeQuery();
     }
 
+    /**
+     * Executes sql statement and returns first result mapped using {@link #resultMapper}.
+     */
     @Nullable
     public T query() throws SQLException {
         try (ResultSet r = executeQuery()) {
@@ -234,6 +299,10 @@ public class DbPreparedStatement<T> implements AutoCloseable {
         }
     }
 
+    /**
+     * Same as {@link #query()} but checks if result value is not null.
+     * Throws {@link java.lang.NullPointerException} if value is null.
+     */
     @NotNull
     public T queryNN() throws SQLException {
         T res = null;
@@ -246,6 +315,9 @@ public class DbPreparedStatement<T> implements AutoCloseable {
         }
     }
 
+    /**
+     * Executes sql statement and returns list of all values in result set mapped using {@link #resultMapper}.
+     */
     @NotNull
     public List<T> queryList() throws SQLException {
         List<T> res = new ArrayList<>();
@@ -257,7 +329,9 @@ public class DbPreparedStatement<T> implements AutoCloseable {
         return res;
     }
 
-
+    /**
+     * Executes insert method on wrapped statement.
+     */
     public int insert() throws SQLException {
         return statement.executeUpdate();
     }
@@ -273,10 +347,17 @@ public class DbPreparedStatement<T> implements AutoCloseable {
         }
     }
 
+    /**
+     * Runs {@link PreparedStatement#executeUpdate()} on wrapped statement and returns it's result.
+     */
     public int update() throws SQLException {
         return statement.executeUpdate();
     }
 
+    /**
+     * Returns list of indexes for a given key.
+     * If key is not found throws {@link IllegalArgumentException}
+     */
     @NotNull
     public List<Integer> getIndexes(String name) {
         List<Integer> indexes = parametersMapping.get(name);
@@ -286,6 +367,14 @@ public class DbPreparedStatement<T> implements AutoCloseable {
         return indexes;
     }
 
+
+    /**
+     * Closes underlying sql statement.
+     */
+    @Override
+    public void close() throws SQLException {
+        statement.close();
+    }
 
     // TODO: add mappings cache for parsed maps -> reuse DbConnection -> Db::cache!
     @NotNull
@@ -336,7 +425,7 @@ public class DbPreparedStatement<T> implements AutoCloseable {
     }
 
     @Override
-    public void close() throws SQLException {
-        statement.close();
+    public String toString() {
+        return "DbPS[" + statement + "]";
     }
 }
