@@ -3,23 +3,19 @@ package com.github.mjdbc;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * Lightweight java.sql.Connection wrapper.
  * Used in pair with DbPreparedStatement and DbOpX classes for automatic statements cleanup when connection is closed.
  */
 public class DbConnection {
-    /**
-     * Datasource to obtain sql connection
-     */
-    @Nullable
-    private final DataSource dataSource;
+
+    @NotNull
+    protected final DbImpl db;
 
     /**
      * Native SQL connection.
@@ -33,14 +29,10 @@ public class DbConnection {
     @NotNull
     protected final List<DbPreparedStatement> statementsToClose = new ArrayList<>();
 
-    public DbConnection(@NotNull DataSource dataSource) {
-        this.dataSource = Objects.requireNonNull(dataSource);
+    public DbConnection(@NotNull DbImpl db) {
+        this.db = db;
     }
 
-    public DbConnection(@NotNull Connection sqlConnection) {
-        this.dataSource = null;
-        this.sqlConnection = Objects.requireNonNull(sqlConnection);
-    }
 
     @NotNull
     public Connection getConnection() {
@@ -51,9 +43,8 @@ public class DbConnection {
 
     private void ensureConnection() {
         if (sqlConnection == null) {
-            assert dataSource != null;
             try {
-                sqlConnection = dataSource.getConnection();
+                sqlConnection = db.dataSource.getConnection();
             } catch (SQLException e) {
                 throw new RuntimeException("Failed to get connection from DataSource!", e);
             }

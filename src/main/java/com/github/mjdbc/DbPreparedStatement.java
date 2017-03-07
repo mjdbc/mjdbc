@@ -52,6 +52,9 @@ public class DbPreparedStatement<T> implements AutoCloseable {
     @NotNull
     private final Map<String, List<Integer>> parametersMapping;
 
+    @NotNull
+    private final DbConnection dbConnection;
+
     public DbPreparedStatement(@NotNull DbConnection dbc, @NotNull String sql) throws SQLException {
         //noinspection unchecked
         this(dbc, sql, (DbMapper<T>) Mappers.VoidMapper, false);
@@ -68,6 +71,7 @@ public class DbPreparedStatement<T> implements AutoCloseable {
     public DbPreparedStatement(@NotNull DbConnection dbc, @NotNull String sql, @NotNull DbMapper<T> resultMapper, boolean returnGeneratedKeys) throws SQLException {
         this.resultMapper = resultMapper;
         this.parametersMapping = new HashMap<>();
+        this.dbConnection = dbc;
         String parsedSql = parse(sql, this.parametersMapping);
         statement = prepareStatement(dbc.getConnection(), parsedSql, returnGeneratedKeys);
         dbc.statementsToClose.add(this);
@@ -77,6 +81,7 @@ public class DbPreparedStatement<T> implements AutoCloseable {
                                   @NotNull Map<String, List<Integer>> parametersMapping, boolean returnGeneratedKeys) throws SQLException {
         this.resultMapper = resultMapper;
         this.parametersMapping = parametersMapping;
+        this.dbConnection = dbc;
         statement = prepareStatement(dbc.getConnection(), parsedSql, returnGeneratedKeys);
         dbc.statementsToClose.add(this);
     }
@@ -231,13 +236,12 @@ public class DbPreparedStatement<T> implements AutoCloseable {
     /**
      * Sets all bean properties to named parameters.
      *
-     * @param db   database to use. This method call relies on binders registered in this database instance.
      * @param bean bean to map to named SQL parameters.
      * @return this.
      * @throws SQLException if anything bad happens during SQL operations or bean field accessors calls.
      */
-    public DbPreparedStatement<T> bindBean(@NotNull Db db, @NotNull Object bean) throws SQLException {
-        return bindBean(db, bean, true);
+    public DbPreparedStatement<T> bindBean(@NotNull Object bean) throws SQLException {
+        return bindBean(dbConnection.db, bean, true);
     }
 
     /**

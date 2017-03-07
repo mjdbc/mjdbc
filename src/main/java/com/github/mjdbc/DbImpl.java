@@ -47,7 +47,7 @@ public class DbImpl implements Db {
     private final Map<Method, DbTimer> timersByMethod = new ConcurrentHashMap<>();
 
     @NotNull
-    private final DataSource dataSource;
+    protected final DataSource dataSource;
 
     DbImpl(@NotNull DataSource dataSource) {
         this.dataSource = dataSource;
@@ -111,7 +111,7 @@ public class DbImpl implements Db {
         try {
             try {
                 if (c == null) {
-                    c = new DbConnection(dataSource);
+                    c = new DbConnection(this);
                     activeConnections.set(c);
                     topLevel = true;
                 }

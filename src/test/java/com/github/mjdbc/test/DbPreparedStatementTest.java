@@ -83,7 +83,7 @@ public class DbPreparedStatementTest extends Assert {
                     + "reg_date = :registrationDate "
                     + "WHERE id = :id");
 
-            stmt.bindBean(db, updatedUser);
+            stmt.bindBean(updatedUser);
             updatedUser.firstName = updatedUser.firstName + "_custom";
             stmt.set("customField", updatedUser.firstName);
             stmt.update();
@@ -115,7 +115,7 @@ public class DbPreparedStatementTest extends Assert {
         db.executeV(c -> {
             try {
                 DbPreparedStatement stmt = new DbPreparedStatement<>(c, "SELECT * FROM users  WHERE id = :id ", User.MAPPER);
-                stmt.bindBean(db, new BadGetterBean(exceptionMessage));
+                stmt.bindBean(new BadGetterBean(exceptionMessage));
                 fail("Expected SQLException!");
             } catch (SQLException e) {
                 Assert.assertNotNull(e.getCause());
