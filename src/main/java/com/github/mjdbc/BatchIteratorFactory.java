@@ -1,10 +1,9 @@
 package com.github.mjdbc;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.lang.reflect.Array;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * The factory that provides binder handlers for batch parameters: Iterable, Iterator and Array handlers.

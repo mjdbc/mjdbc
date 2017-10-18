@@ -1,8 +1,6 @@
 package com.github.mjdbc;
 
 import com.github.mjdbc.DbImpl.SqlOp;
-import org.jetbrains.annotations.NotNull;
-
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -10,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Proxy for {@link Sql} method. Manages execution of SQL query.

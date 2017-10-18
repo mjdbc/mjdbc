@@ -1,9 +1,5 @@
 package com.github.mjdbc;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
-import javax.sql.DataSource;
 import java.lang.reflect.AnnotatedParameterizedType;
 import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.Field;
@@ -23,6 +19,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
+import javax.sql.DataSource;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import static java.lang.reflect.Modifier.isPublic;
 import static java.lang.reflect.Modifier.isStatic;
@@ -49,7 +48,7 @@ public class DbImpl implements Db {
     @NotNull
     protected final DataSource dataSource;
 
-    DbImpl(@NotNull DataSource dataSource) {
+    public DbImpl(@NotNull DataSource dataSource) {
         this.dataSource = dataSource;
     }
 
@@ -101,6 +100,16 @@ public class DbImpl implements Db {
     @Override
     public Map<Method, DbTimer> getTimers() {
         return timersByMethod;
+    }
+
+    @NotNull
+    @Override
+    public DbConnection getActiveConnection() {
+        DbConnection c = activeConnections.get();
+        if (c == null) {
+            throw new IllegalStateException("No active connection found!");
+        }
+        return c;
     }
 
     @SuppressWarnings("unchecked")

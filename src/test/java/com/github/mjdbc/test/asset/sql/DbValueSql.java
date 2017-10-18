@@ -7,9 +7,8 @@ import com.github.mjdbc.type.DbInt;
 import com.github.mjdbc.type.DbLong;
 import com.github.mjdbc.type.DbString;
 import com.github.mjdbc.type.DbTimestamp;
-import org.jetbrains.annotations.Nullable;
-
 import java.sql.Timestamp;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Sql interface to test various Java types.

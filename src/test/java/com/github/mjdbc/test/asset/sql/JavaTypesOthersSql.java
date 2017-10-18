@@ -3,11 +3,11 @@ package com.github.mjdbc.test.asset.sql;
 
 import com.github.mjdbc.Bind;
 import com.github.mjdbc.Sql;
-import org.jetbrains.annotations.Nullable;
-
 import java.math.BigDecimal;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.time.Instant;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Sql interface to test various Java types.
@@ -148,4 +148,11 @@ public interface JavaTypesOthersSql {
 
     @Sql("UPDATE custom_types SET timestamp_field = :value")
     void setNullableTimestamp(@Bind("value") @Nullable Timestamp value);
+
+    /* Instant */
+    @Sql("SELECT instant_field FROM custom_types")
+    Instant getNullableInstant();
+
+    @Sql("UPDATE custom_types SET instant_field = :value")
+    void setNullableInstant(@Bind("value") @Nullable Instant value);
 }

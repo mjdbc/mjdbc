@@ -1,12 +1,11 @@
 package com.github.mjdbc;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Lightweight java.sql.Connection wrapper.
@@ -29,19 +28,17 @@ public class DbConnection {
     @NotNull
     protected final List<DbPreparedStatement> statementsToClose = new ArrayList<>();
 
-    public DbConnection(@NotNull DbImpl db) {
+    protected DbConnection(@NotNull DbImpl db) {
         this.db = db;
     }
 
-
     @NotNull
     public Connection getConnection() {
-        ensureConnection();
-        assert sqlConnection != null;
-        return sqlConnection;
+        return ensureConnection();
     }
 
-    private void ensureConnection() {
+    @NotNull
+    private Connection ensureConnection() {
         if (sqlConnection == null) {
             try {
                 sqlConnection = db.dataSource.getConnection();
@@ -49,6 +46,7 @@ public class DbConnection {
                 throw new RuntimeException("Failed to get connection from DataSource!", e);
             }
         }
+        return sqlConnection;
     }
 
     public void commit() throws SQLException {

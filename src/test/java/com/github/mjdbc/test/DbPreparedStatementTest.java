@@ -1,46 +1,20 @@
 package com.github.mjdbc.test;
 
-import com.github.mjdbc.Db;
 import com.github.mjdbc.DbConnection;
 import com.github.mjdbc.DbPreparedStatement;
 import com.github.mjdbc.test.asset.model.GetterBean;
 import com.github.mjdbc.test.asset.model.User;
-import com.github.mjdbc.test.util.DbUtils;
-import com.zaxxer.hikari.HikariDataSource;
-import org.jetbrains.annotations.NotNull;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-
 import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import org.jetbrains.annotations.NotNull;
+import org.junit.Assert;
+import org.junit.Test;
 
 /**
  * Tests for DbPreparedStatement calls.
  */
-public class DbPreparedStatementTest extends Assert {
-    /**
-     * Low level connection pool.
-     */
-    private HikariDataSource ds;
-
-    /**
-     * Database instance.
-     */
-    private Db db;
-
-    @Before
-    public void setUp() {
-        ds = DbUtils.prepareDataSource("sample");
-        db = Db.newInstance(ds);
-    }
-
-    @After
-    public void tearDown() {
-        ds.close();
-    }
+public class DbPreparedStatementTest extends DbTest {
 
     @Test
     public void checkBindBean() {

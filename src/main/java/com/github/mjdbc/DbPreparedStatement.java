@@ -5,9 +5,6 @@ import com.github.mjdbc.type.DbInt;
 import com.github.mjdbc.type.DbLong;
 import com.github.mjdbc.type.DbString;
 import com.github.mjdbc.type.DbTimestamp;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
 import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
 import java.sql.Connection;
@@ -23,6 +20,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Wrapper over ${PreparedStatement} with named parameters, results mapping ({@link DbMapper})

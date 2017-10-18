@@ -1,44 +1,17 @@
 package com.github.mjdbc.test;
 
-import com.github.mjdbc.Db;
 import com.github.mjdbc.DbPreparedStatement;
 import com.github.mjdbc.Mappers;
-import com.github.mjdbc.test.util.DbUtils;
 import com.github.mjdbc.type.DbInt;
 import com.github.mjdbc.type.DbLong;
 import com.github.mjdbc.type.DbString;
-import com.zaxxer.hikari.HikariDataSource;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-
 import java.sql.Timestamp;
+import org.junit.Test;
 
 /**
  * Tests for DbValue (Int,Long..) support.
  */
-public class DbValuesTest extends Assert {
-    /**
-     * Low level connection pool.
-     */
-    private HikariDataSource ds;
-
-    /**
-     * Database instance.
-     */
-    private Db db;
-
-    @Before
-    public void setUp() {
-        ds = DbUtils.prepareDataSource("sample");
-        db = Db.newInstance(ds);
-    }
-
-    @After
-    public void tearDown() {
-        ds.close();
-    }
+public class DbValuesTest extends DbTest {
 
     @Test
     public void checkDbInt() {

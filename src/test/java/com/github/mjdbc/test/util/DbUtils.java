@@ -2,18 +2,14 @@ package com.github.mjdbc.test.util;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
-
-import javax.sql.DataSource;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import javax.sql.DataSource;
 
-/**
- *
- */
 public class DbUtils {
     static {
         try {

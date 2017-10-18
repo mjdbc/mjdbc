@@ -1,10 +1,7 @@
 package com.github.mjdbc.test;
 
-import com.github.mjdbc.Db;
 import com.github.mjdbc.DbImpl;
 import com.github.mjdbc.test.asset.model.BeanWithStaticFieldMapper;
-import com.github.mjdbc.test.asset.model.User;
-import com.github.mjdbc.test.asset.model.UserId;
 import com.github.mjdbc.test.asset.model.ValidBean;
 import com.github.mjdbc.test.asset.model.error.MultipleMappersBean;
 import com.github.mjdbc.test.asset.sql.BeanWithStaticFieldMapperSql;
@@ -25,42 +22,12 @@ import com.github.mjdbc.test.asset.sql.error.NonStaticMapperBeanSql;
 import com.github.mjdbc.test.asset.sql.error.UnboundBeanParameterSql;
 import com.github.mjdbc.test.asset.sql.error.UnboundParameterSql;
 import com.github.mjdbc.test.asset.sql.error.WildcardParametrizedReturnTypeSql;
-import com.github.mjdbc.test.util.DbUtils;
-import com.zaxxer.hikari.HikariDataSource;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 
 /**
  * Tests for Db::attachSql method.
  */
-public class DbAttachSqlTest extends Assert {
-    /**
-     * Low level connection pool.
-     */
-    private HikariDataSource ds;
-
-    /**
-     * Database instance.
-     */
-    private DbImpl db;
-
-
-    @Before
-    public void setUp() {
-        ds = DbUtils.prepareDataSource("sample");
-        db = (DbImpl) Db.newInstance(ds);
-        db.registerMapper(UserId.class, UserId.MAPPER);
-        db.registerMapper(User.class, User.MAPPER);
-    }
-
-    @After
-    public void tearDown() {
-        ds.close();
-    }
-
-
+public class DbAttachSqlTest extends DbTest {
     /**
      * Check that empty Sql interface is OK.
      */
@@ -184,9 +151,10 @@ public class DbAttachSqlTest extends Assert {
 
     @Test
     public void checkBeanWithStaticFieldMapperByAnnotation() {
-        assertNull(db.getRegisteredMapperByType(BeanWithStaticFieldMapper.class));
-        db.attachSql(BeanWithStaticFieldMapperSql.class);
-        assertNotNull(db.getRegisteredMapperByType(BeanWithStaticFieldMapper.class));
+        DbImpl dbImpl = (DbImpl) this.db;
+        assertNull(dbImpl.getRegisteredMapperByType(BeanWithStaticFieldMapper.class));
+        this.db.attachSql(BeanWithStaticFieldMapperSql.class);
+        assertNotNull(dbImpl.getRegisteredMapperByType(BeanWithStaticFieldMapper.class));
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -210,7 +178,7 @@ public class DbAttachSqlTest extends Assert {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void checkWildcardParameterizedReturnTypeThrowsException() {
+    public void checkWildcardParametrizedReturnTypeThrowsException() {
         db.attachSql(WildcardParametrizedReturnTypeSql.class);
     }
 

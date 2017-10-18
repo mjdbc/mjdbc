@@ -1,14 +1,14 @@
 package com.github.mjdbc.test;
 
 import com.github.mjdbc.test.asset.sql.JavaTypesOthersSql;
-import org.junit.Test;
-
 import java.math.BigDecimal;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
+import org.junit.Test;
 
 public class JavaTypesOthersTest extends BaseJavaTypesTest<JavaTypesOthersSql> {
 
@@ -334,12 +334,9 @@ public class JavaTypesOthersTest extends BaseJavaTypesTest<JavaTypesOthersSql> {
         java.util.Date v1 = sql.getNullableDate();
         assertNull(v1);
 
-        Calendar c = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
-        c.setTimeInMillis(0);
-        c.set(Calendar.YEAR, 2015);
 
         // check java.util.Date <-> java.sql.Date compatibility.
-        java.util.Date utilDate = new java.util.Date(c.getTimeInMillis());
+        java.util.Date utilDate = new java.util.Date(getTestingDateMillis());
         sql.setNullableDate(utilDate);
         java.util.Date v3 = sql.getNullableDate();
         assertNotNull(v3);
@@ -347,7 +344,7 @@ public class JavaTypesOthersTest extends BaseJavaTypesTest<JavaTypesOthersSql> {
         assertEquals(utilDate.getTime(), v3.getTime());
 
         // check java.util.Date <-> java.sql.Date compatibility.
-        java.sql.Date sqlDate = new java.sql.Date(c.getTimeInMillis());
+        java.sql.Date sqlDate = new java.sql.Date(getTestingDateMillis());
         sql.setNullableDate(sqlDate);
         java.util.Date v4 = sql.getNullableDate();
         assertNotNull(v4);
@@ -366,15 +363,36 @@ public class JavaTypesOthersTest extends BaseJavaTypesTest<JavaTypesOthersSql> {
         java.sql.Date v1 = sql.getNullableSqlDate();
         assertNull(v1);
 
-        Calendar c = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
-        c.setTimeInMillis(0);
-        c.set(Calendar.YEAR, 2015);
-
-        java.sql.Date sqlDate = new java.sql.Date(c.getTimeInMillis());
+        java.sql.Date sqlDate = new java.sql.Date(getTestingDateMillis());
         sql.setNullableSqlDate(sqlDate);
         java.sql.Date v3 = sql.getNullableSqlDate();
         assertNotNull(v3);
         assertEquals(sqlDate.getTime(), v3.getTime());
+    }
+
+    @Test
+    public void checkJavaInstant() {
+        // check original value
+        Instant v0 = sql.getNullableInstant();
+        assertNotNull(v0);
+
+        // check nulls
+        sql.setNullableInstant(null);
+        Instant v1 = sql.getNullableInstant();
+        assertNull(v1);
+
+        Instant instant = Instant.ofEpochMilli(getTestingDateMillis());
+        sql.setNullableInstant(instant);
+        Instant v3 = sql.getNullableInstant();
+        assertNotNull(v3);
+        assertEquals(instant.toEpochMilli(), v3.toEpochMilli());
+    }
+
+    private static long getTestingDateMillis() {
+        Calendar c = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
+        c.setTimeInMillis(0);
+        c.set(Calendar.YEAR, 2015);
+        return c.getTimeInMillis();
     }
 
 

@@ -1,45 +1,24 @@
 package com.github.mjdbc.test;
 
-import com.github.mjdbc.Db;
 import com.github.mjdbc.test.asset.dbi.EmptyDbi;
 import com.github.mjdbc.test.asset.dbi.EmptyDbiImpl;
 import com.github.mjdbc.test.asset.dbi.ProfiledDbi;
 import com.github.mjdbc.test.asset.dbi.ProfiledDbiImpl;
 import com.github.mjdbc.test.asset.model.User;
 import com.github.mjdbc.test.asset.model.UserId;
-import com.github.mjdbc.test.util.DbUtils;
-import com.zaxxer.hikari.HikariDataSource;
-import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 /**
  * Tests for Db::attachDbi method.
  */
-public class DbAttachDbiTest extends Assert {
-    /**
-     * Low level connection pool.
-     */
-    private HikariDataSource ds;
-
-    /**
-     * Database instance.
-     */
-    private Db db;
-
+public class DbAttachDbiTest extends DbTest {
 
     @Before
     public void setUp() {
-        ds = DbUtils.prepareDataSource("sample");
-        db = Db.newInstance(ds);
+        super.setUp();
         db.registerMapper(UserId.class, UserId.MAPPER);
         db.registerMapper(User.class, User.MAPPER);
-    }
-
-    @After
-    public void tearDown() {
-        ds.close();
     }
 
     @Test

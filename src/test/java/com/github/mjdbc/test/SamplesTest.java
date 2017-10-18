@@ -1,39 +1,23 @@
 package com.github.mjdbc.test;
 
-import com.github.mjdbc.Db;
 import com.github.mjdbc.DbTimer;
 import com.github.mjdbc.test.asset.dbi.SampleDbi;
 import com.github.mjdbc.test.asset.dbi.SampleDbiImpl;
 import com.github.mjdbc.test.asset.model.Gender;
 import com.github.mjdbc.test.asset.model.User;
 import com.github.mjdbc.test.asset.sql.UserSql;
-import com.github.mjdbc.test.util.DbUtils;
-import com.zaxxer.hikari.HikariDataSource;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-
 import java.lang.reflect.Method;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.List;
+import org.junit.Before;
+import org.junit.Test;
 
 /**
  * Set of examples to demonstrate basic Db functionality.
  */
-public class SamplesTest extends Assert {
-    /**
-     * Low level connection pool.
-     */
-    private HikariDataSource ds;
-
-    /**
-     * Database instance.
-     */
-    private Db db;
-
+public class SamplesTest extends DbTest {
     /**
      * Data access interface. Set of complex SQL ops & business logic joined into transactions.
      */
@@ -46,19 +30,12 @@ public class SamplesTest extends Assert {
 
     @Before
     public void setUp() {
-        ds = DbUtils.prepareDataSource("sample");
-        db = Db.newInstance(ds);
+        super.setUp();
         dbi = db.attachDbi(new SampleDbiImpl(db), SampleDbi.class);
 
         // Usually DB must be accessed by calling Dbi interface method.
         // But for testing we create a separate queries interface here.
         sampleQueries = db.attachSql(UserSql.class);
-    }
-
-    @After
-    public void tearDown() {
-        dbi = null;
-        ds.close();
     }
 
     /**
@@ -68,6 +45,7 @@ public class SamplesTest extends Assert {
     public void checkDatabaseNotEmpty() {
         db.executeV(c -> {
             try (Statement statement = c.getConnection().createStatement()) {
+                //noinspection SqlNoDataSourceInspection,SqlResolve
                 try (ResultSet rs = statement.executeQuery("SELECT * FROM users")) {
                     assertTrue(rs.next());
                 }
@@ -227,8 +205,6 @@ public class SamplesTest extends Assert {
 
     /**
      * Check that statistics is collected for Dbi methods.
-     *
-     * @throws NoSuchMethodException
      */
     @Test
     public void checkTxTimer() throws NoSuchMethodException {
@@ -242,8 +218,6 @@ public class SamplesTest extends Assert {
 
     /**
      * Check that statistics is updated for @Sql methods.
-     *
-     * @throws NoSuchMethodException
      */
     @Test
     public void checkSqlTimer() throws NoSuchMethodException {

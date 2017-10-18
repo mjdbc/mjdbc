@@ -1,10 +1,9 @@
 package com.github.mjdbc;
 
 
-import org.jetbrains.annotations.NotNull;
-
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Java object mapper for java.sql.ResultSet

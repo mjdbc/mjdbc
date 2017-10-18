@@ -1,11 +1,10 @@
 package com.github.mjdbc;
 
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Sets statement's parameter value using position idx provided.

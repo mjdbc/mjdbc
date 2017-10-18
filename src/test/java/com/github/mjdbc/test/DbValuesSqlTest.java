@@ -1,39 +1,26 @@
 package com.github.mjdbc.test;
 
-import com.github.mjdbc.Db;
 import com.github.mjdbc.test.asset.sql.DbValueSql;
-import com.github.mjdbc.test.util.DbUtils;
 import com.github.mjdbc.test.asset.types.DbIntValue;
 import com.github.mjdbc.test.asset.types.DbLongValue;
-import com.zaxxer.hikari.HikariDataSource;
-import org.junit.After;
-import org.junit.Assert;
+import java.sql.Timestamp;
 import org.junit.Before;
 import org.junit.Test;
-
-import java.sql.Timestamp;
 
 /**
  * Tests for DbValue (Int,Long..) support.
  */
-public class DbValuesSqlTest extends Assert {
-    /**
-     * Low level connection pool.
-     */
-    private HikariDataSource ds;
-
+public class DbValuesSqlTest extends DbTest {
     private DbValueSql sql;
+
+    public DbValuesSqlTest() {
+        super("types");
+    }
 
     @Before
     public void setUp() {
-        ds = DbUtils.prepareDataSource("types");
-        Db db = Db.newInstance(ds);
+        super.setUp();
         sql = db.attachSql(DbValueSql.class);
-    }
-
-    @After
-    public void tearDown() {
-        ds.close();
     }
 
     @Test
@@ -45,7 +32,6 @@ public class DbValuesSqlTest extends Assert {
         sql.setNullableDbInt(new DbIntValue(1));
         Integer v2 = sql.getNullableInt();
         assertEquals(new Integer(1), v2);
-
     }
 
 

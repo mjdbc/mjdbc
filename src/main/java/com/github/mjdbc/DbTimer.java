@@ -1,8 +1,7 @@
 package com.github.mjdbc;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.lang.reflect.Method;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Structure to hold per-method statistics: total invocation count and total time spent inside of the method in nanoseconds.

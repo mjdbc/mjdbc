@@ -1,11 +1,9 @@
 package com.github.mjdbc;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
-import javax.sql.DataSource;
 import java.lang.reflect.Method;
 import java.util.Map;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * mJDBC database wrapper.
@@ -99,14 +97,8 @@ public interface Db {
 
 
     /**
-     * Factory method to obtain DB instance.
-     *
-     * @param ds {@link javax.sql.DataSource} to wrap.
-     * @return new Db instance
+     * Returns active connection assigned to current thread or throws IllegalStateException if not within DBOp.
      */
     @NotNull
-    static Db newInstance(@NotNull DataSource ds) {
-        return new DbImpl(ds);
-    }
-
+    DbConnection getActiveConnection();
 }

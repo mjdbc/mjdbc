@@ -1,11 +1,10 @@
 package com.github.mjdbc;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Maps list of result set arguments.
