@@ -37,7 +37,7 @@ mvn -DskipTests=true clean package install
 ##### Raw SQL queries
 ```java
     java.sql.DataSource ds = ...; // have a DataSource first. 
-    Db db = MJDBC.newDb(ds);  // wrap DataSource with mJDBC wrapper.
+    Db db = DbFactory.wrap(ds);  // wrap DataSource with mJDBC wrapper.
     MySqlQueries q = db.attachSql(MySqlQueries.class) // attach query interface. All queries are parsed and validated at this moment.
     User user = q.getUserByLogin('login'); // run any query method
 ```
@@ -55,7 +55,7 @@ To run multiple SQL queries within a single transaction create a dedicated dbi (
 It will return a proxy class that will wrap all interface methods into transactions.
 ```java
     java.sql.DataSource ds = ...;
-    Db db = MJDBC.newDb(ds);
+    Db db = DbFactory.wrap(ds);
     MyDbi dbi = db.attachDbi(MyDbiImpl(), MyDbi.class); // all MyDbi method calls will be proxied to MyDbiImpl wrapped with transactions.
     User user = dbi.getUserByLoginCreateIfNotFound('login');
 ```
@@ -104,7 +104,7 @@ public static final DbMapper<User> MAPPER = (r) -> {
 
 Optional: register this mapper during initialization;
 ```java
-    Db db = MJDBC.newDb(ds);
+    Db db = DbFactory.wrap(ds);
     db.registerMapper(User.class, User.MAPPER)
 ```
 Now use User type in all queries attached to mJDBC database instance.
@@ -125,7 +125,7 @@ In most cases you do not need to create your own binder. All you need is to make
 Usage of java.sql.* API is transparent in mJDBC. You can always get statements, connections, result sets and have a full power of native JDBC driver.
 Example:
 ```java
-Db db = MJDBC.newDb(ds);
+Db db = DbFactory.wrap(ds);
 db.execute(c -> { // wraps method into transaction
     try (java.sql.Statement statement = c.getConnection().createStatement()) {
         ...
@@ -134,7 +134,7 @@ db.execute(c -> { // wraps method into transaction
 ```
 If named parameters or object/collections mappers support is needed:
 ```java
-Db db = MJDBC.newDb(ds);
+Db db = DbFactory.wrap(ds);
 User user = db.execute(c -> { // wraps method into transaction
     DbPreparedStatement s = new DbPreparedStatement(c, "SELECT * FROM users WHERE login = :login", User.MAPPER)
     s.setString("login", login);

@@ -6,9 +6,13 @@ import org.jetbrains.annotations.NotNull;
 /**
  * Helper factory interface for mJDBC helpers.
  */
-public class MJDBC {
+public class DbFactory {
 
-    public static Db newDb(@NotNull DataSource dataSource) {
+    /**
+     * Creates new mjdbc Db wrapper for the given datasource.
+     */
+    @NotNull
+    public static Db wrap(@NotNull DataSource dataSource) {
         return new DbImpl(dataSource);
     }
 

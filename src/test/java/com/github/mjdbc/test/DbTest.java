@@ -1,7 +1,7 @@
 package com.github.mjdbc.test;
 
 import com.github.mjdbc.Db;
-import com.github.mjdbc.MJDBC;
+import com.github.mjdbc.DbFactory;
 import com.github.mjdbc.test.util.DbUtils;
 import com.zaxxer.hikari.HikariDataSource;
 import org.jetbrains.annotations.NotNull;
@@ -34,7 +34,7 @@ public abstract class DbTest extends Assert {
     @Before
     public void setUp() {
         ds = DbUtils.prepareDataSource(dbName);
-        db = MJDBC.newDb(ds);
+        db = DbFactory.wrap(ds);
     }
 
     @After

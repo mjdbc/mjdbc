@@ -2,7 +2,7 @@ package com.github.mjdbc.test;
 
 import com.github.mjdbc.Db;
 import com.github.mjdbc.DbConnection;
-import com.github.mjdbc.MJDBC;
+import com.github.mjdbc.DbFactory;
 import com.github.mjdbc.test.asset.dbi.SampleDbi;
 import com.github.mjdbc.test.asset.dbi.SampleDbiImpl;
 import com.github.mjdbc.test.asset.sql.UserSql;
@@ -29,7 +29,7 @@ public class LazyTxTest extends Assert {
     public void setUp() {
         origDs = DbUtils.prepareDataSource("sample");
         profiledDs = new ProfiledDataSource(origDs);
-        db = MJDBC.newDb(profiledDs);
+        db = DbFactory.wrap(profiledDs);
         dbi = db.attachDbi(new SampleDbiImpl(db), SampleDbi.class);
         sampleQueries = db.attachSql(UserSql.class);
     }

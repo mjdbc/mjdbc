@@ -1,7 +1,7 @@
 package com.github.mjdbc.test;
 
 import com.github.mjdbc.Db;
-import com.github.mjdbc.MJDBC;
+import com.github.mjdbc.DbFactory;
 import com.github.mjdbc.test.util.DbUtils;
 import com.github.mjdbc.test.util.ProfiledDataSource;
 import com.zaxxer.hikari.HikariDataSource;
@@ -36,7 +36,7 @@ public abstract class BaseSqlTest<S> extends Assert {
     public void setUp() {
         ds = DbUtils.prepareDataSource(schemaFileName);
         profiledDs = new ProfiledDataSource(ds);
-        db = MJDBC.newDb(profiledDs);
+        db = DbFactory.wrap(profiledDs);
         sql = db.attachSql(type);
     }
 
