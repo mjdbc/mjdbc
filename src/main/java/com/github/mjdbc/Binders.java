@@ -8,7 +8,6 @@ import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.Timestamp;
 import java.sql.Types;
-import java.time.Instant;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -83,7 +82,6 @@ public final class Binders {
     public static final DbBinder<String> StringBinder = PreparedStatement::setString;
     public static final DbBinder<Timestamp> TimestampBinder = PreparedStatement::setTimestamp;
     public static final DbBinder<java.util.Date> UtilDateBinder = (statement, idx, value) -> statement.setDate(idx, value == null ? null : new java.sql.Date(value.getTime()));
-    public static final DbBinder<Instant> InstantBinder = (statement, idx, value) -> statement.setDate(idx, value == null ? null : new java.sql.Date(value.toEpochMilli()));
 
     public static final DbBinder<DbInt> DbIntBinder = (statement, idx, value) -> IntegerBinder.bind(statement, idx, value == null ? null : value.getDbValue());
     public static final DbBinder<DbLong> DbLongBinder = (statement, idx, value) -> LongBinder.bind(statement, idx, value == null ? null : value.getDbValue());
@@ -120,7 +118,6 @@ public final class Binders {
         put(java.sql.Time.class, SqlTimeBinder);
         put(Timestamp.class, TimestampBinder);
         put(java.util.Date.class, UtilDateBinder);
-        put(Instant.class, InstantBinder);
 
         // Strings
         put(String.class, StringBinder);

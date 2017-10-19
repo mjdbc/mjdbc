@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.time.Instant;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -39,11 +38,6 @@ public final class Mappers {
     public static final DbMapper<String> StringMapper = r -> r.getString(1);
 
     public static final DbMapper<Timestamp> TimestampMapper = r -> r.getTimestamp(1);
-
-    public static final DbMapper<Instant> InstantMapper = r -> {
-        Timestamp ts = r.getTimestamp(1);
-        return ts == null ? null : ts.toInstant();
-    };
 
     public static final DbMapper<java.util.Date> UtilDateMapper = r -> r.getDate(1);
 
@@ -82,8 +76,6 @@ public final class Mappers {
 
         // Common Java types
         put(String.class, StringMapper);
-        put(Instant.class, InstantMapper);
-
 
         // Collection wrappers are processed separately.
     }});

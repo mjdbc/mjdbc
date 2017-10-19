@@ -4,7 +4,6 @@ import com.github.mjdbc.test.asset.sql.JavaTypesOthersSql;
 import java.math.BigDecimal;
 import java.sql.Time;
 import java.sql.Timestamp;
-import java.time.Instant;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
@@ -71,7 +70,7 @@ public class JavaTypesOthersTest extends BaseJavaTypesTest<JavaTypesOthersSql> {
     public void checkByte() {
         // check original value
         Byte v0 = sql.getNullableByte();
-        assertEquals(new Byte((byte) 1), v0);
+        assertEquals(Byte.valueOf((byte) 1), v0);
         byte v0b = sql.getNullableByteAsByte();
         assertTrue(v0b == 1);
 
@@ -105,7 +104,7 @@ public class JavaTypesOthersTest extends BaseJavaTypesTest<JavaTypesOthersSql> {
     public void checkLong() {
         // check original value
         Long v0 = sql.getNullableLong();
-        assertEquals(new Long(1L), v0);
+        assertEquals(Long.valueOf(1L), v0);
         long v0b = sql.getNullableLongAsLong();
         assertTrue(v0b == 1L);
 
@@ -139,7 +138,7 @@ public class JavaTypesOthersTest extends BaseJavaTypesTest<JavaTypesOthersSql> {
     public void checkShort() {
         // check original value
         Short v0 = sql.getNullableShort();
-        assertEquals(new Short((short) 1), v0);
+        assertEquals(Short.valueOf((short) 1), v0);
         short v0b = sql.getNullableShortAsShort();
         assertTrue(v0b == 1);
 
@@ -368,24 +367,6 @@ public class JavaTypesOthersTest extends BaseJavaTypesTest<JavaTypesOthersSql> {
         java.sql.Date v3 = sql.getNullableSqlDate();
         assertNotNull(v3);
         assertEquals(sqlDate.getTime(), v3.getTime());
-    }
-
-    @Test
-    public void checkJavaInstant() {
-        // check original value
-        Instant v0 = sql.getNullableInstant();
-        assertNotNull(v0);
-
-        // check nulls
-        sql.setNullableInstant(null);
-        Instant v1 = sql.getNullableInstant();
-        assertNull(v1);
-
-        Instant instant = Instant.ofEpochMilli(getTestingDateMillis());
-        sql.setNullableInstant(instant);
-        Instant v3 = sql.getNullableInstant();
-        assertNotNull(v3);
-        assertEquals(instant.toEpochMilli(), v3.toEpochMilli());
     }
 
     private static long getTestingDateMillis() {

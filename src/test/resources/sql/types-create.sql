@@ -14,7 +14,6 @@ CREATE TABLE custom_types (
   short_field       INTEGER     DEFAULT NULL,
   time_field        TIME        DEFAULT NULL,
   timestamp_field   TIMESTAMP   DEFAULT NULL,
-  instant_field     TIMESTAMP   DEFAULT NULL,
   varchar_field     VARCHAR(10) DEFAULT NULL,
   varchar_field_nn  VARCHAR(10) NOT NULL
 );
@@ -35,7 +34,6 @@ INSERT INTO
     short_field,
     time_field,
     timestamp_field,
-    instant_field,
     varchar_field, varchar_field_nn
   )
 VALUES (
@@ -52,7 +50,6 @@ VALUES (
   1,
   '16:07',
   '2015-09-17 15:50:05', -- timestamp
-  '2015-10-17 15:50:05', -- instant
   NULL, 'value'
 );
 

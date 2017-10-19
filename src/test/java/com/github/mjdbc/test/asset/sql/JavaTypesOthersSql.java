@@ -148,11 +148,4 @@ public interface JavaTypesOthersSql {
 
     @Sql("UPDATE custom_types SET timestamp_field = :value")
     void setNullableTimestamp(@Bind("value") @Nullable Timestamp value);
-
-    /* Instant */
-    @Sql("SELECT instant_field FROM custom_types")
-    Instant getNullableInstant();
-
-    @Sql("UPDATE custom_types SET instant_field = :value")
-    void setNullableInstant(@Bind("value") @Nullable Instant value);
 }
