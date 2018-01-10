@@ -27,7 +27,7 @@ import org.jetbrains.annotations.Nullable;
  * Wrapper over ${PreparedStatement} with named parameters, results mapping ({@link DbMapper})
  * and bean binding ({@link @{@link BindBean}}) support.
  * <p>
- * Provides full access to underlying ${PreparedStatement} and ads useful utility methods.
+ * Provides full access to underlying ${PreparedStatement} and adds useful utility methods.
  * <p>
  * DbPreparedStatement is automatically closed on transaction commit/rollback.
  */
