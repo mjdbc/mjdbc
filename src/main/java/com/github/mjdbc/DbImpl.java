@@ -13,6 +13,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -48,8 +49,12 @@ public class DbImpl implements Db {
     @NotNull
     protected final DataSource dataSource;
 
-    public DbImpl(@NotNull DataSource dataSource) {
+    @NotNull
+    protected final EnumSet<DbFlags> flags;
+
+    public DbImpl(@NotNull DataSource dataSource, @NotNull EnumSet<DbFlags> flags) {
         this.dataSource = dataSource;
+        this.flags = flags;
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.github.mjdbc;
 
+import java.util.EnumSet;
 import javax.sql.DataSource;
 import org.jetbrains.annotations.NotNull;
 
@@ -13,7 +14,12 @@ public class DbFactory {
      */
     @NotNull
     public static Db wrap(@NotNull DataSource dataSource) {
-        return new DbImpl(dataSource);
+        return wrap(dataSource, EnumSet.noneOf(DbFlags.class));
+    }
+
+    @NotNull
+    public static Db wrap(@NotNull DataSource dataSource, @NotNull EnumSet<DbFlags> flags) {
+        return new DbImpl(dataSource, flags);
     }
 
 }

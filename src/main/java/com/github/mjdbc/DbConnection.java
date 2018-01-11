@@ -52,14 +52,20 @@ public class DbConnection {
     public void commit() throws SQLException {
         // commit only if connection was opened.
         if (sqlConnection != null) {
-            sqlConnection.commit();
+            boolean commit = !db.flags.contains(DbFlags.UseGetAutoCommit) || sqlConnection.getAutoCommit();
+            if (commit) {
+                sqlConnection.commit();
+            }
         }
     }
 
     public void rollback() throws SQLException {
         // rollback only if connection was opened.
         if (sqlConnection != null) {
-            sqlConnection.rollback();
+            boolean rollback = !db.flags.contains(DbFlags.UseGetAutoCommit) || sqlConnection.getAutoCommit();
+            if (rollback) {
+                sqlConnection.rollback();
+            }
         }
     }
 
