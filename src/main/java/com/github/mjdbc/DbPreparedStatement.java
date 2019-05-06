@@ -25,7 +25,7 @@ import org.jetbrains.annotations.Nullable;
 
 /**
  * Wrapper over ${PreparedStatement} with named parameters, results mapping ({@link DbMapper})
- * and bean binding ({@link @{@link BindBean}}) support.
+ * and bean binding ({@link BindBean}) support.
  * <p>
  * Provides full access to underlying ${PreparedStatement} and adds useful utility methods.
  * <p>
@@ -198,7 +198,7 @@ public class DbPreparedStatement<T> implements AutoCloseable {
     }
 
     /**
-     * Sets string value for all fields matched by name. If value is null -> sets null.
+     * Sets string value for all fields matched by name. If value is null - sets null.
      */
     @NotNull
     public DbPreparedStatement<T> set(@NotNull String name, @Nullable DbString value) throws SQLException {
@@ -228,7 +228,7 @@ public class DbPreparedStatement<T> implements AutoCloseable {
     }
 
     /**
-     * Sets Timestamp value for all fields matched by name. If value is null -> sets null.
+     * Sets Timestamp value for all fields matched by name. If value is null - sets null.
      */
     @NotNull
     public DbPreparedStatement<T> set(@NotNull String name, @Nullable DbTimestamp value) throws SQLException {
@@ -251,7 +251,7 @@ public class DbPreparedStatement<T> implements AutoCloseable {
      *
      * @param db                database to use. This method call relies on binders registered in this database instance.
      * @param bean              bean to map to named SQL parameters.
-     * @param allowCustomFields if false and SQL contains keys not resolved with this bean -> SQLException will be thrown.
+     * @param allowCustomFields if false and SQL contains keys not resolved with this bean - SQLException will be thrown.
      * @return this.
      * @throws SQLException if anything bad happens during SQL operations or bean field accessors calls.
      */
