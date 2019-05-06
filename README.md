@@ -22,7 +22,7 @@ __mJDBC__  - Small and efficient JDBC wrapper.
     <dependency>
         <groupId>com.github.mjdbc</groupId>
         <artifactId>mjdbc</artifactId>
-        <version>1.3.1</version>
+        <version>1.4.0</version>
     </dependency>
 ```
 
@@ -127,7 +127,7 @@ Example:
 ```java
 Db db = DbFactory.wrap(ds);
 db.execute(c -> { // wraps method into transaction
-    try (java.sql.Statement statement = c.getConnection().createStatement()) {
+    try (java.sql.Statement statement = c.createStatement()) {
         ...
     }
 });
@@ -136,7 +136,7 @@ If named parameters or object/collections mappers support is needed:
 ```java
 Db db = DbFactory.wrap(ds);
 User user = db.execute(c -> { // wraps method into transaction
-    DbPreparedStatement s = new DbPreparedStatement(c, "SELECT * FROM users WHERE login = :login", User.MAPPER)
+    DbPreparedStatement s = c.prepareStatement(c, "SELECT * FROM users WHERE login = :login", User.MAPPER)
     s.setString("login", login);
 
     // Direct access to JDBC starts here

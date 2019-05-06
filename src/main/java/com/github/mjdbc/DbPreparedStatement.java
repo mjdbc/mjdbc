@@ -60,7 +60,10 @@ public class DbPreparedStatement<T> implements AutoCloseable {
     }
 
     public DbPreparedStatement(@NotNull DbConnection dbc, @NotNull String sql, @NotNull Class<T> resultClass) throws SQLException {
-        this(dbc, sql, Objects.requireNonNull(DbImpl.findOrResolveMapperByType(resultClass, null)), false);
+        //noinspection unchecked
+        this(dbc, sql,
+                Objects.requireNonNull(DbImpl.findOrResolveMapperByType(resultClass, null, (DbMapper<T>) dbc.db.getRegisteredMapperByType(resultClass)),
+                        () -> "Mapper for class not found: " + resultClass), false);
     }
 
     public DbPreparedStatement(@NotNull DbConnection dbc, @NotNull String sql, @NotNull DbMapper<T> resultMapper) throws SQLException {
@@ -425,6 +428,11 @@ public class DbPreparedStatement<T> implements AutoCloseable {
             parsedQuery.append(c);
         }
         return parsedQuery.toString();
+    }
+
+    @NotNull
+    public DbConnection getDbConnection() {
+        return dbConnection;
     }
 
     @Override

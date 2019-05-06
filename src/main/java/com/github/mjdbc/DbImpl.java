@@ -54,8 +54,8 @@ public class DbImpl implements Db {
 
     @Override
     public <T> void registerMapper(@NotNull Class<T> mapperClass, @NotNull DbMapper<T> mapper) {
-        requireNonNull(mapperClass);
-        requireNonNull(mapper);
+        requireNonNull(mapperClass, "Mapper class is null");
+        requireNonNull(mapper, () -> "Mapper is null for class: " + mapperClass);
         if (Collection.class.isAssignableFrom(mapperClass)) {
             throw new IllegalArgumentException("Collection mappers override is not supported.");
         }
@@ -189,14 +189,14 @@ public class DbImpl implements Db {
                 throw new IllegalArgumentException("Wildcard generics return types are not supported: " + m);
             }
             Class<?> elementType = (Class<?>) type;
-            DbMapper elementMapper = findOrResolveMapperByType(elementType, mapperByClass);
+            DbMapper elementMapper = findOrResolveMapperByType(elementType, mapperByClass, null);
             if (elementMapper != null) {
                 resultMapper = new ListMapper(elementMapper);
             } else {
                 throw new IllegalArgumentException(getNoMapperMessage(elementType));
             }
         } else {
-            resultMapper = findOrResolveMapperByType(returnType, mapperByClass);
+            resultMapper = findOrResolveMapperByType(returnType, mapperByClass, null);
         }
         if (resultMapper == null) {
             throw new IllegalArgumentException(getNoMapperMessage(returnType));
@@ -290,7 +290,7 @@ public class DbImpl implements Db {
             throw new IllegalArgumentException("Illegal batch size : " + m + " batch size:" + sqlAnnotation.batchChunkSize());
         }
         // construct result mapping
-        BindInfo[] bindingsArray = bindings.toArray(new BindInfo[bindings.size()]);
+        BindInfo[] bindingsArray = bindings.toArray(new BindInfo[0]);
         SqlOp op = new SqlOp(parsedSql, resultMapper, returnGeneratedKeys, parametersMapping, bindingsArray, batchIteratorFactory, batchParamIdx, batchSize, useUpdateOp);
         opByMethod.put(m, op);
     }
@@ -357,7 +357,7 @@ public class DbImpl implements Db {
     }
 
     @Nullable
-    public <T> DbMapper getRegisteredMapperByType(Class<T> type) {
+    public <T> DbMapper getRegisteredMapperByType(@Nullable Class<T> type) {
         return mapperByClass.get(type);
     }
 
@@ -365,45 +365,47 @@ public class DbImpl implements Db {
      * Finds and return mapper by type. Uses registered mappers map if not null to search for candidates and register results in this map.
      */
     @Nullable
-    public static <T> DbMapper<T> findOrResolveMapperByType(@NotNull Class<T> type, @Nullable Map<Class, DbMapper> registeredMappers) {
+    public static <T> DbMapper<T> findOrResolveMapperByType(@NotNull Class<T> type, @Nullable Map<Class, DbMapper> registeredMappers, @Nullable DbMapper<T> defaultValue) {
+        //noinspection unchecked
         DbMapper<T> mapper = registeredMappers == null ? null : registeredMappers.get(type);
-        if (mapper == null) {
-            // search for a field marked as mapper with valid parameter type
-            for (Field f : type.getDeclaredFields()) {
-                int mods = f.getModifiers();
-                if (Modifier.isStatic(mods) && Modifier.isPublic(mods) && Modifier.isFinal(mods) && f.getType().isAssignableFrom(DbMapper.class)) {
-                    AnnotatedType at = f.getAnnotatedType();
-                    if (at instanceof AnnotatedParameterizedType) {
-                        AnnotatedParameterizedType apt = (AnnotatedParameterizedType) at;
-                        AnnotatedType[] args = apt.getAnnotatedActualTypeArguments();
-                        if (args.length == 1 && args[0].getType() == type) {
-                            Mapper a = f.getAnnotation(Mapper.class);
-                            if (a != null) {
-                                try {
-                                    //noinspection unchecked
-                                    mapper = (DbMapper<T>) f.get(type);
-                                    if (mapper == null) {
-                                        throw new IllegalArgumentException("Mapper must not be null: " + f);
-                                    }
-                                } catch (IllegalAccessException ignored) { // already checked for 'isPublic' before
+        if (mapper != null) {
+            return mapper;
+        }
+        // search for a field marked as mapper with valid parameter type
+        for (Field f : type.getDeclaredFields()) {
+            int mods = f.getModifiers();
+            if (Modifier.isStatic(mods) && Modifier.isPublic(mods) && Modifier.isFinal(mods) && f.getType().isAssignableFrom(DbMapper.class)) {
+                AnnotatedType at = f.getAnnotatedType();
+                if (at instanceof AnnotatedParameterizedType) {
+                    AnnotatedParameterizedType apt = (AnnotatedParameterizedType) at;
+                    AnnotatedType[] args = apt.getAnnotatedActualTypeArguments();
+                    if (args.length == 1 && args[0].getType() == type) {
+                        Mapper a = f.getAnnotation(Mapper.class);
+                        if (a != null) {
+                            try {
+                                //noinspection unchecked
+                                mapper = (DbMapper<T>) f.get(type);
+                                if (mapper == null) {
+                                    throw new IllegalArgumentException("Mapper must not be null: " + f);
                                 }
-                                if (registeredMappers != null) {
-                                    if (registeredMappers.containsKey(type)) {
-                                        throw new IllegalArgumentException("Found multiple mappers per type: m1: " + mapper + ", m2: " + registeredMappers.get(type));
-                                    }
-                                    registeredMappers.put(type, mapper);
+                            } catch (IllegalAccessException ignored) { // already checked for 'isPublic' before
+                            }
+                            if (registeredMappers != null) {
+                                if (registeredMappers.containsKey(type)) {
+                                    throw new IllegalArgumentException("Found multiple mappers per type: m1: " + mapper + ", m2: " + registeredMappers.get(type));
                                 }
+                                registeredMappers.put(type, mapper);
                             }
                         }
                     }
-                } else {
-                    if (f.getAnnotation(Mapper.class) != null) {
-                        throw new IllegalArgumentException("@Mapper field must be public, static final and have valid parametrized type type: " + f);
-                    }
+                }
+            } else {
+                if (f.getAnnotation(Mapper.class) != null) {
+                    throw new IllegalArgumentException("@Mapper field must be public, static final and have valid parametrized type type: " + f);
                 }
             }
         }
-        return mapper;
+        return mapper == null ? defaultValue : mapper;
     }
 
     @Nullable
