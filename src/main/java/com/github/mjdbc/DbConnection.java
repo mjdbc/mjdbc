@@ -50,22 +50,22 @@ public class DbConnection {
     }
 
     @NotNull
-    public <T> DbPreparedStatement prepareStatement(@NotNull String sql, @NotNull Class<T> resultClass) throws SQLException {
+    public <T> DbPreparedStatement<T> prepareStatement(@NotNull String sql, @NotNull Class<T> resultClass) throws SQLException {
         return new DbPreparedStatement<>(this, sql, resultClass);
     }
 
     @NotNull
-    public <T> DbPreparedStatement prepareStatement(@NotNull String sql, @NotNull DbMapper<T> resultMapper) throws SQLException {
+    public <T> DbPreparedStatement<T> prepareStatement(@NotNull String sql, @NotNull DbMapper<T> resultMapper) throws SQLException {
         return new DbPreparedStatement<>(this, sql, resultMapper);
     }
 
     @NotNull
-    public <T> DbPreparedStatement prepareStatement(@NotNull String sql, @NotNull DbMapper<T> resultMapper, boolean returnGeneratedKeys) throws SQLException {
+    public <T> DbPreparedStatement<T> prepareStatement(@NotNull String sql, @NotNull DbMapper<T> resultMapper, boolean returnGeneratedKeys) throws SQLException {
         return new DbPreparedStatement<>(this, sql, resultMapper, returnGeneratedKeys);
     }
 
     @NotNull
-    public <T> DbPreparedStatement prepareStatement(@NotNull String sql, @NotNull DbMapper<T> resultMapper, @NotNull Map<String, List<Integer>> parametersMapping, boolean returnGeneratedKeys) throws SQLException {
+    public <T> DbPreparedStatement<T> prepareStatement(@NotNull String sql, @NotNull DbMapper<T> resultMapper, @NotNull Map<String, List<Integer>> parametersMapping, boolean returnGeneratedKeys) throws SQLException {
         return new DbPreparedStatement<>(this, sql, resultMapper, parametersMapping, returnGeneratedKeys);
     }
 
